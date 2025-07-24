@@ -79,5 +79,18 @@
     "typescript": "^5.5.3",
     "typescript-eslint": "^8.0.1",
     "vite": "^5.4.1"
-  }
+  },
+  "description": "An AI‑driven web/mobile platform that recommends campus events, clubs, and resources to students based on their interests and past activity.",
+  "main": "eslint.config.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Rahilyw/FlockIn.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Rahilyw/FlockIn/issues"
+  },
+  "homepage": "https://github.com/Rahilyw/FlockIn#readme"
 }

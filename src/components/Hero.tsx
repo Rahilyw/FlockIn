@@ -1,7 +1,7 @@
 import { Search, Calendar, Users, BookOpen, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import campusHero from "@/assets/campus-hero.jpg";
+import campusHero from "../assets/campus-hero.jpg";
 
 const Hero = () => {
   return (
