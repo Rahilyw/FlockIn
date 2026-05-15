@@ -2,6 +2,7 @@ import { Search, Calendar, Users, BookOpen, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Link } from "react-router-dom";
+import flockinLogo from "../assets/FlockIn-login.png";
 
 const Header = () => {
   return (
@@ -10,9 +11,11 @@ const Header = () => {
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-primary">
-              <span className="text-lg font-bold text-white">F</span>
-            </div>
+            <img 
+              src={flockinLogo} 
+              alt="FlockIn Logo" 
+              className="h-8 w-8 object-contain"
+            />
             <span className="text-xl font-bold bg-gradient-primary bg-clip-text text-transparent">
               FlockIn!!
             </span>

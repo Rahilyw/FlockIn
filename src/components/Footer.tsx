@@ -1,5 +1,6 @@
 import { Facebook, Twitter, Instagram, Mail, MapPin, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import flockinLogo from "../assets/FlockIn-login.png";
 
 const Footer = () => {
   return (
@@ -9,9 +10,11 @@ const Footer = () => {
           {/* Brand Section */}
           <div className="col-span-1 md:col-span-2">
             <div className="flex items-center space-x-2 mb-4">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent">
-                <span className="text-lg font-bold text-white">F</span>
-              </div>
+              <img 
+                src={flockinLogo} 
+                alt="FlockIn Logo" 
+                className="h-8 w-8 object-contain"
+              />
               <span className="text-xl font-bold">FlockIn!!</span>
             </div>
             <p className="text-primary-foreground/80 mb-6 max-w-md">

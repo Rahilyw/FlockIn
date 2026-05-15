@@ -1,7 +1,7 @@
 import { Search, Calendar, Users, BookOpen, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import campusHero from "../assets/campus-hero.jpg";
+import aerialUVic from "../assets/aerial-3600x1450-1800x725.webp";
 
 const Hero = () => {
   return (
@@ -9,8 +9,8 @@ const Hero = () => {
       {/* Background Image with Overlay */}
       <div className="absolute inset-0">
         <img 
-          src={campusHero} 
-          alt="Campus scene with students" 
+          src={aerialUVic} 
+          alt="Aerial view of University of Victoria campus" 
           className="w-full h-full object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-r from-primary/90 via-primary/70 to-secondary/90" />
