@@ -1,0 +1,1 @@
+export { NoticeboardLayout } from "./NoticeboardLayout";

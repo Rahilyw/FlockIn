@@ -2,3 +2,4 @@
 export { EventCard } from "./EventCard";
 export { ClubCard } from "./ClubCard";
 export { TagBadge } from "./TagBadge";
+export { EventPoster } from "./EventPoster";
