@@ -36,7 +36,16 @@ export function mapAuthError(error: unknown): string {
     case "auth/network-request-failed":
       return "Network error. Check your connection.";
     case "auth/operation-not-allowed":
-      return "Email/password sign-in is not enabled for this project.";
+      return "This sign-in method is not enabled for this project.";
+    case "auth/popup-closed-by-user":
+    case "auth/cancelled-popup-request":
+      return "Sign-in cancelled.";
+    case "auth/popup-blocked":
+      return "Pop-up was blocked by your browser. Allow pop-ups and try again.";
+    case "auth/account-exists-with-different-credential":
+      return "An account already exists with this email using a different sign-in method.";
+    case "auth/credential-already-in-use":
+      return "This credential is already linked to another account.";
     default:
       return error.message || "Authentication failed.";
   }

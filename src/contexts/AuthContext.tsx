@@ -10,39 +10,51 @@ import {
 import type { User } from "firebase/auth";
 import {
   browserLocalPersistence,
+  getAdditionalUserInfo,
   onAuthStateChanged,
   setPersistence,
+  signInWithPopup,
   signOut,
 } from "firebase/auth";
-import { getFirebaseAuth } from "@/firebase/app";
+import { getFirebaseAuth, getGoogleProvider } from "@/firebase/app";
+import { createUserProfile, getUserProfile } from "@/lib/firestore";
 
 type AuthContextValue = {
-  /** Current Firebase user, or null when signed out */
   user: User | null;
-  /** True until the first `onAuthStateChanged` callback runs */
   loading: boolean;
-  /** Signs the user out and clears local persistence */
   signOutUser: () => Promise<void>;
+  signInWithGoogle: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
-/**
- * Wrap your routed app with this provider so any component can call `useAuth()`.
- * It subscribes once to Firebase auth state and keeps `user` / `loading` in sync.
- */
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const auth = getFirebaseAuth();
-    // Keep sessions across browser tabs / restarts (default, but set explicitly for clarity)
     void setPersistence(auth, browserLocalPersistence);
 
     const unsubscribe = onAuthStateChanged(auth, (nextUser) => {
       setUser(nextUser);
       setLoading(false);
+
+      // Ensure a Firestore profile exists for every authenticated user.
+      // This covers email/password signup, Google sign-in, and any future
+      // provider — without the page components needing to know about it.
+      if (nextUser) {
+        void getUserProfile(nextUser.uid).then((profile) => {
+          if (!profile) {
+            void createUserProfile(
+              nextUser.uid,
+              nextUser.email ?? "",
+              nextUser.displayName,
+              nextUser.photoURL,
+            );
+          }
+        });
+      }
     });
 
     return () => unsubscribe();
@@ -52,13 +64,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await signOut(getFirebaseAuth());
   }, []);
 
+  /**
+   * Opens a Google sign-in popup. If the user is new, their Firestore profile
+   * is created via the onAuthStateChanged handler above.
+   * Throws on error so callers can handle it (e.g. show a toast).
+   */
+  const signInWithGoogle = useCallback(async () => {
+    const credential = await signInWithPopup(getFirebaseAuth(), getGoogleProvider());
+    // For new Google users, create the profile immediately rather than waiting
+    // for the next onAuthStateChanged tick, so the profile exists right away.
+    const { isNewUser } = getAdditionalUserInfo(credential) ?? {};
+    if (isNewUser) {
+      await createUserProfile(
+        credential.user.uid,
+        credential.user.email ?? "",
+        credential.user.displayName,
+        credential.user.photoURL,
+      );
+    }
+  }, []);
+
   const value = useMemo(
-    () => ({
-      user,
-      loading,
-      signOutUser,
-    }),
-    [user, loading, signOutUser],
+    () => ({ user, loading, signOutUser, signInWithGoogle }),
+    [user, loading, signOutUser, signInWithGoogle],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

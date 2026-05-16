@@ -1,5 +1,7 @@
 import { getApps, initializeApp, type FirebaseApp } from "firebase/app";
-import { getAuth, type Auth } from "firebase/auth";
+import { getAuth, GoogleAuthProvider, type Auth } from "firebase/auth";
+import { getFirestore, type Firestore } from "firebase/firestore";
+import { getStorage, type FirebaseStorage } from "firebase/storage";
 import { getFirebaseConfig } from "@/firebase/config";
 
 /**
@@ -27,6 +29,36 @@ export function getFirebaseAuth(): Auth {
     firebaseAuth = getAuth(getFirebaseApp());
   }
   return firebaseAuth;
+}
+
+/** Lazily created Firestore instance. */
+let firebaseDb: Firestore | undefined;
+
+export function getFirebaseDb(): Firestore {
+  if (!firebaseDb) {
+    firebaseDb = getFirestore(getFirebaseApp());
+  }
+  return firebaseDb;
+}
+
+/** Lazily created Storage instance. */
+let firebaseStorage: FirebaseStorage | undefined;
+
+export function getFirebaseStorage(): FirebaseStorage {
+  if (!firebaseStorage) {
+    firebaseStorage = getStorage(getFirebaseApp());
+  }
+  return firebaseStorage;
+}
+
+/**
+ * Returns a fresh GoogleAuthProvider configured to always show the account
+ * picker (so users can switch accounts even if already signed in to Google).
+ */
+export function getGoogleProvider(): GoogleAuthProvider {
+  const provider = new GoogleAuthProvider();
+  provider.setCustomParameters({ prompt: "select_account" });
+  return provider;
 }
 
 /**
