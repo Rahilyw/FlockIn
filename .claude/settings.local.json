@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run *)",
+      "Bash(Get-Content \"C:\\\\Users\\\\rahil\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-rahil-Documents-Projects-FlockIn--claude-worktrees-jovial-austin-141c97\\\\eb173387-fd93-4134-abbd-9aa6d62a5d2e\\\\tasks\\\\bosfbtigs.output\" -Tail 30)",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(Test-Path \"C:\\\\Users\\\\rahil\\\\Documents\\\\Projects\\\\FlockIn\\\\.claude\\\\worktrees\\\\jovial-austin-141c97\\\\.env\")",
+      "Bash(Get-Content \"C:\\\\Users\\\\rahil\\\\Documents\\\\Projects\\\\FlockIn\\\\.claude\\\\worktrees\\\\jovial-austin-141c97\\\\.env\")",
+      "Read(//c/Users/rahil/Documents/Projects/FlockIn/**)",
+      "Bash(cp \"C:\\\\Users\\\\rahil\\\\Documents\\\\Projects\\\\FlockIn\\\\.env\" \"C:\\\\Users\\\\rahil\\\\Documents\\\\Projects\\\\FlockIn\\\\.claude\\\\worktrees\\\\jovial-austin-141c97\\\\.env\")",
+      "Bash(ls \"C:\\\\Users\\\\rahil\\\\Documents\\\\Projects\\\\FlockIn\\\\\" | grep -i env)",
+      "Bash(cp \"/c/Users/rahil/Documents/Projects/FlockIn/.env.local\" \"/c/Users/rahil/Documents/Projects/FlockIn/.claude/worktrees/jovial-austin-141c97/.env.local\" && echo \"copied\")",
+      "Bash(gh pr create --title 'Redesign: Campus Arts & Community Noticeboard UI' --body ' *)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\rahil\\\\Documents\\\\Projects\\\\FlockIn\\\\.claude\\\\worktrees\\\\jovial-austin-141c97\" -Force)",
+      "Bash(Select-Object Name, FullName)",
+      "Bash(Format-Table)",
+      "Bash(gh pr *)",
+      "Bash(cd \"/c/Users/rahil/Documents/Projects/FlockIn/.claude/worktrees/jovial-austin-141c97\" && cat package.json | grep -E '\"firebase|\"@firebase')"
+    ]
+  }
+}
