@@ -2,116 +2,95 @@
 @tailwind components;
 @tailwind utilities;
 
-/* FlockIn!! Design System - Campus Information Platform
-All colors MUST be HSL for consistency.
-*/
+/* FlockIn!! Design System — Campus Arts & Community Noticeboard */
 
 @layer base {
   :root {
-    --background: 220 13% 97%;
-    --foreground: 220 9% 9%;
+    /* Warm paper background */
+    --background: 45 33% 98%;
+    --foreground: 90 5% 10%;
 
     --card: 0 0% 100%;
-    --card-foreground: 220 9% 9%;
+    --card-foreground: 90 5% 10%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 220 9% 9%;
+    --popover-foreground: 90 5% 10%;
 
-    /* University Blue - Primary Brand */
-    --primary: 218 91% 56%;
+    /* Terracotta / Peach — Primary brand */
+    --primary: 6 32% 40%;
     --primary-foreground: 0 0% 100%;
-    --primary-hover: 218 91% 48%;
+    --primary-hover: 6 32% 33%;
 
-    /* Purple Accent */
-    --secondary: 258 90% 66%;
+    /* Mint green — Secondary */
+    --secondary: 161 29% 31%;
     --secondary-foreground: 0 0% 100%;
 
-    /* Warm Gray */
-    --muted: 220 13% 95%;
-    --muted-foreground: 220 9% 46%;
+    /* Warm gray muted */
+    --muted: 40 20% 94%;
+    --muted-foreground: 30 10% 40%;
 
-    /* Orange Accent for CTAs */
-    --accent: 32 95% 44%;
+    /* Lavender accent */
+    --accent: 236 16% 42%;
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 84% 60%;
+    --destructive: 0 84% 37%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 220 13% 91%;
-    --input: 220 13% 91%;
-    --ring: 218 91% 56%;
-
-    /* Custom FlockIn colors */
-    --campus-blue: 218 91% 56%;
-    --campus-purple: 258 90% 66%;
-    --campus-orange: 32 95% 44%;
-    --campus-green: 142 76% 36%;
-    
-    /* Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(218 91% 56%), hsl(258 90% 66%));
-    --gradient-hero: linear-gradient(135deg, hsl(218 91% 56%) 0%, hsl(258 90% 66%) 50%, hsl(32 95% 44%) 100%);
-    --gradient-card: linear-gradient(145deg, hsl(0 0% 100%), hsl(220 13% 98%));
-    
-    /* Shadows */
-    --shadow-card: 0 4px 6px -1px hsl(220 9% 9% / 0.1), 0 2px 4px -1px hsl(220 9% 9% / 0.06);
-    --shadow-elevated: 0 10px 15px -3px hsl(220 9% 9% / 0.1), 0 4px 6px -2px hsl(220 9% 9% / 0.05);
-    --shadow-glow: 0 0 20px hsl(218 91% 56% / 0.3);
+    --border: 30 15% 88%;
+    --input: 30 15% 88%;
+    --ring: 6 32% 40%;
 
     --radius: 0.5rem;
 
-    --sidebar-background: 0 0% 98%;
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, #ffb3a7, #c3c3e8);
+    --gradient-hero: linear-gradient(135deg, #894e45 0%, #5a5c7c 50%, #3a675a 100%);
+    --gradient-card: linear-gradient(145deg, #ffffff, #f5f3ee);
 
-    --sidebar-foreground: 240 5.3% 26.1%;
+    /* Shadows */
+    --shadow-card: 0 4px 6px -1px rgba(27,28,25,0.1), 0 2px 4px -1px rgba(27,28,25,0.06);
+    --shadow-elevated: 0 10px 15px -3px rgba(27,28,25,0.1), 0 4px 6px -2px rgba(27,28,25,0.05);
+    --shadow-glow: 0 0 20px rgba(137, 78, 69, 0.3);
 
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    /* Sidebar */
+    --sidebar-background: 40 20% 96%;
+    --sidebar-foreground: 30 10% 20%;
+    --sidebar-primary: 6 32% 40%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 40 20% 92%;
+    --sidebar-accent-foreground: 30 10% 20%;
+    --sidebar-border: 30 15% 88%;
+    --sidebar-ring: 6 32% 40%;
   }
 
   .dark {
     --background: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;
-
     --card: 222.2 84% 4.9%;
     --card-foreground: 210 40% 98%;
-
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
-
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-
+    --primary: 6 50% 65%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 161 35% 45%;
+    --secondary-foreground: 0 0% 100%;
     --muted: 217.2 32.6% 17.5%;
     --muted-foreground: 215 20.2% 65.1%;
-
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-
+    --accent: 236 20% 55%;
+    --accent-foreground: 0 0% 100%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
-
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
+    --ring: 6 50% 65%;
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary: 6 50% 65%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 240 3.7% 15.9%;
     --sidebar-accent-foreground: 240 4.8% 95.9%;
     --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-ring: 6 50% 65%;
   }
 }
 
@@ -119,8 +98,68 @@ All colors MUST be HSL for consistency.
   * {
     @apply border-border;
   }
-
   body {
     @apply bg-background text-foreground;
+    font-family: 'Montserrat', sans-serif;
   }
+}
+
+/* ── Noticeboard board texture ── */
+.board-texture {
+  background-color: #3a7d52;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.18) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.18) 1px, transparent 1px);
+  background-size: 28px 28px;
+  box-shadow: inset 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+/* ── Poster card hover lift ── */
+.poster-card {
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), z-index 0s;
+  position: relative;
+}
+.poster-card:hover {
+  transform: scale(1.04) rotate(0deg) !important;
+  z-index: 30;
+}
+
+/* ── Pushpin ── */
+.pushpin {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  position: absolute;
+  top: -7px;
+  left: 50%;
+  transform: translateX(-50%);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.35), inset 0 -2px 2px rgba(0, 0, 0, 0.2);
+  z-index: 20;
+}
+
+/* ── Washi tape torn-edge mask ── */
+.washi-tape {
+  mask-image: linear-gradient(to right, transparent, black 12%, black 88%, transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, black 12%, black 88%, transparent);
+}
+
+/* ── Glass overlay on hover ── */
+.glass-overlay {
+  background: rgba(27, 28, 25, 0.82);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+/* ── Masonry grid ── */
+.masonry-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 40px;
+  padding: 40px;
+  align-items: start;
+}
+
+/* ── Material Symbols ── */
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
 }
