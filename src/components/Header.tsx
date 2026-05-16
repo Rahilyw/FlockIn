@@ -1,7 +1,4 @@
-import { Search, Calendar, Users, BookOpen, Menu, User, LogOut, LayoutDashboard } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,9 +11,17 @@ import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/components/ui/sonner";
 import { mapAuthError } from "@/lib/authErrors";
 
+const NAV_LINKS = [
+  { label: "Discover", to: "/" },
+  { label: "My Events", to: "/dashboard" },
+  { label: "Orgs", to: "/#clubs" },
+  { label: "Map", to: "/#map" },
+];
+
 const Header = () => {
   const { user, loading, signOutUser } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleSignOut = async () => {
     try {
@@ -28,140 +33,97 @@ const Header = () => {
     }
   };
 
-  const mobileNav = (
-    <>
-      <DropdownMenuItem asChild>
-        <Link to="/#events">Events</Link>
-      </DropdownMenuItem>
-      <DropdownMenuItem asChild>
-        <Link to="/#clubs">Clubs</Link>
-      </DropdownMenuItem>
-      <DropdownMenuItem asChild>
-        <Link to="/posters">Posters</Link>
-      </DropdownMenuItem>
-      <DropdownMenuItem asChild>
-        <Link to="/#resources">Resources</Link>
-      </DropdownMenuItem>
-    </>
-  );
-
   return (
-    <header className="sticky top-0 z-50 w-full bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex h-16 items-center justify-between gap-2">
-          <Link to="/" className="flex items-center space-x-2 shrink-0">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-primary">
-              <span className="text-lg font-bold text-white">F</span>
-            </div>
-            <span className="text-xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-              FlockIn!!
-            </span>
-          </Link>
+    <header className="sticky top-0 z-50 w-full flex justify-between items-center px-gutter py-4 bg-white/60 backdrop-blur-xl border-b border-white/20 shadow-sm">
+      {/* Logo + Nav */}
+      <div className="flex items-center gap-8">
+        <Link to="/" className="font-bold text-2xl tracking-tight text-primary">
+          FlockIn!!
+        </Link>
+        <nav className="hidden md:flex items-center gap-6">
+          {NAV_LINKS.map(({ label, to }) => {
+            const isActive = location.pathname === to || (to === "/" && location.pathname === "/");
+            return (
+              <Link
+                key={label}
+                to={to}
+                className={`text-base font-medium transition-colors ${
+                  isActive
+                    ? "text-primary font-bold border-b-2 border-primary pb-0.5"
+                    : "text-on-surface-variant hover:text-primary"
+                }`}
+              >
+                {label}
+              </Link>
+            );
+          })}
+        </nav>
+      </div>
 
-          <nav className="hidden md:flex items-center space-x-8">
-            <Link to="/#events" className="flex items-center space-x-2 text-muted-foreground hover:text-foreground transition-colors">
-              <Calendar className="h-4 w-4" />
-              <span>Events</span>
-            </Link>
-            <Link to="/#clubs" className="flex items-center space-x-2 text-muted-foreground hover:text-foreground transition-colors">
-              <Users className="h-4 w-4" />
-              <span>Clubs</span>
-            </Link>
-            <Link to="/posters" className="flex items-center space-x-2 text-muted-foreground hover:text-foreground transition-colors">
-              <BookOpen className="h-4 w-4" />
-              <span>Posters</span>
-            </Link>
-            <Link to="/#resources" className="flex items-center space-x-2 text-muted-foreground hover:text-foreground transition-colors">
-              <BookOpen className="h-4 w-4" />
-              <span>Resources</span>
-            </Link>
-          </nav>
+      {/* Right icons */}
+      <div className="flex items-center gap-2">
+        <button className="p-2 hover:bg-surface-variant/40 rounded-full transition-all active:scale-90">
+          <span className="material-symbols-outlined text-primary">search</span>
+        </button>
 
-          <div className="hidden sm:flex flex-1 max-w-md mx-4 min-w-0">
-            <div className="relative w-full">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input placeholder="Search events, clubs, resources..." className="pl-10 w-full" />
-            </div>
-          </div>
+        {loading ? (
+          <div className="h-9 w-9 rounded-full bg-muted animate-pulse" />
+        ) : user ? (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="p-2 hover:bg-surface-variant/40 rounded-full transition-all active:scale-90">
+                <span className="material-symbols-outlined text-primary">account_circle</span>
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuLabel className="truncate font-normal text-muted-foreground text-xs">
+                {user.email}
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem asChild>
+                <Link to="/dashboard">Dashboard</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={handleSignOut}
+                className="text-destructive focus:text-destructive cursor-pointer"
+              >
+                Log out
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        ) : (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="p-2 hover:bg-surface-variant/40 rounded-full transition-all active:scale-90">
+                <span className="material-symbols-outlined text-primary">account_circle</span>
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuItem asChild>
+                <Link to="/login">Sign in</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to="/signup">Get started</Link>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
 
-          <div className="flex items-center gap-2 shrink-0">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="md:hidden" aria-label="Open menu">
-                  <Menu className="h-5 w-5" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-52">
-                {mobileNav}
-                {!loading && !user && (
-                  <>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem asChild>
-                      <Link to="/login">Sign in</Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link to="/signup">Get started</Link>
-                    </DropdownMenuItem>
-                  </>
-                )}
-                {!loading && user && (
-                  <>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuLabel className="truncate font-normal text-muted-foreground text-xs">
-                      {user.email}
-                    </DropdownMenuLabel>
-                    <DropdownMenuItem asChild>
-                      <Link to="/dashboard">Dashboard</Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={handleSignOut}>Log out</DropdownMenuItem>
-                  </>
-                )}
-              </DropdownMenuContent>
-            </DropdownMenu>
-
-            {loading ? (
-              <div className="h-9 w-24 animate-pulse rounded-md bg-muted hidden md:block" aria-hidden />
-            ) : user ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm" className="gap-2 max-w-[220px] hidden md:flex">
-                    <User className="h-4 w-4 shrink-0" />
-                    <span className="truncate">{user.email}</span>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48">
-                  <DropdownMenuItem asChild>
-                    <Link to="/dashboard" className="cursor-pointer">
-                      <LayoutDashboard className="mr-2 h-4 w-4" />
-                      Dashboard
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer text-destructive focus:text-destructive">
-                    <LogOut className="mr-2 h-4 w-4" />
-                    Log out
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            ) : (
-              <>
-                <Button variant="outline" size="sm" className="hidden md:flex" asChild>
-                  <Link to="/login">Sign In</Link>
-                </Button>
-                <Button size="sm" className="hidden md:flex bg-gradient-primary hover:opacity-90" asChild>
-                  <Link to="/signup">Get Started</Link>
-                </Button>
-              </>
-            )}
-          </div>
-        </div>
-
-        <div className="sm:hidden pb-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input placeholder="Search events, clubs, resources..." className="pl-10 w-full" />
-          </div>
-        </div>
+        {/* Mobile hamburger */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button className="md:hidden p-2 hover:bg-surface-variant/40 rounded-full transition-all">
+              <span className="material-symbols-outlined text-primary">menu</span>
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-48">
+            {NAV_LINKS.map(({ label, to }) => (
+              <DropdownMenuItem key={label} asChild>
+                <Link to={to}>{label}</Link>
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </header>
   );
