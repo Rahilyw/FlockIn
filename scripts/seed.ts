@@ -1,73 +1,60 @@
 /**
- * Firestore seeder — run with:
- *   npx tsx scripts/seed.ts
- *   npx tsx scripts/seed.ts --fresh   (clears collections first)
+ * Firestore seeder — run from the project root:
+ *   npm run seed
+ *   npm run seed:fresh   (clears collections first)
  *
- * Requires:  scripts/service-account.json (Firebase Admin SDK key)
+ * Requires:  scripts/service-account.json  (Firebase Admin SDK key)
  */
 
+import { initializeApp, cert, type ServiceAccount } from "firebase-admin/app";
+import { getFirestore, Timestamp } from "firebase-admin/firestore";
+import { faker } from "@faker-js/faker";
 import { createRequire } from "module";
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
 
 const require = createRequire(import.meta.url);
-const __dirname = dirname(fileURLToPath(import.meta.url));
+const __dir = dirname(fileURLToPath(import.meta.url));
+const serviceAccount = require(join(__dir, "service-account.json")) as ServiceAccount;
 
-// Use locally-installed firebase-admin inside scripts/node_modules
-const admin = require(join(__dirname, "node_modules/firebase-admin/lib/index.js"));
-const { faker } = await import(join(__dirname, "node_modules/@faker-js/faker/dist/esm/index.js"));
-
-// ── Init ──────────────────────────────────────────────────────────────────────
-
-const serviceAccount = require(join(__dirname, "service-account.json"));
-
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-});
-
-const db = admin.firestore();
+initializeApp({ credential: cert(serviceAccount) });
+const db = getFirestore();
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 const FRESH = process.argv.includes("--fresh");
+const now = Timestamp.now();
 
 function ts(date: Date) {
-  return admin.firestore.Timestamp.fromDate(date);
+  return Timestamp.fromDate(date);
 }
 
 function futureDate(daysFromNow: number) {
   const d = new Date();
   d.setDate(d.getDate() + daysFromNow);
-  d.setHours(Math.floor(Math.random() * 10) + 10, 0, 0, 0); // 10am–8pm
+  d.setHours(Math.floor(Math.random() * 10) + 10, 0, 0, 0);
   return d;
 }
 
 async function clearCollection(name: string) {
   const snap = await db.collection(name).get();
+  if (snap.empty) return;
   const batch = db.batch();
-  snap.docs.forEach((d: any) => batch.delete(d.ref));
+  snap.docs.forEach((d) => batch.delete(d.ref));
   await batch.commit();
   console.log(`  Cleared ${snap.size} docs from "${name}"`);
 }
 
 async function batchWrite(col: string, docs: Record<string, unknown>[]) {
-  const batches: Promise<void>[] = [];
   for (let i = 0; i < docs.length; i += 499) {
-    const chunk = docs.slice(i, i + 499);
     const batch = db.batch();
-    chunk.forEach((doc: any) => {
-      const ref = db.collection(col).doc(doc.id as string);
-      batch.set(ref, doc);
+    docs.slice(i, i + 499).forEach((doc) => {
+      batch.set(db.collection(col).doc(doc.id as string), doc);
     });
-    batches.push(batch.commit());
+    await batch.commit();
   }
-  await Promise.all(batches);
   console.log(`  Wrote ${docs.length} docs → "${col}"`);
 }
-
-// ── Seed data ─────────────────────────────────────────────────────────────────
-
-const now = admin.firestore.Timestamp.now();
 
 // ── Events (22) ───────────────────────────────────────────────────────────────
 
@@ -116,7 +103,7 @@ const events = [
     location: "MacLaurin B-wing Courtyard",
     category: "Music",
     organizerId: "seed-organizer",
-    organizerName: "Victoria Coding Collective",
+    organizerName: "UVic Music Collective",
     attendeeCount: 0,
     attendeeIds: [],
     posterUrl: null,
@@ -763,6 +750,9 @@ const resources = [
 
 // ── Main ──────────────────────────────────────────────────────────────────────
 
+// Suppress unused import warning — faker is available for extending the script
+void faker;
+
 async function main() {
   console.log(`\n🌱 FlockIn Firestore Seeder${FRESH ? " (--fresh mode)" : ""}\n`);
 
@@ -779,10 +769,13 @@ async function main() {
   await batchWrite("clubs", clubs as unknown as Record<string, unknown>[]);
   await batchWrite("resources", resources as unknown as Record<string, unknown>[]);
 
-  console.log(`\n✅ Done. Seeded ${events.length} events, ${clubs.length} clubs, ${resources.length} resources.\n`);
+  console.log(
+    `\n✅ Done. Seeded ${events.length} events, ${clubs.length} clubs, ${resources.length} resources.\n`,
+  );
+  process.exit(0);
 }
 
 main().catch((err) => {
-  console.error("Seeding failed:", err);
+  console.error("\n❌ Seeding failed:", err.message ?? err);
   process.exit(1);
 });
