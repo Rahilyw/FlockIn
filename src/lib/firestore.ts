@@ -46,8 +46,11 @@ export async function createUserProfile(
     email,
     displayName,
     photoURL,
+    bio: null,
+    interests: [],
     joinedEvents: [],
     joinedClubs: [],
+    onboardingComplete: false,
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
   });
@@ -60,10 +63,23 @@ export async function getUserProfile(uid: string): Promise<UserProfile | null> {
 
 export async function updateUserProfile(
   uid: string,
-  data: Partial<Pick<UserProfile, "displayName" | "photoURL">>,
+  data: Partial<Pick<UserProfile, "displayName" | "photoURL" | "bio" | "interests">>,
 ): Promise<void> {
   await updateDoc(doc(usersCol(), uid), {
     ...data,
+    updatedAt: serverTimestamp(),
+  });
+}
+
+export async function completeOnboarding(
+  uid: string,
+  displayName: string,
+  interests: string[],
+): Promise<void> {
+  await updateDoc(doc(usersCol(), uid), {
+    displayName,
+    interests,
+    onboardingComplete: true,
     updatedAt: serverTimestamp(),
   });
 }

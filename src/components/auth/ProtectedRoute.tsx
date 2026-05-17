@@ -8,7 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
  * Login can send them back after a successful sign-in.
  */
 export function ProtectedRoute() {
-  const { user, loading } = useAuth();
+  const { user, profile, loading } = useAuth();
   const location = useLocation();
 
   if (loading) {
@@ -24,6 +24,10 @@ export function ProtectedRoute() {
 
   if (!user) {
     return <Navigate to="/login" replace state={{ from: location }} />;
+  }
+
+  if (profile && !profile.onboardingComplete && location.pathname !== "/onboarding") {
+    return <Navigate to="/onboarding" replace />;
   }
 
   return <Outlet />;

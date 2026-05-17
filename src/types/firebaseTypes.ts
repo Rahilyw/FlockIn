@@ -7,8 +7,11 @@ export interface UserProfile {
   email: string;
   displayName: string | null;
   photoURL: string | null;
+  bio: string | null;
+  interests: string[];
   joinedEvents: string[];
   joinedClubs: string[];
+  onboardingComplete: boolean;
   createdAt: Timestamp;
   updatedAt: Timestamp;
 }
