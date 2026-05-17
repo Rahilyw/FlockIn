@@ -7,6 +7,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/components/ui/sonner";
 import { mapAuthError } from "@/lib/authErrors";
@@ -19,7 +20,7 @@ const NAV_LINKS = [
 ];
 
 const Header = () => {
-  const { user, loading, signOutUser } = useAuth();
+  const { user, profile, loading, signOutUser } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -71,8 +72,18 @@ const Header = () => {
         ) : user ? (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className="p-2 hover:bg-surface-variant/40 rounded-full transition-all active:scale-90">
-                <span className="material-symbols-outlined text-primary">account_circle</span>
+              <button className="rounded-full transition-all active:scale-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary">
+                <Avatar className="h-9 w-9">
+                  <AvatarImage src={user.photoURL ?? undefined} alt={profile?.displayName ?? user.email ?? ""} />
+                  <AvatarFallback className="text-sm">
+                    {(profile?.displayName ?? user.email ?? "?")
+                      .split(" ")
+                      .map((w) => w[0])
+                      .slice(0, 2)
+                      .join("")
+                      .toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
@@ -82,6 +93,9 @@ const Header = () => {
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
                 <Link to="/dashboard">Dashboard</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to="/profile">Profile</Link>
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={handleSignOut}
