@@ -1,0 +1,34 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run *)",
+      "Bash(Get-Content \"C:\\\\Users\\\\rahil\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-rahil-Documents-Projects-FlockIn--claude-worktrees-jovial-austin-141c97\\\\eb173387-fd93-4134-abbd-9aa6d62a5d2e\\\\tasks\\\\bosfbtigs.output\" -Tail 30)",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(Test-Path \"C:\\\\Users\\\\rahil\\\\Documents\\\\Projects\\\\FlockIn\\\\.claude\\\\worktrees\\\\jovial-austin-141c97\\\\.env\")",
+      "Bash(Get-Content \"C:\\\\Users\\\\rahil\\\\Documents\\\\Projects\\\\FlockIn\\\\.claude\\\\worktrees\\\\jovial-austin-141c97\\\\.env\")",
+      "Read(//c/Users/rahil/Documents/Projects/FlockIn/**)",
+      "Bash(cp \"C:\\\\Users\\\\rahil\\\\Documents\\\\Projects\\\\FlockIn\\\\.env\" \"C:\\\\Users\\\\rahil\\\\Documents\\\\Projects\\\\FlockIn\\\\.claude\\\\worktrees\\\\jovial-austin-141c97\\\\.env\")",
+      "Bash(ls \"C:\\\\Users\\\\rahil\\\\Documents\\\\Projects\\\\FlockIn\\\\\" | grep -i env)",
+      "Bash(cp \"/c/Users/rahil/Documents/Projects/FlockIn/.env.local\" \"/c/Users/rahil/Documents/Projects/FlockIn/.claude/worktrees/jovial-austin-141c97/.env.local\" && echo \"copied\")",
+      "Bash(gh pr create --title 'Redesign: Campus Arts & Community Noticeboard UI' --body ' *)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\rahil\\\\Documents\\\\Projects\\\\FlockIn\\\\.claude\\\\worktrees\\\\jovial-austin-141c97\" -Force)",
+      "Bash(Select-Object Name, FullName)",
+      "Bash(Format-Table)",
+      "Bash(gh pr *)",
+      "Bash(cd \"/c/Users/rahil/Documents/Projects/FlockIn/.claude/worktrees/jovial-austin-141c97\" && cat package.json | grep -E '\"firebase|\"@firebase')",
+      "Bash(grep -E \"src/|package\\\\.json$\")",
+      "Bash(npm list *)",
+      "Bash(dir \"C:\\\\Users\\\\rahil\\\\Documents\\\\Projects\\\\FlockIn\\\\.claude\\\\worktrees\\\\\")",
+      "Bash(npm install *)",
+      "Bash(cat \"C:/Users/rahil/AppData/Local/npm-cache/_logs/2026-05-17T19_18_46_556Z-debug-0.log\" 2>/dev/null | head -30)",
+      "Bash(pnpm --version)",
+      "Bash(yarn --version)",
+      "Bash(node -e \"const {execSync} = require\\('child_process'\\); try { execSync\\('npm install -D firebase-admin@12 @faker-js/faker tsx', {stdio:'inherit'}\\); } catch\\(e\\) { console.log\\(e.message\\); }\")",
+      "Bash(node -e ' *)",
+      "Bash(python3 -c \"import json,sys; pkg=json.load\\(sys.stdin\\); print\\('version:', pkg.get\\('version'\\)\\); print\\('deps:', list\\(pkg.get\\('dependencies',{}\\).keys\\(\\)\\)[:5]\\)\")",
+      "Bash(node -e \"const p = require\\('./node_modules/lovable-tagger/package.json'\\); console.log\\('v:', p.version\\); console.log\\('swc:', JSON.stringify\\(p.optionalDependencies || {}\\).substring\\(0,200\\)\\)\")",
+      "Bash(npm view *)",
+      "Bash(npm pack *)"
+    ]
+  }
+}

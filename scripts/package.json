@@ -1,0 +1,1 @@
+{"name":"seed","version":"1.0.0","type":"module","private":true,"dependencies":{"@faker-js/faker":"^10.4.0","firebase-admin":"^13.10.0"}}
