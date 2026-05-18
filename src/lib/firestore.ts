@@ -255,3 +255,9 @@ export async function getResources(limitCount = 20): Promise<Resource[]> {
   );
   return snap.docs.map((d) => d.data() as Resource);
 }
+
+export async function getResource(id: string): Promise<Resource | null> {
+  const snap = await getDoc(doc(resourcesCol(), id));
+  return snap.exists() ? (snap.data() as Resource) : null;
+}
+
