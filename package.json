@@ -10,7 +10,9 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "seed": "npx tsx scripts/seed.ts",
-    "seed:fresh": "npx tsx scripts/seed.ts --fresh"
+    "seed:fresh": "npx tsx scripts/seed.ts --fresh",
+    "posters": "npx tsx scripts/upload-posters.ts",
+    "posters:dry": "npx tsx scripts/upload-posters.ts --dry-run"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",

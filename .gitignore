@@ -47,6 +47,9 @@ scripts/service-account.json
 scripts/node_modules/
 scripts/package-lock.json
 
+# Event posters (stored in Firebase Storage, not git)
+evt-posters/
+
 # Miscellaneous
 *.pem
 *.p12

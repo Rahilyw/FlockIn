@@ -28,7 +28,8 @@
       "Bash(python3 -c \"import json,sys; pkg=json.load\\(sys.stdin\\); print\\('version:', pkg.get\\('version'\\)\\); print\\('deps:', list\\(pkg.get\\('dependencies',{}\\).keys\\(\\)\\)[:5]\\)\")",
       "Bash(node -e \"const p = require\\('./node_modules/lovable-tagger/package.json'\\); console.log\\('v:', p.version\\); console.log\\('swc:', JSON.stringify\\(p.optionalDependencies || {}\\).substring\\(0,200\\)\\)\")",
       "Bash(npm view *)",
-      "Bash(npm pack *)"
+      "Bash(npm pack *)",
+      "Bash(npx tsc *)"
     ]
   }
 }
