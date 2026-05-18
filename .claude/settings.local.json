@@ -3,7 +3,13 @@
     "allow": [
       "Bash(npm run *)",
       "Bash(git add *)",
-      "Bash(git commit -m ' *)"
+      "Bash(git commit -m ' *)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\rahil\\\\Documents\\\\Projects\\\\FlockIn\" -Recurse -Depth 2)",
+      "Bash(Select-Object -First 100)",
+      "Bash(Format-Table FullName)",
+      "Bash(npx tsc *)",
+      "Bash(git push *)",
+      "Bash(gh pr *)"
     ]
   }
 }
