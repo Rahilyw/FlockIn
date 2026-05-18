@@ -231,6 +231,22 @@ export async function leaveClub(clubId: string, userId: string): Promise<void> {
   });
 }
 
+// ── Bookmark operations ───────────────────────────────────────────────────
+
+export async function toggleSavedEvent(userId: string, eventId: string, save: boolean): Promise<void> {
+  await updateDoc(doc(usersCol(), userId), {
+    savedEvents: save ? arrayUnion(eventId) : arrayRemove(eventId),
+    updatedAt: serverTimestamp(),
+  });
+}
+
+export async function toggleSavedClub(userId: string, clubId: string, save: boolean): Promise<void> {
+  await updateDoc(doc(usersCol(), userId), {
+    savedClubs: save ? arrayUnion(clubId) : arrayRemove(clubId),
+    updatedAt: serverTimestamp(),
+  });
+}
+
 // ── Resource operations ───────────────────────────────────────────────────
 
 export async function getResources(limitCount = 20): Promise<Resource[]> {

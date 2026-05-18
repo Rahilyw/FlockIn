@@ -7,6 +7,10 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import Index from "./pages/Index";
 import Posters from "./pages/Posters";
+import EventList from "./pages/EventList";
+import EventDetail from "./pages/EventDetail";
+import ClubList from "./pages/ClubList";
+import ClubDetail from "./pages/ClubDetail";
 import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
@@ -26,6 +30,10 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/posters" element={<Posters />} />
+            <Route path="/events" element={<EventList />} />
+            <Route path="/events/:id" element={<EventDetail />} />
+            <Route path="/clubs" element={<ClubList />} />
+            <Route path="/clubs/:id" element={<ClubDetail />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
             <Route element={<ProtectedRoute />}>

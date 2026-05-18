@@ -11,6 +11,8 @@ export interface UserProfile {
   interests: string[];
   joinedEvents: string[];
   joinedClubs: string[];
+  savedEvents: string[];
+  savedClubs: string[];
   onboardingComplete: boolean;
   createdAt: Timestamp;
   updatedAt: Timestamp;
