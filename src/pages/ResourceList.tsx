@@ -18,7 +18,7 @@ export default function ResourceList() {
     const navigate = useNavigate();
 
     // Fetch resources using the custom hook
-    const { data: resources, isLoading } = useResources(100); // Fetch up to 100 resources for client-side filtering
+    const { data: resources = [], isLoading } = useResources(100);
 
     // Filter resources based on the search query (case-insensitive)
     const filtered = resources.filter((r) => {

@@ -14,9 +14,9 @@ import { mapAuthError } from "@/lib/authErrors";
 
 const NAV_LINKS = [
   { label: "Discover", to: "/" },
-  { label: "My Events", to: "/dashboard" },
-  { label: "Orgs", to: "/#clubs" },
-  { label: "Map", to: "/#map" },
+  { label: "Events", to: "/events" },
+  { label: "Clubs", to: "/clubs" },
+  { label: "Resources", to: "/resources" },
 ];
 
 const Header = () => {
