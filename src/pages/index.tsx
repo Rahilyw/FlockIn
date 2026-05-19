@@ -12,8 +12,8 @@ const TAGS = [
 
 const NAV_ITEMS = [
   { icon: "dynamic_feed", label: "Your Feed", to: "/", active: true, color: "" },
-  { icon: "trending_up", label: "Trending", to: "/trending", active: false, color: "#F6AD55" },
-  { icon: "bookmark", label: "Saved", to: "/saved", active: false, color: "#F687B3" },
+  { icon: "trending_up", label: "Trending", to: "/events", active: false, color: "#F6AD55" },
+  { icon: "bookmark", label: "Saved", to: "/dashboard", active: false, color: "#F687B3" },
   { icon: "calendar_today", label: "Calendar", to: "/dashboard", active: false, color: "#63B3ED" },
 ];
 
