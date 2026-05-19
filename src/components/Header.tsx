@@ -1,3 +1,4 @@
+import { useState, useRef, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import {
   DropdownMenu,
@@ -8,6 +9,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/components/ui/sonner";
 import { mapAuthError } from "@/lib/authErrors";
@@ -17,12 +19,29 @@ const NAV_LINKS = [
   { label: "Events", to: "/events" },
   { label: "Clubs", to: "/clubs" },
   { label: "Resources", to: "/resources" },
+  {label: "My Space", to: "/dashboard" },
 ];
 
 const Header = () => {
   const { user, profile, loading, signOutUser } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const searchRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (searchOpen) searchRef.current?.focus();
+  }, [searchOpen]);
+
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/events?q=${encodeURIComponent(searchQuery.trim())}`);
+      setSearchOpen(false);
+      setSearchQuery("");
+    }
+  };
 
   const handleSignOut = async () => {
     try {
@@ -63,9 +82,32 @@ const Header = () => {
 
       {/* Right icons */}
       <div className="flex items-center gap-2">
-        <button className="p-2 hover:bg-surface-variant/40 rounded-full transition-all active:scale-90">
-          <span className="material-symbols-outlined text-primary">search</span>
-        </button>
+        {searchOpen ? (
+          <form onSubmit={handleSearchSubmit} className="flex items-center gap-2">
+            <Input
+              ref={searchRef}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={(e) => e.key === "Escape" && setSearchOpen(false)}
+              placeholder="Search events..."
+              className="h-9 w-48 sm:w-64"
+            />
+            <button
+              type="button"
+              className="p-2 hover:bg-surface-variant/40 rounded-full transition-all"
+              onClick={() => { setSearchOpen(false); setSearchQuery(""); }}
+            >
+              <span className="material-symbols-outlined text-primary">close</span>
+            </button>
+          </form>
+        ) : (
+          <button
+            className="p-2 hover:bg-surface-variant/40 rounded-full transition-all active:scale-90"
+            onClick={() => setSearchOpen(true)}
+          >
+            <span className="material-symbols-outlined text-primary">search</span>
+          </button>
+        )}
 
         {loading ? (
           <div className="h-9 w-9 rounded-full bg-muted animate-pulse" />

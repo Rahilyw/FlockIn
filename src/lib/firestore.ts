@@ -261,3 +261,17 @@ export async function getResource(id: string): Promise<Resource | null> {
   return snap.exists() ? (snap.data() as Resource) : null;
 }
 
+// ── Batch-by-ID operations ────────────────────────────────────────────────
+
+export async function getEventsByIds(ids: string[]): Promise<Event[]> {
+  if (ids.length === 0) return [];
+  const snap = await getDocs(query(eventsCol(), where("id", "in", ids.slice(0, 30))));
+  return snap.docs.map((d) => d.data() as Event);
+}
+
+export async function getClubsByIds(ids: string[]): Promise<Club[]> {
+  if (ids.length === 0) return [];
+  const snap = await getDocs(query(clubsCol(), where("id", "in", ids.slice(0, 30))));
+  return snap.docs.map((d) => d.data() as Club);
+}
+
