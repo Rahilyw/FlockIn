@@ -28,7 +28,7 @@ export default function ClubList() {
       <Header />
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-2 bg-gradient-primary bg-clip-text text-transparent">
+          <h1 className="text-4xl font-bold mb-2 text-primary">
             Clubs
           </h1>
           <p className="text-muted-foreground text-lg">Find clubs and organizations on campus</p>
@@ -57,8 +57,14 @@ export default function ClubList() {
             ))}
           </div>
         ) : filtered.length === 0 ? (
-          <div className="text-center py-16 text-muted-foreground">
-            No clubs match your search. Try different keywords.
+          <div className="text-center py-16 space-y-4">
+            <p className="text-muted-foreground">No clubs match your search. Try different keywords.</p>
+            <button
+              className="text-sm text-primary font-medium hover:underline"
+              onClick={() => setSearch("")}
+            >
+              Clear search
+            </button>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">

@@ -13,7 +13,12 @@
       "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\rahil\\\\Documents\\\\Projects\\\\FlockIn\" -Force)",
       "mcp__Claude_Preview__preview_start",
       "Bash(claude mcp *)",
-      "Bash(npx skills *)"
+      "Bash(npx skills *)",
+      "Bash(npm --version)",
+      "Bash(npm list *)",
+      "Bash(npm root *)",
+      "Bash(npm bin *)",
+      "Bash(npm config *)"
     ]
   }
 }

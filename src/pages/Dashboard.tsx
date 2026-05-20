@@ -36,11 +36,11 @@ export default function Dashboard() {
       <Header />
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-2 bg-gradient-primary bg-clip-text text-transparent">
+          <h1 className="text-4xl font-bold mb-2 text-primary">
             My Space
           </h1>
           <p className="text-muted-foreground text-lg">
-            Your joined events, clubs, and saved items
+            Everything you've joined and saved, in one place.
           </p>
         </div>
 

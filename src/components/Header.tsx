@@ -173,11 +173,19 @@ const Header = () => {
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-48">
-            {NAV_LINKS.map(({ label, to }) => (
-              <DropdownMenuItem key={label} asChild>
-                <Link to={to}>{label}</Link>
-              </DropdownMenuItem>
-            ))}
+            {NAV_LINKS.map(({ label, to }) => {
+              const isActive = location.pathname === to || (to === "/" && location.pathname === "/");
+              return (
+                <DropdownMenuItem key={label} asChild>
+                  <Link
+                    to={to}
+                    className={isActive ? "text-primary font-semibold" : ""}
+                  >
+                    {label}
+                  </Link>
+                </DropdownMenuItem>
+              );
+            })}
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

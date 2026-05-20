@@ -48,7 +48,7 @@ const Signup = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-muted/40 p-4">
+    <div className="min-h-screen flex items-center justify-center p-4">
       <Card className="w-full max-w-md shadow-lg">
         <CardHeader>
           <CardTitle className="text-2xl">Create an account</CardTitle>
@@ -96,7 +96,7 @@ const Signup = () => {
                   </FormItem>
                 )}
               />
-              <Button type="submit" className="w-full bg-gradient-primary hover:opacity-90" disabled={form.formState.isSubmitting}>
+              <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
                 {form.formState.isSubmitting ? "Creating account…" : "Sign up"}
               </Button>
             </form>

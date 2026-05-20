@@ -70,7 +70,7 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-muted/40 p-4">
+    <div className="min-h-screen flex items-center justify-center p-4">
       <Card className="w-full max-w-md shadow-lg">
         <CardHeader>
           <CardTitle className="text-2xl">Sign in</CardTitle>
@@ -125,7 +125,6 @@ const Login = () => {
               <Button
                 type="submit"
                 className="w-full"
-                style={{ background: "var(--gradient-primary)" }}
                 disabled={form.formState.isSubmitting}
               >
                 {form.formState.isSubmitting ? "Signing in…" : "Sign in"}

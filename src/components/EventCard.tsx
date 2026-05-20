@@ -25,7 +25,7 @@ export function EventCard({ event, isBookmarked = false, onBookmark }: Props) {
 
   return (
     <Card
-      className="group cursor-pointer hover:shadow-elevated transition-all duration-300 hover:-translate-y-1 bg-gradient-card border-border/50"
+      className="group cursor-pointer hover:shadow-elevated transition-[transform,box-shadow] duration-300 hover:-translate-y-1 bg-gradient-card border-border/50"
       onClick={() => navigate(`/events/${event.id}`)}
     >
       <CardContent className="p-0">

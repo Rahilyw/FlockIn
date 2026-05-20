@@ -16,7 +16,7 @@ export function ClubCard({ club, isBookmarked = false, onBookmark }: Props) {
 
   return (
     <Card
-      className="group cursor-pointer hover:shadow-elevated transition-all duration-300 hover:-translate-y-1 bg-gradient-card border-border/50"
+      className="group cursor-pointer hover:shadow-elevated transition-[transform,box-shadow] duration-300 hover:-translate-y-1 bg-gradient-card border-border/50"
       onClick={() => navigate(`/clubs/${club.id}`)}
     >
       <CardContent className="p-4 flex flex-col gap-3">
