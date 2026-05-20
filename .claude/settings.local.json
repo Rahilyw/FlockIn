@@ -9,7 +9,11 @@
       "Bash(Format-Table FullName)",
       "Bash(npx tsc *)",
       "Bash(git push *)",
-      "Bash(gh pr *)"
+      "Bash(gh pr *)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\rahil\\\\Documents\\\\Projects\\\\FlockIn\" -Force)",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(claude mcp *)",
+      "Bash(npx skills *)"
     ]
   }
 }
