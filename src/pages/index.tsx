@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import Noticeboard from "@/components/Noticeboard";
 
@@ -18,6 +18,7 @@ const NAV_ITEMS = [
 ];
 
 const Index = () => {
+  const navigate = useNavigate();
   return (
     <div className="min-h-screen bg-background text-on-surface flex flex-col">
       <Header />
@@ -57,7 +58,10 @@ const Index = () => {
             )}
           </nav>
 
-          <button className="mt-auto group relative overflow-hidden bg-gradient-to-r from-primary-container to-tertiary-container text-on-primary-container font-bold py-4 px-6 rounded-2xl shadow-lg transition-all duration-300 hover:scale-[1.02] active:scale-95">
+          <button
+            onClick={() => navigate("/events/new")}
+            className="mt-auto group relative overflow-hidden bg-gradient-to-r from-primary-container to-tertiary-container text-on-primary-container font-bold py-4 px-6 rounded-2xl shadow-lg transition-all duration-300 hover:scale-[1.02] active:scale-95"
+          >
             <span className="flex items-center justify-center gap-2">
               <span className="material-symbols-outlined">add_circle</span>
               Post Event
@@ -86,7 +90,11 @@ const Index = () => {
       </div>
 
       {/* Mobile FAB */}
-      <button className="md:hidden fixed bottom-6 right-6 w-16 h-16 rounded-full text-white shadow-2xl flex items-center justify-center active:scale-90 transition-transform" style={{ background: "linear-gradient(135deg, #894e45, #3a675a)" }}>
+      <button
+        onClick={() => navigate("/events/new")}
+        className="md:hidden fixed bottom-6 right-6 w-16 h-16 rounded-full text-white shadow-2xl flex items-center justify-center active:scale-90 transition-transform"
+        style={{ background: "linear-gradient(135deg, #894e45, #3a675a)" }}
+      >
         <span className="material-symbols-outlined text-[32px]">add</span>
       </button>
     </div>

@@ -33,19 +33,6 @@ export default function ResourceList() {
     });
 
 
-    // ── Club membership operations ─────────────────────────────────────────────
-/** Atomically adds userId to club.memberIds and increments memberCount.
- * No-ops if already a member. Also adds clubId to user.joinedClubs.
- * @param clubId - The ID of the club to join.
- * @param userId - The ID of the user joining the club.
- * @returns A promise that resolves when the operation is complete.
- * Example usage:   
- * joinClub("club123", "user456").then
- * (() => console.log("Joined club successfully!")).catch((error) => console.error("Failed to join club:", error));
- *  
- * 
- * 
- * */
   return (
     <div className="min-h-screen bg-background">
       <Header />

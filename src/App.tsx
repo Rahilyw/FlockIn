@@ -19,6 +19,7 @@ import Onboarding from "./pages/Onboarding";
 import Profile from "./pages/Profile";
 import ResourceList from "./pages/ResourceList";
 import ResourceDetail from "./pages/ResourceDetail";
+import CreateEvent from "./pages/CreateEvent";
 
 const queryClient = new QueryClient();
 
@@ -44,6 +45,7 @@ const App = () => (
               <Route path="/onboarding" element={<Onboarding />} />
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/profile" element={<Profile />} />
+              <Route path="/events/new" element={<CreateEvent />} />
             </Route>
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
