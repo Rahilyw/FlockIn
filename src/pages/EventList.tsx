@@ -98,12 +98,13 @@ export default function EventList() {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {filtered.map((event) => (
+            {filtered.map((event, index) => (
               <EventCard
                 key={event.id}
                 event={event}
                 isBookmarked={savedEvents.includes(event.id)}
                 onBookmark={toggleEvent}
+                style={{ animationDelay: `${Math.min(index * 40, 480)}ms` }}
               />
             ))}
           </div>

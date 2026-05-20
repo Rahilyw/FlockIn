@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Header from "@/components/Header";
@@ -20,6 +21,7 @@ function EmptyState({ message, linkTo, linkLabel }: { message: string; linkTo: s
 }
 
 export default function Dashboard() {
+  const [activeTab, setActiveTab] = useState("joined-events");
   const { profile } = useAuth();
   const { savedEvents, savedClubs, toggleEvent, toggleClub } = useBookmarks();
 
@@ -44,7 +46,7 @@ export default function Dashboard() {
           </p>
         </div>
 
-        <Tabs defaultValue="joined-events">
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="mb-8">
             <TabsTrigger value="joined-events">
               Joined Events
@@ -81,111 +83,123 @@ export default function Dashboard() {
           </TabsList>
 
           <TabsContent value="joined-events">
-            {loadingJoinedEvents ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {Array.from({ length: 4 }).map((_, i) => (
-                  <div key={i} className="aspect-[3/4] rounded-lg bg-muted animate-pulse" />
-                ))}
-              </div>
-            ) : joinedEvents.length === 0 ? (
-              <EmptyState
-                message="You haven't joined any events yet."
-                linkTo="/events"
-                linkLabel="Browse Events"
-              />
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {joinedEvents.map((event) => (
-                  <EventCard
-                    key={event.id}
-                    event={event}
-                    isBookmarked={savedEvents.includes(event.id)}
-                    onBookmark={toggleEvent}
-                  />
-                ))}
-              </div>
-            )}
+            <div key={`joined-events-${activeTab}`} className="animate-content-fade">
+              {loadingJoinedEvents ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  {Array.from({ length: 4 }).map((_, i) => (
+                    <div key={i} className="aspect-[3/4] rounded-lg bg-muted animate-pulse" />
+                  ))}
+                </div>
+              ) : joinedEvents.length === 0 ? (
+                <EmptyState
+                  message="You haven't joined any events yet."
+                  linkTo="/events"
+                  linkLabel="Browse Events"
+                />
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  {joinedEvents.map((event, index) => (
+                    <EventCard
+                      key={event.id}
+                      event={event}
+                      isBookmarked={savedEvents.includes(event.id)}
+                      onBookmark={toggleEvent}
+                      style={{ animationDelay: `${Math.min(index * 40, 480)}ms` }}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
           </TabsContent>
 
           <TabsContent value="joined-clubs">
-            {loadingJoinedClubs ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {Array.from({ length: 3 }).map((_, i) => (
-                  <div key={i} className="h-48 rounded-lg bg-muted animate-pulse" />
-                ))}
-              </div>
-            ) : joinedClubs.length === 0 ? (
-              <EmptyState
-                message="You haven't joined any clubs yet."
-                linkTo="/clubs"
-                linkLabel="Browse Clubs"
-              />
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {joinedClubs.map((club) => (
-                  <ClubCard
-                    key={club.id}
-                    club={club}
-                    isBookmarked={savedClubs.includes(club.id)}
-                    onBookmark={toggleClub}
-                  />
-                ))}
-              </div>
-            )}
+            <div key={`joined-clubs-${activeTab}`} className="animate-content-fade">
+              {loadingJoinedClubs ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {Array.from({ length: 3 }).map((_, i) => (
+                    <div key={i} className="h-48 rounded-lg bg-muted animate-pulse" />
+                  ))}
+                </div>
+              ) : joinedClubs.length === 0 ? (
+                <EmptyState
+                  message="You haven't joined any clubs yet."
+                  linkTo="/clubs"
+                  linkLabel="Browse Clubs"
+                />
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {joinedClubs.map((club, index) => (
+                    <ClubCard
+                      key={club.id}
+                      club={club}
+                      isBookmarked={savedClubs.includes(club.id)}
+                      onBookmark={toggleClub}
+                      style={{ animationDelay: `${Math.min(index * 40, 480)}ms` }}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
           </TabsContent>
 
           <TabsContent value="saved-events">
-            {loadingSavedEvents ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {Array.from({ length: 4 }).map((_, i) => (
-                  <div key={i} className="aspect-[3/4] rounded-lg bg-muted animate-pulse" />
-                ))}
-              </div>
-            ) : savedEventsList.length === 0 ? (
-              <EmptyState
-                message="You haven't saved any events yet. Hit the bookmark icon on any event."
-                linkTo="/events"
-                linkLabel="Browse Events"
-              />
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {savedEventsList.map((event) => (
-                  <EventCard
-                    key={event.id}
-                    event={event}
-                    isBookmarked={savedEvents.includes(event.id)}
-                    onBookmark={toggleEvent}
-                  />
-                ))}
-              </div>
-            )}
+            <div key={`saved-events-${activeTab}`} className="animate-content-fade">
+              {loadingSavedEvents ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  {Array.from({ length: 4 }).map((_, i) => (
+                    <div key={i} className="aspect-[3/4] rounded-lg bg-muted animate-pulse" />
+                  ))}
+                </div>
+              ) : savedEventsList.length === 0 ? (
+                <EmptyState
+                  message="You haven't saved any events yet. Hit the bookmark icon on any event."
+                  linkTo="/events"
+                  linkLabel="Browse Events"
+                />
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  {savedEventsList.map((event, index) => (
+                    <EventCard
+                      key={event.id}
+                      event={event}
+                      isBookmarked={savedEvents.includes(event.id)}
+                      onBookmark={toggleEvent}
+                      style={{ animationDelay: `${Math.min(index * 40, 480)}ms` }}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
           </TabsContent>
 
           <TabsContent value="saved-clubs">
-            {loadingSavedClubs ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {Array.from({ length: 3 }).map((_, i) => (
-                  <div key={i} className="h-48 rounded-lg bg-muted animate-pulse" />
-                ))}
-              </div>
-            ) : savedClubsList.length === 0 ? (
-              <EmptyState
-                message="You haven't saved any clubs yet. Hit the bookmark icon on any club."
-                linkTo="/clubs"
-                linkLabel="Browse Clubs"
-              />
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {savedClubsList.map((club) => (
-                  <ClubCard
-                    key={club.id}
-                    club={club}
-                    isBookmarked={savedClubs.includes(club.id)}
-                    onBookmark={toggleClub}
-                  />
-                ))}
-              </div>
-            )}
+            <div key={`saved-clubs-${activeTab}`} className="animate-content-fade">
+              {loadingSavedClubs ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {Array.from({ length: 3 }).map((_, i) => (
+                    <div key={i} className="h-48 rounded-lg bg-muted animate-pulse" />
+                  ))}
+                </div>
+              ) : savedClubsList.length === 0 ? (
+                <EmptyState
+                  message="You haven't saved any clubs yet. Hit the bookmark icon on any club."
+                  linkTo="/clubs"
+                  linkLabel="Browse Clubs"
+                />
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {savedClubsList.map((club, index) => (
+                    <ClubCard
+                      key={club.id}
+                      club={club}
+                      isBookmarked={savedClubs.includes(club.id)}
+                      onBookmark={toggleClub}
+                      style={{ animationDelay: `${Math.min(index * 40, 480)}ms` }}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
           </TabsContent>
         </Tabs>
       </div>

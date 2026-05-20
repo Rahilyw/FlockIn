@@ -84,20 +84,25 @@ const Noticeboard = () => {
           const action = ACTION_BY_CATEGORY[event.category] ?? ACTION_BY_CATEGORY.Other;
 
           return (
-            <PosterCard
+            <div
               key={event.id}
-              title={event.title}
-              date={event.date}
-              location={event.location}
-              description={event.description}
-              posterUrl={event.posterUrl}
-              rotation={ROTATIONS[i % ROTATIONS.length]}
-              marginTop={MARGIN_TOPS[i % MARGIN_TOPS.length]}
-              fallbackGradient={FALLBACK_GRADIENTS[i % FALLBACK_GRADIENTS.length]}
-              actionLabel={action.label}
-              actionClassName={action.className}
-              {...attachment}
-            />
+              className="animate-card-enter"
+              style={{ animationDelay: `${Math.min(i * 55, 900)}ms` }}
+            >
+              <PosterCard
+                title={event.title}
+                date={event.date}
+                location={event.location}
+                description={event.description}
+                posterUrl={event.posterUrl}
+                rotation={ROTATIONS[i % ROTATIONS.length]}
+                marginTop={MARGIN_TOPS[i % MARGIN_TOPS.length]}
+                fallbackGradient={FALLBACK_GRADIENTS[i % FALLBACK_GRADIENTS.length]}
+                actionLabel={action.label}
+                actionClassName={action.className}
+                {...attachment}
+              />
+            </div>
           );
         })}
       </div>

@@ -18,7 +18,8 @@
       "Bash(npm list *)",
       "Bash(npm root *)",
       "Bash(npm bin *)",
-      "Bash(npm config *)"
+      "Bash(npm config *)",
+      "Bash(node \"C:\\\\Users\\\\rahil\\\\.claude\\\\skills\\\\impeccable\\\\scripts\\\\load-context.mjs\")"
     ]
   }
 }

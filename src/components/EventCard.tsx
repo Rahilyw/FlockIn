@@ -1,3 +1,4 @@
+import type React from "react";
 import { useNavigate } from "react-router-dom";
 import { Bookmark, Calendar, MapPin, Users } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -10,6 +11,7 @@ interface Props {
   event: Event;
   isBookmarked?: boolean;
   onBookmark?: (id: string) => void;
+  style?: React.CSSProperties;
 }
 
 function formatDate(ts: Timestamp) {
@@ -20,12 +22,13 @@ function formatDate(ts: Timestamp) {
   }) ?? "TBD";
 }
 
-export function EventCard({ event, isBookmarked = false, onBookmark }: Props) {
+export function EventCard({ event, isBookmarked = false, onBookmark, style }: Props) {
   const navigate = useNavigate();
 
   return (
     <Card
-      className="group cursor-pointer hover:shadow-elevated transition-[transform,box-shadow] duration-300 hover:-translate-y-1 bg-gradient-card border-border/50"
+      className="group cursor-pointer hover:shadow-elevated transition-[transform,box-shadow] duration-300 hover:-translate-y-1 bg-gradient-card border-border/50 animate-card-enter"
+      style={style}
       onClick={() => navigate(`/events/${event.id}`)}
     >
       <CardContent className="p-0">

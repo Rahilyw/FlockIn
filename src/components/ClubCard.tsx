@@ -1,3 +1,4 @@
+import type React from "react";
 import { useNavigate } from "react-router-dom";
 import { Bookmark, Users } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -9,14 +10,16 @@ interface Props {
   club: Club;
   isBookmarked?: boolean;
   onBookmark?: (id: string) => void;
+  style?: React.CSSProperties;
 }
 
-export function ClubCard({ club, isBookmarked = false, onBookmark }: Props) {
+export function ClubCard({ club, isBookmarked = false, onBookmark, style }: Props) {
   const navigate = useNavigate();
 
   return (
     <Card
-      className="group cursor-pointer hover:shadow-elevated transition-[transform,box-shadow] duration-300 hover:-translate-y-1 bg-gradient-card border-border/50"
+      className="group cursor-pointer hover:shadow-elevated transition-[transform,box-shadow] duration-300 hover:-translate-y-1 bg-gradient-card border-border/50 animate-card-enter"
+      style={style}
       onClick={() => navigate(`/clubs/${club.id}`)}
     >
       <CardContent className="p-4 flex flex-col gap-3">

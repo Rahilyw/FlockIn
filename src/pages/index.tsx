@@ -12,9 +12,9 @@ const TAGS = [
 
 const NAV_ITEMS = [
   { icon: "dynamic_feed", label: "Your Feed", to: "/", active: true, color: "" },
-  { icon: "trending_up", label: "Trending", to: "/events", active: false, color: "#F6AD55" },
-  { icon: "bookmark", label: "Saved", to: "/dashboard", active: false, color: "#F687B3" },
-  { icon: "calendar_today", label: "Calendar", to: "/dashboard", active: false, color: "#63B3ED" },
+  { icon: "trending_up", label: "Trending", to: "/events", active: false, color: "#c47d12" },
+  { icon: "bookmark", label: "Saved", to: "/dashboard", active: false, color: "#894e45" },
+  { icon: "calendar_today", label: "Calendar", to: "/dashboard", active: false, color: "#5a5c7c" },
 ];
 
 const Index = () => {
@@ -33,7 +33,7 @@ const Index = () => {
             </p>
           </div>
 
-          <nav className="flex flex-col gap-2 flex-1">
+          <nav className="flex flex-col gap-2">
             {NAV_ITEMS.map(({ icon, label, to, active, color }) =>
               active ? (
                 <Link
@@ -60,7 +60,7 @@ const Index = () => {
 
           <button
             onClick={() => navigate("/events/new")}
-            className="mt-auto group relative overflow-hidden bg-gradient-to-r from-primary-container to-tertiary-container text-on-primary-container font-bold py-4 px-6 rounded-2xl shadow-lg transition-all duration-300 hover:scale-[1.02] active:scale-95"
+            className="mt-6 group relative overflow-hidden bg-gradient-to-r from-primary-container to-tertiary-container text-on-primary-container font-bold py-4 px-6 rounded-2xl shadow-lg transition-all duration-300 hover:scale-[1.02] active:scale-95"
           >
             <span className="flex items-center justify-center gap-2">
               <span className="material-symbols-outlined">add_circle</span>
