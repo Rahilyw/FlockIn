@@ -1,6 +1,14 @@
+import { useState } from "react";
 import PosterCard from "./PosterCard";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "@/components/ui/sonner";
+import { useAuth } from "@/contexts/AuthContext";
+import { joinEvent, leaveEvent } from "@/lib/firestore";
+import { useBookmarks } from "@/hooks/useBookmarks";
 import { useEvents } from "@/hooks/useEvents";
-import type { EventCategory } from "@/types/firebaseTypes";
+import { queryKeys } from "@/hooks/queryKeys";
+import type { Event, EventCategory } from "@/types/firebaseTypes";
 
 // ── Visual presets cycling by card index ──────────────────────────────────────
 
@@ -63,7 +71,63 @@ function SkeletonCard({ index }: { index: number }) {
 // ── Noticeboard ───────────────────────────────────────────────────────────────
 
 const Noticeboard = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const queryClient = useQueryClient();
+  const { user, profile, refreshProfile } = useAuth();
+  const { savedEvents, toggleEvent } = useBookmarks();
   const { data: events, isLoading, isError } = useEvents({ limit: 22 });
+  const [savingEventId, setSavingEventId] = useState<string | null>(null);
+  const [attendingEventId, setAttendingEventId] = useState<string | null>(null);
+
+  const redirectToLogin = () => {
+    navigate("/login", { state: { from: location } });
+  };
+
+  const handleToggleSave = async (event: Event) => {
+    if (!user) {
+      redirectToLogin();
+      return;
+    }
+
+    setSavingEventId(event.id);
+    const wasSaved = savedEvents.includes(event.id);
+    try {
+      await toggleEvent(event.id);
+      toast.success(wasSaved ? "Removed from saved events." : "Saved to My Space.");
+    } catch {
+      toast.error("Couldn't update your saved events. Try again.");
+    } finally {
+      setSavingEventId(null);
+    }
+  };
+
+  const handleToggleAttendance = async (event: Event) => {
+    if (!user) {
+      redirectToLogin();
+      return;
+    }
+
+    setAttendingEventId(event.id);
+    const wasAttending = profile?.joinedEvents?.includes(event.id) ?? false;
+    try {
+      if (wasAttending) {
+        await leaveEvent(event.id, user.uid);
+      } else {
+        await joinEvent(event.id, user.uid);
+      }
+      await refreshProfile();
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: queryKeys.events.all }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.events.detail(event.id) }),
+      ]);
+      toast.success(wasAttending ? "Removed from your attending list." : "Added to your attending events.");
+    } catch {
+      toast.error("Couldn't update your attendance. Try again.");
+    } finally {
+      setAttendingEventId(null);
+    }
+  };
 
   return (
     <div className="relative rounded-[32px] p-4 bg-[#5D4037] shadow-2xl border-[12px] border-[#3E2723]">
@@ -82,6 +146,8 @@ const Noticeboard = () => {
         {events?.map((event, i) => {
           const attachment = ATTACHMENTS[i % ATTACHMENTS.length];
           const action = ACTION_BY_CATEGORY[event.category] ?? ACTION_BY_CATEGORY.Other;
+          const isSaved = savedEvents.includes(event.id);
+          const isAttending = profile?.joinedEvents?.includes(event.id) ?? false;
 
           return (
             <div
@@ -100,6 +166,13 @@ const Noticeboard = () => {
                 fallbackGradient={FALLBACK_GRADIENTS[i % FALLBACK_GRADIENTS.length]}
                 actionLabel={action.label}
                 actionClassName={action.className}
+                onOpen={() => navigate(`/events/${event.id}`)}
+                isSaved={isSaved}
+                isAttending={isAttending}
+                isSavePending={savingEventId === event.id}
+                isAttendancePending={attendingEventId === event.id}
+                onToggleSave={() => handleToggleSave(event)}
+                onToggleAttendance={() => handleToggleAttendance(event)}
                 {...attachment}
               />
             </div>

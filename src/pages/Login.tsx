@@ -37,14 +37,14 @@ const Login = () => {
   const from = (location.state as { from?: Location } | null)?.from?.pathname ?? "/";
   const [googleLoading, setGoogleLoading] = useState(false);
 
-  if (!authLoading && user) {
-    return <Navigate to={from} replace />;
-  }
-
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: { email: "", password: "" },
   });
+
+  if (!authLoading && user) {
+    return <Navigate to={from} replace />;
+  }
 
   const onSubmit = async (values: LoginFormValues) => {
     try {

@@ -23,14 +23,14 @@ const Signup = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
 
-  if (!authLoading && user) {
-    return <Navigate to="/" replace />;
-  }
-
   const form = useForm<SignupFormValues>({
     resolver: zodResolver(signupSchema),
     defaultValues: { email: "", password: "", confirmPassword: "" },
   });
+
+  if (!authLoading && user) {
+    return <Navigate to="/" replace />;
+  }
 
   const onSubmit = async (values: SignupFormValues) => {
     try {
