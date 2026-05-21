@@ -1,82 +1,136 @@
-import { Link, useNavigate } from "react-router-dom";
+import type { CSSProperties } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import Header from "@/components/Header";
 import Noticeboard from "@/components/Noticeboard";
 
 const TAGS = [
-  { label: "#Tonight", bg: "#FFD6E0", color: "#7A423A" },
-  { label: "#ArtsWeek", bg: "#E0F2F1", color: "#214E43" },
-  { label: "#CareerFair", bg: "#F3E5F5", color: "#434463" },
-  { label: "#FreePizza", bg: "#FFF9C4", color: "#894E45" },
-  { label: "#LiveMusic", bg: "#D1C4E9", color: "#5A5C7C" },
+  { label: "#Tonight",    bg: "oklch(93% 0.04 15)",  color: "oklch(34% 0.10 15)"  },
+  { label: "#ArtsWeek",   bg: "oklch(94% 0.04 162)", color: "oklch(30% 0.09 162)" },
+  { label: "#CareerFair", bg: "oklch(93% 0.04 280)", color: "oklch(33% 0.10 280)" },
+  { label: "#FreePizza",  bg: "oklch(95% 0.07 82)",  color: "oklch(36% 0.12 62)"  },
+  { label: "#LiveMusic",  bg: "oklch(92% 0.05 262)", color: "oklch(34% 0.10 262)" },
 ];
 
-const NAV_ITEMS = [
-  { icon: "dynamic_feed", label: "Your Feed", to: "/", active: true, color: "" },
-  { icon: "trending_up", label: "Trending", to: "/events", active: false, color: "#c47d12" },
-  { icon: "bookmark", label: "Saved", to: "/dashboard", active: false, color: "#894e45" },
-  { icon: "calendar_today", label: "Calendar", to: "/dashboard", active: false, color: "#5a5c7c" },
+const NAV_ITEMS: {
+  icon: string;
+  label: string;
+  to: string;
+  active: CSSProperties;
+  inactive: CSSProperties;
+}[] = [
+  {
+    icon: "dynamic_feed",
+    label: "Your Feed",
+    to: "/",
+    active:   { background: "oklch(84% 0.15 196 / 0.30)", border: "1.5px solid oklch(64% 0.19 196 / 0.52)", color: "oklch(23% 0.13 196)" },
+    inactive: { background: "oklch(91% 0.07 196 / 0.20)", border: "1.5px solid oklch(84% 0.10 196 / 0.32)", color: "oklch(40% 0.11 196)" },
+  },
+  {
+    icon: "trending_up",
+    label: "Trending",
+    to: "/events",
+    active:   { background: "oklch(86% 0.16 65 / 0.30)", border: "1.5px solid oklch(70% 0.21 65 / 0.52)", color: "oklch(28% 0.14 65)" },
+    inactive: { background: "oklch(93% 0.07 65 / 0.20)", border: "1.5px solid oklch(86% 0.10 65 / 0.32)", color: "oklch(44% 0.12 65)" },
+  },
+  {
+    icon: "group",
+    label: "Clubs",
+    to: "/clubs",
+    active:   { background: "oklch(83% 0.13 162 / 0.30)", border: "1.5px solid oklch(62% 0.16 162 / 0.52)", color: "oklch(24% 0.11 162)" },
+    inactive: { background: "oklch(91% 0.06 162 / 0.20)", border: "1.5px solid oklch(84% 0.09 162 / 0.32)", color: "oklch(40% 0.09 162)" },
+  },
+  {
+    icon: "layers",
+    label: "Resources",
+    to: "/resources",
+    active:   { background: "oklch(81% 0.14 280 / 0.28)", border: "1.5px solid oklch(62% 0.18 280 / 0.50)", color: "oklch(26% 0.14 280)" },
+    inactive: { background: "oklch(90% 0.07 280 / 0.20)", border: "1.5px solid oklch(83% 0.10 280 / 0.30)", color: "oklch(42% 0.13 280)" },
+  },
+  {
+    icon: "bookmark",
+    label: "Saved",
+    to: "/dashboard",
+    active:   { background: "oklch(82% 0.14 18 / 0.30)", border: "1.5px solid oklch(63% 0.17 18 / 0.52)", color: "oklch(25% 0.12 18)" },
+    inactive: { background: "oklch(91% 0.06 18 / 0.20)", border: "1.5px solid oklch(84% 0.09 18 / 0.30)", color: "oklch(42% 0.10 18)" },
+  },
 ];
 
 const Index = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const isActive = (to: string) =>
+    to === "/" ? location.pathname === "/" : location.pathname.startsWith(to);
+
   return (
-    <div className="min-h-screen bg-background text-on-surface flex flex-col">
+    <div className="min-h-screen bg-background text-foreground flex flex-col">
       <Header />
 
-      <div className="flex flex-1 overflow-hidden">
-        {/* Sidebar */}
-        <aside className="hidden md:flex flex-col w-[280px] sticky top-16 h-[calc(100vh-4rem)] bg-surface-container-low border-r border-outline-variant/30 p-margin-desktop gap-2 shadow-md overflow-y-auto">
-          <div className="mb-8">
-            <h2 className="text-3xl font-bold leading-tight text-primary">Welcome back</h2>
-            <p className="text-sm font-semibold tracking-wide mt-1" style={{ color: "#4FD1C5" }}>
-              Explore the board
-            </p>
+      <div className="flex flex-1 items-start">
+
+        {/* ── Sidebar column ── */}
+        <div className="hidden md:block w-[272px] shrink-0">
+          <div className="sticky top-[4.5rem] p-3">
+            {/* The floating card — rounded on all sides, detached from edges */}
+            <aside
+              className="flex flex-col rounded-[28px] bg-white/72 backdrop-blur-xl"
+              style={{
+                boxShadow: [
+                  "0 6px 32px oklch(50% 0.10 196 / 0.11)",   /* outer depth */
+                  "0 1px 8px oklch(60% 0.08 196 / 0.08)",    /* close shadow */
+                  "0 0 0 1.5px oklch(90% 0.07 196 / 0.50)",  /* tinted ring */
+                  "inset 0 1.5px 0 rgba(255,255,255,0.82)",  /* glass top highlight */
+                ].join(", "),
+              }}
+            >
+              <div className="px-3 pt-7 pb-5 flex flex-col">
+                <p className="text-[10px] font-black tracking-[0.18em] uppercase text-muted-foreground/45 mb-4 px-1">
+                  Discover
+                </p>
+
+                <nav className="flex flex-col gap-2">
+                  {NAV_ITEMS.map(({ icon, label, to, active, inactive }) => {
+                    const itemActive = isActive(to);
+                    return (
+                      <Link
+                        key={label}
+                        to={to}
+                        style={itemActive ? active : inactive}
+                        className="flex items-center gap-3.5 px-4 py-3 rounded-2xl text-[15px] font-semibold transition-all duration-150 hover:brightness-[1.08] hover:scale-[1.015]"
+                      >
+                        <span className="material-symbols-outlined text-[22px] leading-none">
+                          {icon}
+                        </span>
+                        {label}
+                      </Link>
+                    );
+                  })}
+                </nav>
+
+                {/* Post Event — directly below nav */}
+                <button
+                  onClick={() => navigate("/events/new")}
+                  className="mt-5 w-full flex items-center justify-center gap-2.5 text-white font-bold text-[15px] py-3.5 px-4 rounded-2xl active:scale-95 transition-all duration-150 hover:brightness-110"
+                  style={{
+                    background: "hsl(var(--primary))",
+                    boxShadow: "0 6px 22px oklch(55% 0.20 196 / 0.38)",
+                  }}
+                >
+                  <span className="material-symbols-outlined text-[20px] leading-none">add_circle</span>
+                  Post an Event
+                </button>
+              </div>
+            </aside>
           </div>
+        </div>
 
-          <nav className="flex flex-col gap-2">
-            {NAV_ITEMS.map(({ icon, label, to, active, color }) =>
-              active ? (
-                <Link
-                  key={label}
-                  to={to}
-                  className="flex items-center gap-4 px-4 py-3 bg-secondary-container text-on-secondary-container rounded-xl font-bold shadow-sm hover:translate-x-1 transition-transform duration-200"
-                >
-                  <span className="material-symbols-outlined">{icon}</span>
-                  <span className="text-sm font-semibold tracking-widest uppercase">{label}</span>
-                </Link>
-              ) : (
-                <Link
-                  key={label}
-                  to={to}
-                  className="flex items-center gap-4 px-4 py-3 rounded-xl hover:bg-surface-variant/50 hover:translate-x-1 transition-all duration-200"
-                  style={{ color }}
-                >
-                  <span className="material-symbols-outlined">{icon}</span>
-                  <span className="text-sm font-semibold tracking-widest uppercase">{label}</span>
-                </Link>
-              )
-            )}
-          </nav>
-
-          <button
-            onClick={() => navigate("/events/new")}
-            className="mt-6 group relative overflow-hidden bg-gradient-to-r from-primary-container to-tertiary-container text-on-primary-container font-bold py-4 px-6 rounded-2xl shadow-lg transition-all duration-300 hover:scale-[1.02] active:scale-95"
-          >
-            <span className="flex items-center justify-center gap-2">
-              <span className="material-symbols-outlined">add_circle</span>
-              Post Event
-            </span>
-          </button>
-        </aside>
-
-        {/* Main content */}
-        <main className="flex-1 overflow-y-auto p-gutter relative">
-          {/* Tag chips */}
-          <div className="flex flex-wrap gap-3 mb-8">
+        {/* ── Main content ── */}
+        <main className="flex-1 px-6 py-6">
+          <div className="flex flex-wrap gap-2.5 mb-8">
             {TAGS.map((tag) => (
               <button
                 key={tag.label}
-                className="px-4 py-2 rounded-full text-sm font-semibold tracking-wide cursor-pointer hover:brightness-95 transition-all shadow-sm"
+                className="px-4 py-1.5 rounded-full text-sm font-semibold cursor-pointer hover:brightness-95 active:scale-95 transition-all shadow-sm"
                 style={{ background: tag.bg, color: tag.color }}
               >
                 {tag.label}
@@ -84,18 +138,21 @@ const Index = () => {
             ))}
           </div>
 
-          {/* The Noticeboard */}
           <Noticeboard />
         </main>
       </div>
 
-      {/* Mobile FAB */}
+      {/* ── Mobile FAB ── */}
       <button
         onClick={() => navigate("/events/new")}
-        className="md:hidden fixed bottom-6 right-6 w-16 h-16 rounded-full text-white shadow-2xl flex items-center justify-center active:scale-90 transition-transform"
-        style={{ background: "linear-gradient(135deg, #894e45, #3a675a)" }}
+        className="md:hidden fixed bottom-6 right-6 w-14 h-14 rounded-full text-white shadow-lg flex items-center justify-center active:scale-90 transition-transform"
+        style={{
+          background: "hsl(var(--primary))",
+          boxShadow: "0 6px 20px oklch(55% 0.20 196 / 0.40)",
+        }}
+        aria-label="Post an event"
       >
-        <span className="material-symbols-outlined text-[32px]">add</span>
+        <span className="material-symbols-outlined text-[28px]">add</span>
       </button>
     </div>
   );

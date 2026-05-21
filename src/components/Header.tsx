@@ -57,8 +57,16 @@ const Header = () => {
     <header className="sticky top-0 z-50 w-full flex justify-between items-center px-gutter py-4 bg-white/60 backdrop-blur-xl border-b border-white/20 shadow-sm">
       {/* Logo + Nav */}
       <div className="flex items-center gap-8">
-        <Link to="/" className="font-bold text-2xl tracking-tight text-primary">
-          FlockIn!!
+        <Link to="/" className="font-extrabold text-2xl tracking-tight">
+          <span style={{ color: '#1848d0' }}>F</span>
+          <span style={{ color: '#e0321e' }}>l</span>
+          <span style={{ color: '#1c7830' }}>o</span>
+          <span style={{ color: '#d8188a' }}>c</span>
+          <span style={{ color: '#1848d0' }}>k</span>
+          <span style={{ color: '#e0321e' }}>I</span>
+          <span style={{ color: '#1c7830' }}>n</span>
+          <span style={{ color: '#d8188a' }}>!</span>
+          <span style={{ color: '#1848d0' }}>!</span>
         </Link>
         <nav className="hidden md:flex items-center gap-6">
           {NAV_LINKS.map(({ label, to }) => {

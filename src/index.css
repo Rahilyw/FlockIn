@@ -19,10 +19,10 @@
     --popover: 0 0% 100%;
     --popover-foreground: 90 5% 10%;
 
-    /* Terracotta / Peach — Primary brand */
-    --primary: 6 32% 40%;
+    /* Cerulean — Primary brand */
+    --primary: 196 64% 40%;
     --primary-foreground: 0 0% 100%;
-    --primary-hover: 6 32% 33%;
+    --primary-hover: 196 64% 33%;
 
     /* Mint green — Secondary */
     --secondary: 161 29% 31%;
@@ -41,7 +41,7 @@
 
     --border: 30 15% 88%;
     --input: 30 15% 88%;
-    --ring: 6 32% 40%;
+    --ring: 196 64% 40%;
 
     --radius: 0.5rem;
 
@@ -58,12 +58,12 @@
     /* Sidebar */
     --sidebar-background: 40 20% 96%;
     --sidebar-foreground: 30 10% 20%;
-    --sidebar-primary: 6 32% 40%;
+    --sidebar-primary: 196 64% 40%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 40 20% 92%;
     --sidebar-accent-foreground: 30 10% 20%;
     --sidebar-border: 30 15% 88%;
-    --sidebar-ring: 6 32% 40%;
+    --sidebar-ring: 196 64% 40%;
   }
 
   .dark {
@@ -73,7 +73,7 @@
     --card-foreground: 210 40% 98%;
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
-    --primary: 6 50% 65%;
+    --primary: 196 70% 60%;
     --primary-foreground: 0 0% 100%;
     --secondary: 161 35% 45%;
     --secondary-foreground: 0 0% 100%;
@@ -85,10 +85,10 @@
     --destructive-foreground: 210 40% 98%;
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
-    --ring: 6 50% 65%;
+    --ring: 196 70% 60%;
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 6 50% 65%;
+    --sidebar-primary: 196 70% 60%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 240 3.7% 15.9%;
     --sidebar-accent-foreground: 240 4.8% 95.9%;
