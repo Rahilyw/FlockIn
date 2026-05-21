@@ -124,10 +124,29 @@ On hover (desktop) or tap (mobile), show a semi-transparent dark overlay reveali
 - **"View Details"** → event detail modal
 
 ### Hashtag Pills
-- Displayed above the board in a horizontal scrollable row
-- Clicking a tag filters the noticeboard in real-time
-- Tags are set by the event creator (optional field)
-- Default shown: `#Tonight` `#ThisWeek` `#Free` + popular tags from live events
+
+Displayed above the board in a horizontal scrollable row. This is the first interactive element a student sees — it must feel alive and responsive.
+
+**Ordering — Popularity-Ranked (Dynamic):**
+The pill bar shows the top 8 tags ranked by `engagementScore` from the `tags` Firestore collection (see Data Model). As students RSVP and Save events, scores update and the bar shifts. Only tags on **active (future) events** contribute to the score — expired events stop counting automatically.
+
+**Two Auto-Generated System Tags (always shown first, no creator input needed):**
+- `#Today` — auto-applied to any event whose date matches today's date
+- `#Happening Now` — auto-applied to events currently in progress (current time falls between event start time and +2 hours)
+
+These make the board feel live. Implement them as computed filters, not stored tags.
+
+**Pill Behaviour:**
+- Each pill shows a count badge: `#FreePizza 3` (number of active events with that tag)
+- **Active state:** pill fills with terracotta, slight scale-up (`scale(1.05)`), subtle bounce animation on activation
+- **Multi-select:** students can stack tags — `#Tonight` + `#Free` narrows results simultaneously. Active pills stay filled; a second click deactivates.
+- **Clear all:** an `✕` button appears in the row whenever any tag is active. Clicking it resets the board with a satisfying "pop" transition back to full view.
+
+**Filtering Animation (do not just hide/show):**
+- Non-matching posters: fade to 20% opacity + shrink slightly (`scale(0.96)`)
+- Matching posters: remain full opacity, may subtly lift (`scale(1.02)`) to "come forward" off the board
+- Use CSS transitions; respect `prefers-reduced-motion` (instant show/hide with no animation if motion is reduced)
+- Filter is applied in real-time as tags are toggled — no submit button
 
 ---
 
@@ -148,11 +167,13 @@ Do not implement a heart/like button. It is redundant with Save. If any existing
 
 ## Authentication
 
-- **Firebase Auth with Google Sign-In only**
+- **Firebase Auth with Google Sign-In only** — the target state
 - **Any Google account accepted** — no `@uvic.ca` restriction
 - Unauthenticated users can browse and view the noticeboard freely (read-only)
 - To post, RSVP, or save — user must be signed in; prompt login if they attempt while logged out
 - Show user's display name and Google avatar in the nav when signed in
+
+> **Current state:** Email/password `Login.tsx` and `Signup.tsx` forms exist. Do not remove them mid-development — they are useful for testing. Remove/replace with Google-only screens before public launch. Do not invest further work in the email/password flows.
 
 ---
 
@@ -214,11 +235,32 @@ Do not implement a heart/like button. It is redundant with Save. If any existing
 }
 ```
 
+### `tags` collection
+```typescript
+{
+  name: string;              // e.g. "FreePizza" — no # symbol, no spaces
+  eventCount: number;        // number of active (future) events using this tag
+  engagementScore: number;   // sum of (savedCount + rsvpCount) across all active events with this tag
+  lastUsed: Timestamp;       // when an event with this tag was last posted
+}
+```
+
+**Write rules for `tags`:**
+- When an event is **created**: increment `eventCount` and `lastUsed` for each of its tags. Create the tag document if it doesn't exist.
+- When an event is **deleted or expires**: decrement `eventCount` and recalculate `engagementScore` for its tags.
+- When a user **Saves or RSVPs** to an event: increment `engagementScore` for each of that event's tags by 1.
+- When a user **un-Saves or cancels RSVP**: decrement `engagementScore` accordingly.
+
+The pill bar queries: `tags` ordered by `engagementScore` descending, limit 8.
+
+> `#Today` and `#Happening Now` are **computed client-side** — do not store them in the `tags` collection. They are derived from event `date` and `time` fields at render time.
+
 ### Firestore Security Rules
 ```
-- Unauthenticated users: READ events only
-- Authenticated users: READ all events, CREATE events, UPDATE savedBy/savedCount/rsvpBy/rsvpCount on any event
+- Unauthenticated users: READ events and tags only
+- Authenticated users: READ all events/tags, CREATE events, UPDATE savedBy/savedCount/rsvpBy/rsvpCount on any event
 - Event owner (auth.uid === creatorId): UPDATE and DELETE their own events only
+- tags collection: only writable via backend logic triggered by event/engagement writes (use Firestore transactions to keep counts consistent)
 ```
 
 ---
@@ -274,21 +316,28 @@ Edit flow: same form pre-populated. New image upload replaces old (delete old fr
 
 ---
 
-## Phase Boundaries — Do Not Build These in MVP
+## Feature Phases — Roadmap & Policy
 
-> If you find yourself implementing any of the following, stop.
+> **Policy: Never delete or hide features that have already been built, regardless of phase.** FlockIn!! is expanding continuously. If a Phase 2 or Phase 3 feature exists in the codebase, keep it visible and working. Only remove or hide a feature if explicitly instructed to do so.
 
-| Feature | Phase |
-|---|---|
-| Emoji / GIF / comment reactions | Phase 2 |
-| Social proof ("X students going") | Phase 2 |
-| Club directory and club pages | Phase 2 |
-| Event search and advanced filtering | Phase 2 |
-| Campus resources directory | Phase 2 |
-| Google / Apple Calendar integration | Phase 3 |
-| Schedule conflict detection | Phase 3 |
-| Push or email notifications | Phase 3 |
-| Mobile app (React Native) | Phase 3 |
+The phase labels below indicate **when to prioritise building** something from scratch — not whether to keep it if it already exists.
+
+| Feature | Phase | Current State |
+|---|---|---|
+| Emoji / GIF / comment reactions on events | Phase 2 | Not built |
+| Social proof ("X students going") | Phase 2 | `attendeeCount` partially built — keep it |
+| Club directory and club pages | Phase 2 | Already built (`/clubs`, `/clubs/:id`) — keep live |
+| Event search and advanced filtering | Phase 2 | Already built in `EventList` — keep live |
+| Campus resources directory | Phase 2 | Already built (`/resources`, `/resources/:id`) — keep live |
+| Google / Apple Calendar integration | Phase 3 | Not built |
+| Schedule conflict detection | Phase 3 | Not built |
+| Push or email notifications | Phase 3 | Not built |
+| Mobile app (React Native) | Phase 3 | Not built |
+
+**What "Phase 2/3" means in practice:**
+- If it's already built → keep it, don't touch it unless fixing a bug or explicitly asked to improve it
+- If it's not yet built → don't start building it until all P0 and P1 items are done
+- Never delete working code to "clean up" scope
 
 ---
 
@@ -330,7 +379,48 @@ src/
 
 ---
 
-## MVP Done When
+## Data Model Migration — Required Field Renames
+
+> The existing codebase uses different field names than this spec. These must be migrated for consistency. Any agent reading this spec should use the spec field names and update existing references.
+
+| Old field name | New field name | Notes |
+|---|---|---|
+| `organizerId` | `creatorId` | |
+| `organizerName` | `creatorName` | |
+| *(missing)* | `creatorPhoto` | Add: creator's Google avatar URL, stored at event creation |
+| `attendeeIds` | `rsvpBy` | |
+| `attendeeCount` | `rsvpCount` | |
+| *(missing)* | `savedBy` | Add: array of UIDs |
+| *(missing)* | `savedCount` | Add: number |
+| *(missing)* | `imagePath` | Add: Firebase Storage path for deletion on edit/delete |
+| *(missing)* | `time: string` | Add: separate time field e.g. "6:00 PM" — do not rely on date Timestamp alone |
+
+When migrating: update `firebaseTypes.ts`, all Firestore read/write helpers, and any component that references the old field names.
+
+---
+
+## Known Gaps — Current State vs. Spec
+
+> This section tracks identified gaps between what's built and what the spec requires. Check here before starting work to avoid duplicating effort. Mark items done as they ship.
+
+### 🔴 P0 — Blockers (nothing ships until these are done)
+
+1. **Image upload not implemented** — `CreateEvent` and `EditEvent` accept a URL string only. Must be replaced with Firebase Storage upload: drag-drop or click, `.png`/`.jpg`, max 5MB, live preview, stores both `imageUrl` (download URL) and `imagePath` (storage path).
+2. **Data model field renames** — see migration table above. `organizerId` → `creatorId` etc. across `firebaseTypes.ts` and all consumers.
+3. **Hashtag pills are hardcoded and non-functional** — currently a static array. Must pull from live `tags` collection, filter noticeboard in real-time on click, support multi-select.
+4. **"My Space" has wrong tabs** — current tabs are Joined Events / Joined Clubs / Saved Events / Saved Clubs. Spec requires: My Events (created by user) / Saved / Going. "My Events" tab doesn't exist yet.
+
+### 🟠 P1 — Polish (needed to pass MVP done checklist)
+
+5. **Poster rotation is index-based, not event-ID-seeded** — `ROTATIONS[i % ROTATIONS.length]` means order changes re-shuffle rotations. Must hash `event.id` to get a stable, consistent rotation per poster.
+6. **`time` field not shown** — `EventCard` and `EventDetail` show date but never time of day. Must show e.g. "6:00 PM" prominently — critical for students checking if they can attend between classes.
+7. **`creatorPhoto` not stored or displayed** — event creation must capture the poster's Google avatar URL and store it on the event document. Show it in event detail view.
+8. **Old Storage image not deleted on edit** — when a creator uploads a new poster image during edit, the old file must be deleted from Firebase Storage using `imagePath` before uploading the new one.
+9. **Save/RSVP prompt on logged-out click** — currently may silently fail. Must prompt login flow when an unauthenticated user tries to Save or RSVP.
+
+---
+
+
 
 1. ✅ Anyone signs in with any Google account
 2. ✅ Any signed-in user posts an event with an image
@@ -341,6 +431,10 @@ src/
 7. ✅ Noticeboard is fully browsable without logging in
 8. ✅ Green felt board, pushpins, tilted posters, Montserrat, terracotta — all intact
 9. ✅ WCAG AA contrast passes, `prefers-reduced-motion` respected, 44px touch targets met
+10. ✅ Hashtag pills show popularity-ranked tags with live count badges
+11. ✅ `#Today` and `#Happening Now` auto-appear when relevant — no creator input needed
+12. ✅ Multi-tag filtering works — non-matching posters dim, matching ones come forward
+13. ✅ Saving/RSVPing an event updates that event's tag engagement scores in Firestore
 
 ---
 
