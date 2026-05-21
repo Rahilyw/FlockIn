@@ -20,6 +20,7 @@ import Profile from "./pages/Profile";
 import ResourceList from "./pages/ResourceList";
 import ResourceDetail from "./pages/ResourceDetail";
 import CreateEvent from "./pages/CreateEvent";
+import EditEvent from "./pages/EditEvent";
 
 const queryClient = new QueryClient();
 
@@ -46,6 +47,7 @@ const App = () => (
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/events/new" element={<CreateEvent />} />
+              <Route path="/events/:id/edit" element={<EditEvent />} />
             </Route>
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />

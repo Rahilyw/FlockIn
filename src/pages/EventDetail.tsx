@@ -1,13 +1,15 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Bookmark, Calendar, MapPin, Users } from "lucide-react";
+import { ArrowLeft, Bookmark, Calendar, MapPin, Users, Edit, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import Header from "@/components/Header";
 import { useEventDetail } from "@/hooks/useEventDetail";
 import { useBookmarks } from "@/hooks/useBookmarks";
 import { useAuth } from "@/contexts/AuthContext";
+import { useDeleteEvent } from "@/hooks/useDeleteEvent";
 import { joinEvent, leaveEvent } from "@/lib/firestore";
+import { toast } from "@/components/ui/sonner";
 import type { Timestamp } from "firebase/firestore";
 
 function formatDate(ts: Timestamp) {
@@ -26,9 +28,15 @@ export default function EventDetail() {
   const { savedEvents, toggleEvent } = useBookmarks();
   const { user, profile, refreshProfile } = useAuth();
   const [joining, setJoining] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const { mutateAsync: deleteEventMutation, isPending: isDeleting } = useDeleteEvent({
+    eventId: id!,
+    userId: user?.uid ?? "",
+  });
 
   const isAttending = profile?.joinedEvents?.includes(id!) ?? false;
   const isBookmarked = savedEvents.includes(id!);
+  const isOrganizer = event?.organizerId === user?.uid;
 
   const handleJoinLeave = async () => {
     if (!user) { navigate("/login"); return; }
@@ -42,6 +50,18 @@ export default function EventDetail() {
       await refreshProfile();
     } finally {
       setJoining(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    try {
+      await deleteEventMutation();
+      toast.success("Event deleted successfully.");
+      navigate("/events");
+    } catch (error) {
+      toast.error("Failed to delete event. Please try again.");
+    } finally {
+      setShowDeleteDialog(false);
     }
   };
 
@@ -146,7 +166,58 @@ export default function EventDetail() {
               >
                 <Bookmark className={`h-4 w-4 ${isBookmarked ? "fill-current" : ""}`} />
               </Button>
+
+              {isOrganizer && (
+                <>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => navigate(`/events/${id}/edit`)}
+                    title="Edit event"
+                  >
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => setShowDeleteDialog(true)}
+                    className="hover:bg-destructive hover:text-destructive-foreground"
+                    title="Delete event"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </>
+              )}
             </div>
+
+            {showDeleteDialog && (
+              <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                <div className="bg-card border border-border rounded-lg p-6 max-w-sm w-full">
+                  <h3 className="text-lg font-semibold mb-2">Delete Event?</h3>
+                  <p className="text-muted-foreground text-sm mb-6">
+                    This action cannot be undone. All attendees will be removed from this event.
+                  </p>
+                  <div className="flex gap-3">
+                    <Button
+                      variant="outline"
+                      className="flex-1"
+                      onClick={() => setShowDeleteDialog(false)}
+                      disabled={isDeleting}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      className="flex-1"
+                      onClick={handleDelete}
+                      disabled={isDeleting}
+                    >
+                      {isDeleting ? "Deleting…" : "Delete"}
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

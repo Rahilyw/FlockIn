@@ -5,6 +5,7 @@ import {
   getDocs,
   setDoc,
   updateDoc,
+  deleteDoc,
   query,
   where,
   orderBy,
@@ -166,6 +167,58 @@ export async function leaveEvent(eventId: string, userId: string): Promise<void>
       joinedEvents: arrayRemove(eventId),
       updatedAt: serverTimestamp(),
     });
+  });
+}
+
+/**
+ * Updates event fields. Only the organizer can update their event.
+ * Throws if event doesn't exist or user is not the organizer.
+ */
+export async function updateEvent(
+  eventId: string,
+  userId: string,
+  updates: Partial<Omit<Event, "id" | "organizerId" | "attendeeCount" | "attendeeIds" | "createdAt" | "updatedAt">>,
+): Promise<void> {
+  const eventRef = doc(eventsCol(), eventId);
+
+  await runTransaction(db(), async (tx) => {
+    const eventSnap = await tx.get(eventRef);
+    if (!eventSnap.exists()) throw new Error("Event not found.");
+    const event = eventSnap.data() as Event;
+    if (event.organizerId !== userId) throw new Error("Only the organizer can update this event.");
+
+    tx.update(eventRef, {
+      ...updates,
+      updatedAt: serverTimestamp(),
+    });
+  });
+}
+
+/**
+ * Deletes an event and atomically removes it from all attendees' joinedEvents.
+ * Only the organizer can delete their event.
+ * Throws if event doesn't exist or user is not the organizer.
+ */
+export async function deleteEvent(eventId: string, userId: string): Promise<void> {
+  const eventRef = doc(eventsCol(), eventId);
+
+  await runTransaction(db(), async (tx) => {
+    const eventSnap = await tx.get(eventRef);
+    if (!eventSnap.exists()) throw new Error("Event not found.");
+    const event = eventSnap.data() as Event;
+    if (event.organizerId !== userId) throw new Error("Only the organizer can delete this event.");
+
+    // Remove event from all attendees' joinedEvents
+    for (const attendeeId of event.attendeeIds) {
+      const userRef = doc(usersCol(), attendeeId);
+      tx.update(userRef, {
+        joinedEvents: arrayRemove(eventId),
+        updatedAt: serverTimestamp(),
+      });
+    }
+
+    // Delete the event
+    tx.delete(eventRef);
   });
 }
 

@@ -23,4 +23,7 @@ export const createEventSchema = z.object({
   tags: z.string().optional(),
 });
 
+export const updateEventSchema = createEventSchema.partial();
+
 export type CreateEventFormValues = z.infer<typeof createEventSchema>;
+export type UpdateEventFormValues = z.infer<typeof updateEventSchema>;
