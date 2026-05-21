@@ -96,7 +96,7 @@ The current implementation has:
 - **Dark green felt board background** with subtle grid texture — keep exactly
 - **Colored pushpins** (red, yellow, teal) at the top of each poster card
 - **Slight random rotation** on each poster (`-3deg` to `+3deg`) — feels real and pinned
-- **Left sidebar** with: Your Feed, Trending, Clubs, Resources, Saved, and a "Post an Event" CTA
+- **Left sidebar** with: Noticeboard, Trending, Clubs, Resources, Saved, and a "Post an Event" CTA
 - **Hashtag pills** above the board for quick filtering
 - **Masonry layout** preserving each poster's natural aspect ratio
 - **FlockIn!! wordmark** top-left in colorful bold type
@@ -110,18 +110,27 @@ Do not flatten to white. Do not convert to a card grid. Do not remove pins or ro
 
 The virtual noticeboard is the main attraction. Every design and engineering decision should make it more delightful, not more utilitarian.
 
+### Navigation Naming
+The main board view is called **"Noticeboard"** everywhere — in the sidebar, top nav, and page title. Do not call it "Your Feed" or "Discover." "Your Feed" implies personalization that doesn't exist yet — calling it that and showing the same unfiltered board to everyone is a trust break. The name is simply **Noticeboard**.
+
 ### Visual Behavior
-- Posters render with randomized rotation seeded per event ID (consistent across renders, not re-randomizing on re-render)
+- Posters render with randomized rotation **seeded per event ID** — hash the event's Firestore ID to a rotation value between `-3deg` and `+3deg`. This must be stable and consistent across re-renders. Do not use array index (`ROTATIONS[i % n]`) — this causes rotation shuffling when the event list order changes.
 - On hover: poster smoothly straightens to `0deg`, scales to `1.04`, shadow deepens — "lifts off the board"
 - Use CSS transitions for smoothness; respect `prefers-reduced-motion`
 - Masonry layout — no fixed card heights, preserve poster aspect ratios
 
 ### Poster Hover Overlay
 On hover (desktop) or tap (mobile), show a semi-transparent dark overlay revealing:
-- Event title + date/time
+- Event title + date + time + end time
 - **Save 🔖** button (toggle — filled state when saved)
 - **RSVP ✅** button (toggle — filled state when attending)
 - **"View Details"** → event detail modal
+
+### Event Lifecycle on the Board
+- Only **future and current** events appear on the noticeboard. An event is "current" if the current time is before its `endTime`.
+- Once an event's `endTime` has passed, it is automatically excluded from the noticeboard query (filter `endTime >= now()` in the Firestore query).
+- Past events are **not deleted** — they remain in Firestore and are accessible in "My Space → My Events" for the creator. They just don't show on the public board.
+- This keeps the board feeling alive and up-to-date without any manual cleanup.
 
 ### Hashtag Pills
 
@@ -132,9 +141,22 @@ The pill bar shows the top 8 tags ranked by `engagementScore` from the `tags` Fi
 
 **Two Auto-Generated System Tags (always shown first, no creator input needed):**
 - `#Today` — auto-applied to any event whose date matches today's date
-- `#Happening Now` — auto-applied to events currently in progress (current time falls between event start time and +2 hours)
+- `#Happening Now` — auto-applied to events currently in progress (current time is between `time` and `endTime`)
 
-These make the board feel live. Implement them as computed filters, not stored tags.
+These make the board feel live. Implement them as computed client-side filters, not stored tags.
+
+> ⚙️ **Implementation note for `#Happening Now`:** `endTime` is stored as a string (e.g. `"9:00 PM"`) and `date` is a Firestore Timestamp (date portion only). To determine if an event is currently in progress, you must combine both into a full comparable datetime on the client. This is non-trivial — especially for events that cross midnight or involve timezone differences. A dedicated helper function **must** be used. It lives at `src/lib/eventTime.ts` and exports:
+> ```ts
+> // Combines a Firestore Timestamp (date) + time string (e.g. "9:00 PM") into a JS Date
+> export function toDateTime(date: Timestamp, time: string): Date
+>
+> // Returns true if current time is between the event's start and end datetime
+> export function isHappeningNow(event: Event): boolean
+>
+> // Returns true if the event's date matches today's local date
+> export function isToday(event: Event): boolean
+> ```
+> All `#Happening Now` and `#Today` filtering must go through these helpers — never inline the date logic in components.
 
 **Pill Behaviour:**
 - Each pill shows a count badge: `#FreePizza 3` (number of active events with that tag)
@@ -147,6 +169,29 @@ These make the board feel live. Implement them as computed filters, not stored t
 - Matching posters: remain full opacity, may subtly lift (`scale(1.02)`) to "come forward" off the board
 - Use CSS transitions; respect `prefers-reduced-motion` (instant show/hide with no animation if motion is reduced)
 - Filter is applied in real-time as tags are toggled — no submit button
+
+---
+
+## Mobile Layout
+
+> Users open FlockIn between classes, on mobile, in bright campus environments. Mobile is a first-class experience, not an afterthought.
+
+### Layout Changes on Mobile (≤768px)
+- **Bottom tab bar replaces the left sidebar** — four tabs: Noticeboard, Saved, Post (+), My Space
+- The "Post an Event" action lives as the center tab (large `+` button, terracotta) — always one tap away
+- Left sidebar is hidden on mobile entirely — do not show a hamburger that reveals it
+- Top nav simplifies to: FlockIn!! logo (left) + Avatar/Sign In (right) only
+
+### Noticeboard on Mobile
+- **Single-column masonry** — one poster per row, full width, natural aspect ratio preserved
+- Hashtag pills scroll horizontally above the board — same behaviour as desktop, touch-scrollable
+- Poster tap = show overlay (same Save/RSVP/View Details as desktop hover)
+- Pushpins and rotation stay — they are identity, not decoration
+
+### Touch Interactions
+- All tap targets minimum 44×44px — enforced on every interactive element
+- Save and RSVP buttons on the overlay must be large enough to tap confidently with a thumb
+- Swipe gestures: not required for MVP, do not add unless explicitly requested
 
 ---
 
@@ -165,6 +210,38 @@ Do not implement a heart/like button. It is redundant with Save. If any existing
 
 ---
 
+## Moderation & Safety
+
+> Open posting is right for growth, but zero moderation is a gamble. This section defines the minimum safety layer for MVP.
+
+### Admin Approval Flow
+- There is **one administrator account** — the product owner (Rahil). Admin UID is stored in a `config/admin` Firestore document or hardcoded as an environment variable.
+- All newly posted events have a status of `"pending"` by default and **do not appear on the public noticeboard** until approved.
+- The admin sees a private **Admin Review Queue** — a list of all `pending` events with poster image, details, and two actions: **Approve** ✅ or **Reject** ❌.
+- On approval: event `status` changes to `"approved"` → appears on the noticeboard immediately.
+- On rejection: event `status` changes to `"rejected"` → creator sees a notice in "My Space → My Events" that their event was not approved (no reason required for MVP).
+- Admin queue is accessible at a private route e.g. `/admin` — only renders if the signed-in UID matches the admin UID. Anyone else gets redirected.
+
+### Rate Limiting
+- Each user may post a maximum of **3 events per day**.
+- Enforce client-side: on "Post an Event" submit, query Firestore for events where `creatorId === uid` and `createdAt >= start of today`. If count ≥ 3, block submission and show a friendly message: *"You've posted 3 events today — come back tomorrow!"*
+- This is a soft limit (client-enforced). Firestore security rules should mirror this with a server-side check where possible.
+
+### Report / Flag Button
+- Every event card and event detail view has a **"Report" option** (accessible via a `···` menu or small flag icon — unobtrusive, not a primary action).
+- Reporting an event sets a `reported: true` flag on the event document in Firestore.
+- Reported events are surfaced in the Admin Review Queue for the admin to review and remove if needed.
+- No automated hiding on report — the admin decides. One report does not remove an event.
+
+### `events` Status Field
+```
+status: "pending" | "approved" | "rejected"
+```
+- Noticeboard query: `WHERE status == "approved" AND endTime >= now()`
+- Admin queue query: `WHERE status == "pending"` ordered by `createdAt` ascending (oldest first)
+
+---
+
 ## Authentication
 
 - **Firebase Auth with Google Sign-In only** — the target state
@@ -180,11 +257,13 @@ Do not implement a heart/like button. It is redundant with Save. If any existing
 ## User Flows
 
 ### Creator Flow (Posting an Event)
-1. Any signed-in user clicks "Post an Event" in the sidebar
+1. Any signed-in user clicks "Post an Event"
 2. Uploads a `.png` or `.jpg` poster image (max 5MB) — preview shown immediately
-3. Fills in: Title, Date, Time, Location, Description, Tags (optional)
-4. Submits → poster appears on the noticeboard in real-time
-5. Visits "My Space" to manage their events
+3. Fills in: Title, Date, Start Time, End Time, Location, Description, Tags (optional)
+4. Submits → event saved to Firestore with `status: "pending"`
+5. Creator sees a confirmation: *"Your event is under review and will appear on the board once approved."*
+6. Admin approves → poster appears on the noticeboard in real-time
+7. Creator visits "My Space" to manage their events
 
 **Rule:** Users can only edit or delete events they created. Enforced in UI and Firestore security rules.
 
@@ -204,18 +283,21 @@ Do not implement a heart/like button. It is redundant with Save. If any existing
   id: string;               // Firestore auto-ID
   creatorId: string;        // auth.uid of poster
   creatorName: string;      // display name
-  creatorPhoto?: string;    // avatar URL
+  creatorPhoto?: string;    // Google avatar URL, stored at creation
   title: string;            // max 80 chars
   description: string;      // max 500 chars
-  date: Timestamp;
-  time: string;             // e.g. "6:00 PM"
+  date: Timestamp;          // event date (date portion)
+  time: string;             // start time, e.g. "6:00 PM"
+  endTime: string;          // end time, e.g. "9:00 PM" — required, used for #Happening Now and board expiry
   location: string;         // e.g. "SUB Vertigo Room"
   tags?: string[];          // e.g. ["Free", "Tonight"]
-  imageUrl: string;         // Firebase Storage download URL
-  imagePath: string;        // Storage path (for deletion)
-  savedBy: string[];        // UIDs of users who saved
+  imageUrl: string | null;  // Firebase Storage download URL — null if no image uploaded (use fallback gradient)
+  imagePath: string | null; // Storage path (for deletion on edit/delete) — null if no image
+  status: "pending" | "approved" | "rejected";  // moderation state
+  reported: boolean;        // true if user has flagged this event
+  savedBy: string[];        // UIDs of users who saved — ⚠️ see scalability note below
   savedCount: number;
-  rsvpBy: string[];         // UIDs of users who RSVP'd
+  rsvpBy: string[];         // UIDs of users who RSVP'd — ⚠️ see scalability note below
   rsvpCount: number;
   createdAt: Timestamp;
   updatedAt: Timestamp;
@@ -223,6 +305,8 @@ Do not implement a heart/like button. It is redundant with Save. If any existing
 ```
 
 > ❌ No `likedBy`, no `likesCount`. Save is the like.
+
+> ⚠️ **Scalability note on `savedBy` / `rsvpBy` arrays:** Firestore document size limit is ~1MB. Arrays of UIDs work fine at campus scale (hundreds of users) but would hit limits if an event goes viral at a much larger scale (tens of thousands of RSVPs). At that point, the correct pattern is a subcollection (`events/{id}/rsvps/{uid}`) or a separate junction collection. This is not a concern for MVP — acknowledge it and revisit if needed when usage grows.
 
 ### `users` collection
 ```typescript
@@ -239,28 +323,36 @@ Do not implement a heart/like button. It is redundant with Save. If any existing
 ```typescript
 {
   name: string;              // e.g. "FreePizza" — no # symbol, no spaces
-  eventCount: number;        // number of active (future) events using this tag
-  engagementScore: number;   // sum of (savedCount + rsvpCount) across all active events with this tag
-  lastUsed: Timestamp;       // when an event with this tag was last posted
+  eventCount: number;        // number of active approved events using this tag
+  engagementScore: number;   // sum of (savedCount + rsvpCount) across all active approved events with this tag
+  lastUsed: Timestamp;       // when an event with this tag was last approved
 }
 ```
 
 **Write rules for `tags`:**
-- When an event is **created**: increment `eventCount` and `lastUsed` for each of its tags. Create the tag document if it doesn't exist.
-- When an event is **deleted or expires**: decrement `eventCount` and recalculate `engagementScore` for its tags.
+- When an event is **approved**: increment `eventCount` and update `lastUsed` for each of its tags. Create the tag document if it doesn't exist.
+- When an event is **deleted, rejected, or expires**: decrement `eventCount` and recalculate `engagementScore` for its tags.
 - When a user **Saves or RSVPs** to an event: increment `engagementScore` for each of that event's tags by 1.
 - When a user **un-Saves or cancels RSVP**: decrement `engagementScore` accordingly.
 
+> ⚙️ **Implementation: Tag aggregation writes are handled by Firebase Cloud Functions triggered on event document writes** — not by the client. Clients cannot be trusted to update aggregate `tags` documents reliably (race conditions, offline state, malicious writes). Two Cloud Functions are required:
+> - `onEventStatusChange` — triggered on `events/{id}` write: handles `eventCount` and `engagementScore` updates when an event is approved, rejected, or deleted.
+> - `onEngagementChange` — triggered on `events/{id}` write: handles `engagementScore` increments/decrements when `savedBy` or `rsvpBy` arrays change.
+>
+> Both functions use Firestore transactions to ensure atomic updates. The `tags` collection is **read-only from the client** — clients may only read it to render the pill bar.
+
 The pill bar queries: `tags` ordered by `engagementScore` descending, limit 8.
 
-> `#Today` and `#Happening Now` are **computed client-side** — do not store them in the `tags` collection. They are derived from event `date` and `time` fields at render time.
+> `#Today` and `#Happening Now` are **computed client-side** — do not store them in the `tags` collection.
 
 ### Firestore Security Rules
 ```
-- Unauthenticated users: READ events and tags only
-- Authenticated users: READ all events/tags, CREATE events, UPDATE savedBy/savedCount/rsvpBy/rsvpCount on any event
+- Unauthenticated users: READ approved events and tags only
+- Authenticated users: READ all events/tags, CREATE events (status auto-set to "pending"),
+  UPDATE savedBy/savedCount/rsvpBy/rsvpCount/reported on approved events
 - Event owner (auth.uid === creatorId): UPDATE and DELETE their own events only
-- tags collection: only writable via backend logic triggered by event/engagement writes (use Firestore transactions to keep counts consistent)
+- Admin UID only: UPDATE event status (approve/reject)
+- tags collection: writable via Firestore transactions triggered by event/engagement writes only
 ```
 
 ---
@@ -271,48 +363,73 @@ Personal hub for signed-in users. Three tabs:
 
 **My Events** — events the user created
 - Poster thumbnail, title, date, location, save count, RSVP count
-- Edit button → pre-filled form
+- Status badge: `Pending Review` / `Approved` / `Rejected`
+- Edit button → pre-filled form (only available on pending/approved events)
 - Delete button → confirmation dialog → removes from Firestore + Storage
 
 **Saved** — events where user UID is in `savedBy`
 - Card or list view, Unsave button on each
 
 **Going** — events where user UID is in `rsvpBy`
-- Date/time shown prominently, Cancel RSVP option
+- Date/time + end time shown prominently, Cancel RSVP option
 
 ---
 
 ## Event Creation Form
 
 Fields:
-1. **Poster Image** — drag-and-drop or click. `.png`/`.jpg`, max 5MB. Immediate preview.
+1. **Poster Image** — drag-and-drop or click. `.png`/`.jpg`, max 5MB. Immediate preview. **Optional** — if no image is uploaded, a fallback gradient is auto-assigned from the event's category or a deterministic gradient seeded by the event ID. The noticeboard must look visually rich whether or not a custom image is provided. Never show a blank or broken poster slot.
 2. **Title** — required, max 80 chars
 3. **Date** — date picker, required, today or future
-4. **Time** — time picker, required
-5. **Location** — required
-6. **Description** — required, max 500 chars
-7. **Tags** — optional, e.g. `FreePizza, Tonight, ArtsWeek`
+4. **Start Time** — time picker, required (e.g. "6:00 PM")
+5. **End Time** — time picker, required (e.g. "9:00 PM"), must be after Start Time
+6. **Location** — required
+7. **Description** — required, max 500 chars
+8. **Tags** — optional, e.g. `FreePizza, Tonight, ArtsWeek`
 
-On submit: upload image to Storage → get URL → write Firestore doc → redirect to noticeboard.
+> **Fallback gradient palette** (already defined in `Noticeboard.tsx` — reuse exactly):
+> ```ts
+> const FALLBACK_GRADIENTS = [
+>   "linear-gradient(160deg, #f97316 0%, #a855f7 50%, #3b82f6 100%)",
+>   "linear-gradient(160deg, #134e4a 0%, #0ea5e9 60%, #67e8f9 100%)",
+>   "linear-gradient(160deg, #166534 0%, #84cc16 60%, #fde68a 100%)",
+>   "linear-gradient(160deg, #1e1b4b 0%, #7c3aed 55%, #ec4899 100%)",
+>   "linear-gradient(160deg, #7f1d1d 0%, #f97316 55%, #fde68a 100%)",
+>   "linear-gradient(160deg, #0c4a6e 0%, #0ea5e9 55%, #a7f3d0 100%)",
+> ];
+> ```
+> Assign by hashing `event.id` to a stable index — same event always gets the same gradient.
 
-Edit flow: same form pre-populated. New image upload replaces old (delete old from Storage first).
+On submit: if image provided, upload to Storage → get `imageUrl` + `imagePath`. If no image, set `imageUrl: null` and `imagePath: null`. Write Firestore doc with `status: "pending"` → show confirmation message.
+
+Edit flow: same form pre-populated. New image upload replaces old (delete old from Storage first using `imagePath`). If image removed on edit, set both to `null`. Edited events reset to `status: "pending"` and re-enter the approval queue.
+
+**Rate limit enforcement:** Before submitting, query `events` where `creatorId === uid AND createdAt >= today`. If count ≥ 3, block form submission with message: *"You've posted 3 events today — come back tomorrow!"*
 
 ---
 
 ## Navigation
 
-**Top nav:**
+**Top nav (desktop):**
 ```
-[FlockIn!! logo]  [Discover] [Events] [Clubs] [Resources] [My Space]  [Avatar / Sign In]
+[FlockIn!! logo]  [Noticeboard] [Events] [Clubs] [Resources] [My Space]  [Avatar / Sign In]
 ```
 
-**Left sidebar (Discover page):**
-- Your Feed
-- Trending
-- Clubs *(Phase 2)*
-- Resources *(Phase 2)*
+**Left sidebar (desktop, Noticeboard page):**
+- Noticeboard
+- Clubs
+- Resources
 - Saved
 - **[Post an Event]** — primary CTA, always visible
+
+> **Note on "Trending":** Removed from MVP. A "Trending" view (sorted by `rsvpCount + savedCount` desc) is a natural Phase 2 addition once there is enough engagement data to make it meaningful. Do not add it until explicitly requested.
+
+**Bottom tab bar (mobile ≤768px) — replaces sidebar:**
+```
+[Noticeboard]  [Saved]  [+ Post]  [My Space]  [Sign In/Avatar]
+```
+- `+` Post button is center, terracotta, larger than other tabs
+- Left sidebar is hidden on mobile
 
 ---
 
@@ -341,44 +458,6 @@ The phase labels below indicate **when to prioritise building** something from s
 
 ---
 
-## File Structure
-
-```
-src/
-  components/
-    Noticeboard/
-      Noticeboard.tsx         # Board wall
-      PosterCard.tsx          # Poster: pin + tilt + hover overlay
-      PosterOverlay.tsx       # Save + RSVP buttons
-    Dashboard/
-      MySpace.tsx             # Tab shell
-      MyEvents.tsx
-      SavedEvents.tsx
-      GoingEvents.tsx
-    EventForm/
-      EventForm.tsx           # Shared create/edit form
-      ImageUploader.tsx
-    Layout/
-      Navbar.tsx
-      Sidebar.tsx
-  pages/
-    Home.tsx                  # Noticeboard
-    Dashboard.tsx             # My Space
-    EventDetail.tsx           # Single event modal or page
-  firebase/
-    config.ts
-    auth.ts
-    events.ts                 # Firestore CRUD
-    storage.ts                # Upload/delete helpers
-  hooks/
-    useAuth.ts
-    useEvents.ts
-  types/
-    index.ts                  # Event, User TypeScript types
-```
-
----
-
 ## Data Model Migration — Required Field Renames
 
 > The existing codebase uses different field names than this spec. These must be migrated for consistency. Any agent reading this spec should use the spec field names and update existing references.
@@ -393,48 +472,102 @@ src/
 | *(missing)* | `savedBy` | Add: array of UIDs |
 | *(missing)* | `savedCount` | Add: number |
 | *(missing)* | `imagePath` | Add: Firebase Storage path for deletion on edit/delete |
-| *(missing)* | `time: string` | Add: separate time field e.g. "6:00 PM" — do not rely on date Timestamp alone |
+| *(missing)* | `time: string` | Add: start time e.g. "6:00 PM" |
+| *(missing)* | `endTime: string` | Add: end time e.g. "9:00 PM" — required for board expiry and #Happening Now |
+| *(missing)* | `status` | Add: `"pending" \| "approved" \| "rejected"` |
+| *(missing)* | `reported` | Add: `boolean`, default `false` |
 
 When migrating: update `firebaseTypes.ts`, all Firestore read/write helpers, and any component that references the old field names.
 
 ---
 
-## Known Gaps — Current State vs. Spec
+## File Structure
 
-> This section tracks identified gaps between what's built and what the spec requires. Check here before starting work to avoid duplicating effort. Mark items done as they ship.
-
-### 🔴 P0 — Blockers (nothing ships until these are done)
-
-1. **Image upload not implemented** — `CreateEvent` and `EditEvent` accept a URL string only. Must be replaced with Firebase Storage upload: drag-drop or click, `.png`/`.jpg`, max 5MB, live preview, stores both `imageUrl` (download URL) and `imagePath` (storage path).
-2. **Data model field renames** — see migration table above. `organizerId` → `creatorId` etc. across `firebaseTypes.ts` and all consumers.
-3. **Hashtag pills are hardcoded and non-functional** — currently a static array. Must pull from live `tags` collection, filter noticeboard in real-time on click, support multi-select.
-4. **"My Space" has wrong tabs** — current tabs are Joined Events / Joined Clubs / Saved Events / Saved Clubs. Spec requires: My Events (created by user) / Saved / Going. "My Events" tab doesn't exist yet.
-
-### 🟠 P1 — Polish (needed to pass MVP done checklist)
-
-5. **Poster rotation is index-based, not event-ID-seeded** — `ROTATIONS[i % ROTATIONS.length]` means order changes re-shuffle rotations. Must hash `event.id` to get a stable, consistent rotation per poster.
-6. **`time` field not shown** — `EventCard` and `EventDetail` show date but never time of day. Must show e.g. "6:00 PM" prominently — critical for students checking if they can attend between classes.
-7. **`creatorPhoto` not stored or displayed** — event creation must capture the poster's Google avatar URL and store it on the event document. Show it in event detail view.
-8. **Old Storage image not deleted on edit** — when a creator uploads a new poster image during edit, the old file must be deleted from Firebase Storage using `imagePath` before uploading the new one.
-9. **Save/RSVP prompt on logged-out click** — currently may silently fail. Must prompt login flow when an unauthenticated user tries to Save or RSVP.
+```
+src/
+  components/
+    Noticeboard/
+      Noticeboard.tsx         # Board wall — queries status=="approved" && endTime>=now
+      PosterCard.tsx          # Poster: pin + ID-seeded tilt + hover overlay
+      PosterOverlay.tsx       # Save + RSVP + Report buttons
+    Dashboard/
+      MySpace.tsx             # Tab shell
+      MyEvents.tsx            # Shows status badge (Pending/Approved/Rejected)
+      SavedEvents.tsx
+      GoingEvents.tsx
+    Admin/
+      AdminQueue.tsx          # Pending event review — admin UID gated
+    EventForm/
+      EventForm.tsx           # Shared create/edit form (start + end time fields)
+      ImageUploader.tsx
+    Layout/
+      Navbar.tsx
+      Sidebar.tsx             # Desktop only
+      BottomTabBar.tsx        # Mobile only (≤768px)
+  pages/
+    Home.tsx                  # Noticeboard
+    Dashboard.tsx             # My Space
+    EventDetail.tsx           # Single event modal or page
+    Admin.tsx                 # Admin review queue (protected by UID check)
+  firebase/
+    config.ts
+    auth.ts
+    events.ts                 # Firestore CRUD
+    storage.ts                # Upload/delete helpers
+  hooks/
+    useAuth.ts
+    useEvents.ts
+    useAdmin.ts               # Admin-specific queries
+  types/
+    index.ts                  # Event, User TypeScript types
+```
 
 ---
 
+## Known Gaps — Current State vs. Spec
 
+> This section tracks identified gaps between what's built and what the spec requires. Check here before starting work to avoid duplicating effort. Remove items as they ship.
+
+### 🔴 P0 — Blockers (nothing ships until these are done)
+
+1. **Image upload not implemented** — `CreateEvent` and `EditEvent` accept a URL string only. Must be replaced with Firebase Storage upload: drag-drop or click, `.png`/`.jpg`, max 5MB, live preview, stores both `imageUrl` and `imagePath`. **Image is optional** — if skipped, `imageUrl` and `imagePath` are `null` and a fallback gradient (seeded by event ID) is shown on the noticeboard.
+2. **Data model field renames** — see migration table above. `organizerId` → `creatorId` etc. across `firebaseTypes.ts` and all consumers. Also add `endTime`, `status`, `reported`.
+3. **Hashtag pills are hardcoded and non-functional** — must pull from live `tags` collection, filter noticeboard in real-time, support multi-select.
+4. **"My Space" has wrong tabs** — needs: My Events (created by user, with status badge) / Saved / Going.
+5. **Admin approval flow not built** — new events must default to `status: "pending"`, not appear on the board. Admin queue at `/admin` must exist and be UID-gated.
+
+### 🟠 P1 — Polish (needed to pass MVP done checklist)
+
+6. **Poster rotation is index-based, not event-ID-seeded** — hash `event.id` to a stable rotation value. Do not use `ROTATIONS[i % n]`.
+7. **`endTime` not shown** — `EventCard`, overlay, and `EventDetail` must show both start and end time prominently.
+8. **`creatorPhoto` not stored or displayed** — capture Google avatar URL at event creation, show in event detail.
+9. **Old Storage image not deleted on edit** — use `imagePath` to delete old image from Storage before uploading new one.
+10. **Save/RSVP prompt on logged-out click** — must prompt login flow, not silently fail.
+11. **Rate limiter not implemented** — check `createdAt >= today` count before allowing form submission.
+12. **Report button not implemented** — `···` menu on every event card/detail with a Report option that sets `reported: true`.
+13. **Mobile bottom tab bar not implemented** — sidebar hidden on mobile, replaced by bottom tabs.
+
+---
+
+## MVP Done When
 
 1. ✅ Anyone signs in with any Google account
-2. ✅ Any signed-in user posts an event with an image
-3. ✅ Poster appears on the noticeboard with pushpin and tilt — matching existing aesthetic
-4. ✅ Any signed-in user can Save 🔖 or RSVP ✅ (no separate Like button exists)
-5. ✅ Saved and RSVP'd events appear in "My Space" correctly
-6. ✅ Creators can edit and delete only their own events
-7. ✅ Noticeboard is fully browsable without logging in
-8. ✅ Green felt board, pushpins, tilted posters, Montserrat, terracotta — all intact
-9. ✅ WCAG AA contrast passes, `prefers-reduced-motion` respected, 44px touch targets met
-10. ✅ Hashtag pills show popularity-ranked tags with live count badges
-11. ✅ `#Today` and `#Happening Now` auto-appear when relevant — no creator input needed
-12. ✅ Multi-tag filtering works — non-matching posters dim, matching ones come forward
-13. ✅ Saving/RSVPing an event updates that event's tag engagement scores in Firestore
+2. ✅ Any signed-in user posts an event with an image (with real Firebase Storage upload)
+3. ✅ New events enter `pending` state, confirmed to creator, not visible on board until approved
+4. ✅ Admin can approve or reject events from the `/admin` queue
+5. ✅ Approved posters appear on the noticeboard with pushpin and ID-seeded tilt
+6. ✅ Any signed-in user can Save 🔖 or RSVP ✅ (no separate Like button)
+7. ✅ Saved and RSVP'd events appear in "My Space" correctly
+8. ✅ Creators can edit and delete only their own events; edits re-enter pending queue
+9. ✅ Noticeboard is fully browsable without logging in
+10. ✅ Past events (endTime passed) auto-disappear from the board
+11. ✅ Green felt board, pushpins, tilted posters, Montserrat, terracotta — all intact
+12. ✅ WCAG AA contrast passes, `prefers-reduced-motion` respected, 44px touch targets met
+13. ✅ Hashtag pills show popularity-ranked tags with live count badges and multi-select filtering
+14. ✅ `#Today` and `#Happening Now` auto-appear when relevant
+15. ✅ Rate limit blocks more than 3 event posts per user per day
+16. ✅ Report button exists on every event; sets `reported: true` in Firestore
+17. ✅ Mobile bottom tab bar works; noticeboard is single-column on mobile
 
 ---
 
