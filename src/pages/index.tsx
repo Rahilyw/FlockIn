@@ -7,11 +7,12 @@ import { useTopTags } from "@/hooks/useTopTags";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { EVENT_CATEGORIES } from "@/lib/eventSchemas";
 
-// ── Static pinned pills (always shown first) ──────────────────────────────────
+// ── Static pinned time-filter pills ───────────────────────────────────────────
 
 const PINNED_TAGS: { label: string; filter: FilterMode; bg: string; color: string }[] = [
-  { label: "#happening-now", filter: "happening-now", bg: "oklch(93% 0.04 15)",  color: "oklch(34% 0.10 15)"  },
-  { label: "#today",          filter: "today",          bg: "oklch(95% 0.07 82)",  color: "oklch(36% 0.12 62)"  },
+  { label: "#today",      filter: "today",      bg: "oklch(93% 0.06 30)",  color: "oklch(36% 0.15 30)"  },
+  { label: "#this-week",  filter: "this-week",  bg: "oklch(94% 0.05 55)",  color: "oklch(36% 0.13 55)"  },
+  { label: "#next-week",  filter: "next-week",  bg: "oklch(95% 0.04 120)", color: "oklch(34% 0.10 140)" },
 ];
 
 // ── Deterministic color palette for dynamic tags ──────────────────────────────
@@ -162,122 +163,173 @@ const Index = () => {
 
         {/* ── Main content ── */}
         <main className="flex-1 px-6 py-6">
-          <div className="flex flex-wrap gap-2.5 mb-8 items-center">
-            {/* Pinned special filters */}
-            {PINNED_TAGS.map((tag) => (
-              <button
-                key={tag.label}
-                aria-pressed={selectedFilter === tag.filter}
-                onClick={() => setSelectedFilter((current) => current === tag.filter ? null : tag.filter)}
-                className={`px-4 py-1.5 rounded-full text-sm font-semibold cursor-pointer hover:brightness-95 active:scale-95 transition-all shadow-sm ${
-                  selectedFilter === tag.filter ? "ring-2 ring-offset-1 ring-current" : ""
-                }`}
-                style={{ background: tag.bg, color: tag.color }}
-              >
-                {tag.label}
-              </button>
-            ))}
+          {/* ── Filter pill bar ── */}
+          <div className="relative mb-8">
+            {/* Right-edge fade — hints at horizontal scroll */}
+            <div className="absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l from-background to-transparent pointer-events-none z-10" />
 
-            {/* Category filters — always shown */}
-            {EVENT_CATEGORIES.map((cat) => {
-              const filter: FilterMode = `category:${cat}`;
-              const isActive = selectedFilter === filter;
-              const { bg, color } = TAG_COLOR_PALETTE[hashTag(cat) % TAG_COLOR_PALETTE.length];
-              return (
+            <div
+              className="flex items-center gap-2 overflow-x-auto py-1.5 pr-14 pl-0.5"
+              style={{ scrollbarWidth: "none", msOverflowStyle: "none" } as React.CSSProperties}
+            >
+              {/* Clear — slides in when anything is active */}
+              {selectedFilter && (
                 <button
-                  key={cat}
-                  aria-pressed={isActive}
-                  onClick={() => setSelectedFilter((current) => current === filter ? null : filter)}
-                  className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-sm font-semibold cursor-pointer hover:brightness-95 active:scale-95 transition-all shadow-sm ${
-                    isActive ? "ring-2 ring-offset-1 ring-current" : ""
-                  }`}
-                  style={{ background: bg, color }}
-                >
-                  <span className="material-symbols-outlined text-[14px] leading-none">
-                    {CATEGORY_ICONS[cat] ?? "label"}
-                  </span>
-                  {cat}
-                </button>
-              );
-            })}
-
-            {/* Trending tag pills from Firestore (top 6) */}
-            {topTags.slice(0, 6).map((tag) => {
-              const filter: FilterMode = `tag:${tag.name}`;
-              const { bg, color } = TAG_COLOR_PALETTE[hashTag(tag.name) % TAG_COLOR_PALETTE.length];
-              return (
-                <button
-                  key={tag.name}
-                  aria-pressed={selectedFilter === filter}
-                  onClick={() => setSelectedFilter((current) => current === filter ? null : filter)}
-                  className={`px-4 py-1.5 rounded-full text-sm font-semibold cursor-pointer hover:brightness-95 active:scale-95 transition-all shadow-sm ${
-                    selectedFilter === filter ? "ring-2 ring-offset-1 ring-current" : ""
-                  }`}
-                  style={{ background: bg, color }}
-                >
-                  #{tag.name}
-                </button>
-              );
-            })}
-
-            {/* + button — opens popover for more tags */}
-            <Popover onOpenChange={() => setTagSearch("")}>
-              <PopoverTrigger asChild>
-                <button
-                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-semibold cursor-pointer transition-all shadow-sm hover:brightness-95 active:scale-95"
+                  onClick={() => setSelectedFilter(null)}
+                  className="shrink-0 inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold transition-all duration-200 hover:-translate-y-px active:scale-95"
                   style={{
-                    background: "oklch(94% 0.03 250)",
-                    color: "oklch(38% 0.10 250)",
-                    border: "1.5px dashed oklch(70% 0.08 250 / 0.6)",
+                    background: "oklch(44% 0.14 25)",
+                    color: "oklch(97% 0.01 25)",
+                    boxShadow: "0 2px 8px oklch(44% 0.14 25 / 0.30)",
                   }}
-                  aria-label="More tag filters"
+                  aria-label="Clear filter"
                 >
-                  <Plus className="w-3.5 h-3.5" />
-                  More
+                  ✕ clear
                 </button>
-              </PopoverTrigger>
-              <PopoverContent className="w-80 p-3" align="start">
-                <p className="text-xs font-bold tracking-wide uppercase text-muted-foreground/60 mb-2 px-1">
-                  Filter by tag
-                </p>
-                {/* Search input */}
-                <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-muted/50 mb-3">
-                  <Search className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
-                  <input
-                    value={tagSearch}
-                    onChange={(e) => setTagSearch(e.target.value)}
-                    placeholder="Search tags…"
-                    className="flex-1 bg-transparent border-none outline-none text-sm text-foreground placeholder:text-muted-foreground"
-                  />
-                </div>
-                {/* All trending tags filtered by search */}
-                <div className="flex flex-wrap gap-1.5 max-h-48 overflow-y-auto">
-                  {topTags
-                    .filter((t) => t.name.toLowerCase().includes(tagSearch.toLowerCase()))
-                    .map((tag) => {
-                      const filter: FilterMode = `tag:${tag.name}`;
-                      const isActive = selectedFilter === filter;
-                      const { bg, color } = TAG_COLOR_PALETTE[hashTag(tag.name) % TAG_COLOR_PALETTE.length];
-                      return (
-                        <button
-                          key={tag.name}
-                          onClick={() => setSelectedFilter((current) => current === filter ? null : filter)}
-                          className={`px-3 py-1 rounded-full text-xs font-semibold transition-all hover:brightness-95 active:scale-95 ${
-                            isActive ? "ring-2 ring-offset-1 ring-current" : ""
-                          }`}
-                          style={{ background: bg, color }}
-                        >
-                          #{tag.name}
-                          {isActive && " ✓"}
-                        </button>
-                      );
-                    })}
-                  {topTags.filter((t) => t.name.toLowerCase().includes(tagSearch.toLowerCase())).length === 0 && (
-                    <p className="text-sm text-muted-foreground px-1">No tags found.</p>
-                  )}
-                </div>
-              </PopoverContent>
-            </Popover>
+              )}
+
+              {/* Pinned time filters */}
+              {PINNED_TAGS.map((tag) => {
+                const isActive = selectedFilter === tag.filter;
+                return (
+                  <button
+                    key={tag.label}
+                    aria-pressed={isActive}
+                    onClick={() => setSelectedFilter((c) => c === tag.filter ? null : tag.filter)}
+                    className="shrink-0 px-4 py-1.5 rounded-full text-sm font-semibold cursor-pointer transition-all duration-200 hover:-translate-y-px active:scale-95"
+                    style={isActive ? {
+                      background: "oklch(44% 0.14 25)",
+                      color: "oklch(97% 0.01 25)",
+                      boxShadow: "0 3px 10px oklch(44% 0.14 25 / 0.35)",
+                      transform: "translateY(-1px) scale(1.04)",
+                    } : {
+                      background: tag.bg,
+                      color: tag.color,
+                      boxShadow: "0 1px 4px oklch(50% 0.05 30 / 0.12)",
+                    }}
+                  >
+                    {tag.label}
+                  </button>
+                );
+              })}
+
+              {/* Separator */}
+              <div className="shrink-0 w-px h-5 rounded-full bg-border/50 mx-0.5" />
+
+              {/* Category filters */}
+              {EVENT_CATEGORIES.map((cat) => {
+                const filter: FilterMode = `category:${cat}`;
+                const isActive = selectedFilter === filter;
+                const { bg, color } = TAG_COLOR_PALETTE[hashTag(cat) % TAG_COLOR_PALETTE.length];
+                return (
+                  <button
+                    key={cat}
+                    aria-pressed={isActive}
+                    onClick={() => setSelectedFilter((c) => c === filter ? null : filter)}
+                    className="shrink-0 inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-sm font-semibold cursor-pointer transition-all duration-200 hover:-translate-y-px active:scale-95"
+                    style={isActive ? {
+                      background: "oklch(44% 0.14 25)",
+                      color: "oklch(97% 0.01 25)",
+                      boxShadow: "0 3px 10px oklch(44% 0.14 25 / 0.35)",
+                      transform: "translateY(-1px) scale(1.04)",
+                    } : {
+                      background: bg,
+                      color,
+                      boxShadow: "0 1px 4px oklch(50% 0.05 30 / 0.12)",
+                    }}
+                  >
+                    <span className="material-symbols-outlined text-[13px] leading-none">
+                      {CATEGORY_ICONS[cat] ?? "label"}
+                    </span>
+                    {cat}
+                  </button>
+                );
+              })}
+
+              {/* Trending tags from Firestore */}
+              {topTags.slice(0, 6).map((tag) => {
+                const filter: FilterMode = `tag:${tag.name}`;
+                const isActive = selectedFilter === filter;
+                const { bg, color } = TAG_COLOR_PALETTE[hashTag(tag.name) % TAG_COLOR_PALETTE.length];
+                return (
+                  <button
+                    key={tag.name}
+                    aria-pressed={isActive}
+                    onClick={() => setSelectedFilter((c) => c === filter ? null : filter)}
+                    className="shrink-0 px-4 py-1.5 rounded-full text-sm font-semibold cursor-pointer transition-all duration-200 hover:-translate-y-px active:scale-95"
+                    style={isActive ? {
+                      background: "oklch(44% 0.14 25)",
+                      color: "oklch(97% 0.01 25)",
+                      boxShadow: "0 3px 10px oklch(44% 0.14 25 / 0.35)",
+                      transform: "translateY(-1px) scale(1.04)",
+                    } : {
+                      background: bg,
+                      color,
+                      boxShadow: "0 1px 4px oklch(50% 0.05 30 / 0.12)",
+                    }}
+                  >
+                    #{tag.name}
+                  </button>
+                );
+              })}
+
+              {/* + More — access remaining trending tags */}
+              <Popover onOpenChange={() => setTagSearch("")}>
+                <PopoverTrigger asChild>
+                  <button
+                    className="shrink-0 inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-sm font-semibold cursor-pointer transition-all duration-200 hover:-translate-y-px active:scale-95"
+                    style={{
+                      background: "oklch(94% 0.02 260)",
+                      color: "oklch(42% 0.08 260)",
+                      border: "1.5px dashed oklch(72% 0.06 260 / 0.7)",
+                    }}
+                    aria-label="More tag filters"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    More
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent className="w-80 p-3" align="start">
+                  <p className="text-[11px] font-black tracking-[0.12em] uppercase text-muted-foreground/50 mb-2.5 px-1">
+                    Filter by tag
+                  </p>
+                  <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-muted/40 mb-3">
+                    <Search className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                    <input
+                      value={tagSearch}
+                      onChange={(e) => setTagSearch(e.target.value)}
+                      placeholder="Search tags…"
+                      className="flex-1 bg-transparent border-none outline-none text-sm text-foreground placeholder:text-muted-foreground"
+                    />
+                  </div>
+                  <div className="flex flex-wrap gap-1.5 max-h-48 overflow-y-auto">
+                    {topTags
+                      .filter((t) => t.name.toLowerCase().includes(tagSearch.toLowerCase()))
+                      .map((tag) => {
+                        const filter: FilterMode = `tag:${tag.name}`;
+                        const isActive = selectedFilter === filter;
+                        const { bg, color } = TAG_COLOR_PALETTE[hashTag(tag.name) % TAG_COLOR_PALETTE.length];
+                        return (
+                          <button
+                            key={tag.name}
+                            onClick={() => setSelectedFilter((c) => c === filter ? null : filter)}
+                            className="px-3 py-1 rounded-full text-xs font-semibold transition-all active:scale-95"
+                            style={isActive ? {
+                              background: "oklch(44% 0.14 25)",
+                              color: "oklch(97% 0.01 25)",
+                            } : { background: bg, color }}
+                          >
+                            #{tag.name}{isActive ? " ✓" : ""}
+                          </button>
+                        );
+                      })}
+                    {topTags.filter((t) => t.name.toLowerCase().includes(tagSearch.toLowerCase())).length === 0 && (
+                      <p className="text-sm text-muted-foreground px-1">No tags yet — they appear as events get tagged.</p>
+                    )}
+                  </div>
+                </PopoverContent>
+              </Popover>
+            </div>
           </div>
 
           <Noticeboard filter={selectedFilter} />

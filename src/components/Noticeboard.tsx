@@ -10,7 +10,7 @@ import { useEvents } from "@/hooks/useEvents";
 import { queryKeys } from "@/hooks/queryKeys";
 import type { Event, EventCategory } from "@/types/firebaseTypes";
 
-export type FilterMode = "happening-now" | "today" | `tag:${string}` | `category:${string}` | null;
+export type FilterMode = "happening-now" | "today" | "this-week" | "next-week" | `tag:${string}` | `category:${string}` | null;
 
 // ── Visual presets ────────────────────────────────────────────────────────────
 
@@ -49,6 +49,26 @@ function matchesFilter(event: Event, filter: FilterMode): boolean {
   if (filter === "today") {
     const start = event.date?.toDate?.();
     return Boolean(start && isSameLocalDate(start, new Date()));
+  }
+
+  if (filter === "this-week") {
+    const start = event.date?.toDate?.();
+    if (!start) return false;
+    const now = new Date();
+    const in7 = new Date(now);
+    in7.setDate(in7.getDate() + 7);
+    return start >= now && start <= in7;
+  }
+
+  if (filter === "next-week") {
+    const start = event.date?.toDate?.();
+    if (!start) return false;
+    const now = new Date();
+    const in7 = new Date(now);
+    in7.setDate(in7.getDate() + 7);
+    const in14 = new Date(now);
+    in14.setDate(in14.getDate() + 14);
+    return start > in7 && start <= in14;
   }
 
   if (filter.startsWith("category:")) {
