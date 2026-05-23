@@ -4,16 +4,56 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "@/components/ui/sonner";
 import { useAuth } from "@/contexts/AuthContext";
-import { joinEvent, leaveEvent } from "@/lib/firestore";
+import { joinEvent, leaveEvent, reportEvent } from "@/lib/firestore";
 import { useBookmarks } from "@/hooks/useBookmarks";
 import { useEvents } from "@/hooks/useEvents";
 import { queryKeys } from "@/hooks/queryKeys";
 import type { Event, EventCategory } from "@/types/firebaseTypes";
 
-// ── Visual presets cycling by card index ──────────────────────────────────────
+export type FilterMode = "happening-now" | "today" | `tag:${string}` | null;
 
-const ROTATIONS = [-2, 3, -1, 6, -3, 2, -5, 4, -1, 3, -4, 2];
+// ── Visual presets ────────────────────────────────────────────────────────────
+
 const MARGIN_TOPS = [0, 48, 24, 80, 16, 60, 32, 72, 8, 56, 40, 64];
+
+function hashId(id: string): number {
+  let h = 0;
+  for (let i = 0; i < id.length; i++) {
+    h = (Math.imul(31, h) + id.charCodeAt(i)) | 0;
+  }
+  return Math.abs(h);
+}
+
+function seededRotation(id: string): string {
+  return `${-3 + (hashId(id) % 7)}deg`;
+}
+
+function isSameLocalDate(a: Date, b: Date): boolean {
+  return (
+    a.getFullYear() === b.getFullYear() &&
+    a.getMonth() === b.getMonth() &&
+    a.getDate() === b.getDate()
+  );
+}
+
+function matchesFilter(event: Event, filter: FilterMode): boolean {
+  if (!filter) return true;
+
+  if (filter === "happening-now") {
+    const now = new Date();
+    const start = event.date?.toDate?.();
+    const end = event.endTime?.toDate?.();
+    return Boolean(start && end && start <= now && end >= now);
+  }
+
+  if (filter === "today") {
+    const start = event.date?.toDate?.();
+    return Boolean(start && isSameLocalDate(start, new Date()));
+  }
+
+  const selectedTag = filter.slice("tag:".length);
+  return event.tags.includes(selectedTag);
+}
 
 const ATTACHMENTS: Array<{
   attachmentType: "pushpin" | "washi";
@@ -30,14 +70,6 @@ const ATTACHMENTS: Array<{
   { attachmentType: "washi", washiColor: "rgba(200,180,255,0.70)", washiSide: "right", washiRotation: -8 },
 ];
 
-const FALLBACK_GRADIENTS = [
-  "linear-gradient(160deg, #f97316 0%, #a855f7 50%, #3b82f6 100%)",
-  "linear-gradient(160deg, #134e4a 0%, #0ea5e9 60%, #67e8f9 100%)",
-  "linear-gradient(160deg, #166534 0%, #84cc16 60%, #fde68a 100%)",
-  "linear-gradient(160deg, #1e1b4b 0%, #7c3aed 55%, #ec4899 100%)",
-  "linear-gradient(160deg, #7f1d1d 0%, #f97316 55%, #fde68a 100%)",
-  "linear-gradient(160deg, #0c4a6e 0%, #0ea5e9 55%, #a7f3d0 100%)",
-];
 
 const ACTION_BY_CATEGORY: Record<EventCategory, { label: string; className: string }> = {
   Workshop: { label: "Sign Up", className: "bg-secondary-container text-on-secondary-container" },
@@ -53,8 +85,10 @@ const ACTION_BY_CATEGORY: Record<EventCategory, { label: string; className: stri
 
 // ── Skeleton card ─────────────────────────────────────────────────────────────
 
+const SKELETON_ROTATIONS = [-2, 3, -1, 6, -3, 2, -5, 4, -1, 3, -4, 2];
+
 function SkeletonCard({ index }: { index: number }) {
-  const rotation = ROTATIONS[index % ROTATIONS.length];
+  const rotation = SKELETON_ROTATIONS[index % SKELETON_ROTATIONS.length];
   const marginTop = MARGIN_TOPS[index % MARGIN_TOPS.length];
   return (
     <div
@@ -70,13 +104,21 @@ function SkeletonCard({ index }: { index: number }) {
 
 // ── Noticeboard ───────────────────────────────────────────────────────────────
 
-const Noticeboard = () => {
+interface NoticeboardProps {
+  filter?: FilterMode;
+}
+
+const Noticeboard = ({ filter = null }: NoticeboardProps) => {
   const navigate = useNavigate();
   const location = useLocation();
   const queryClient = useQueryClient();
   const { user, profile, refreshProfile } = useAuth();
   const { savedEvents, toggleEvent } = useBookmarks();
-  const { data: events, isLoading, isError } = useEvents({ limit: 22 });
+  const { data: events, isLoading, isError } = useEvents({
+    limit: 22,
+    approvedOnly: true,
+    activeOnly: true,
+  });
   const [savingEventId, setSavingEventId] = useState<string | null>(null);
   const [attendingEventId, setAttendingEventId] = useState<string | null>(null);
 
@@ -129,6 +171,19 @@ const Noticeboard = () => {
     }
   };
 
+  const handleReport = async (event: Event) => {
+    if (!user) {
+      redirectToLogin();
+      return;
+    }
+    try {
+      await reportEvent(event.id);
+      toast.success("Thanks for letting us know — we'll review this event.");
+    } catch {
+      toast.error("Couldn't submit report. Try again.");
+    }
+  };
+
   return (
     <div className="relative rounded-[32px] p-4 bg-[#5D4037] shadow-2xl border-[12px] border-[#3E2723]">
       <div className="board-texture rounded-[20px] min-h-[900px] w-full relative masonry-grid">
@@ -143,7 +198,7 @@ const Noticeboard = () => {
           </div>
         )}
 
-        {events?.map((event, i) => {
+        {events?.filter((event) => matchesFilter(event, filter)).map((event, i) => {
           const attachment = ATTACHMENTS[i % ATTACHMENTS.length];
           const action = ACTION_BY_CATEGORY[event.category] ?? ACTION_BY_CATEGORY.Other;
           const isSaved = savedEvents.includes(event.id);
@@ -156,14 +211,14 @@ const Noticeboard = () => {
               style={{ animationDelay: `${Math.min(i * 55, 900)}ms` }}
             >
               <PosterCard
+                eventId={event.id}
                 title={event.title}
                 date={event.date}
                 location={event.location}
                 description={event.description}
-                posterUrl={event.posterUrl}
-                rotation={ROTATIONS[i % ROTATIONS.length]}
+                imagePath={event.imagePath}
+                rotation={seededRotation(event.id)}
                 marginTop={MARGIN_TOPS[i % MARGIN_TOPS.length]}
-                fallbackGradient={FALLBACK_GRADIENTS[i % FALLBACK_GRADIENTS.length]}
                 actionLabel={action.label}
                 actionClassName={action.className}
                 onOpen={() => navigate(`/events/${event.id}`)}
@@ -173,6 +228,7 @@ const Noticeboard = () => {
                 isAttendancePending={attendingEventId === event.id}
                 onToggleSave={() => handleToggleSave(event)}
                 onToggleAttendance={() => handleToggleAttendance(event)}
+                onReport={() => handleReport(event)}
                 {...attachment}
               />
             </div>

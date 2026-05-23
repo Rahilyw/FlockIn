@@ -1,15 +1,32 @@
-import type { CSSProperties } from "react";
+import { useState, type CSSProperties } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import Header from "@/components/Header";
-import Noticeboard from "@/components/Noticeboard";
+import Noticeboard, { type FilterMode } from "@/components/Noticeboard";
+import { useTopTags } from "@/hooks/useTopTags";
 
-const TAGS = [
-  { label: "#Tonight",    bg: "oklch(93% 0.04 15)",  color: "oklch(34% 0.10 15)"  },
-  { label: "#ArtsWeek",   bg: "oklch(94% 0.04 162)", color: "oklch(30% 0.09 162)" },
-  { label: "#CareerFair", bg: "oklch(93% 0.04 280)", color: "oklch(33% 0.10 280)" },
-  { label: "#FreePizza",  bg: "oklch(95% 0.07 82)",  color: "oklch(36% 0.12 62)"  },
-  { label: "#LiveMusic",  bg: "oklch(92% 0.05 262)", color: "oklch(34% 0.10 262)" },
+// ── Static pinned pills (always shown first) ──────────────────────────────────
+
+const PINNED_TAGS: { label: string; filter: FilterMode; bg: string; color: string }[] = [
+  { label: "#happening-now", filter: "happening-now", bg: "oklch(93% 0.04 15)",  color: "oklch(34% 0.10 15)"  },
+  { label: "#today",          filter: "today",          bg: "oklch(95% 0.07 82)",  color: "oklch(36% 0.12 62)"  },
 ];
+
+// ── Deterministic color palette for dynamic tags ──────────────────────────────
+
+const TAG_COLOR_PALETTE = [
+  { bg: "oklch(94% 0.04 162)", color: "oklch(30% 0.09 162)" },
+  { bg: "oklch(93% 0.04 280)", color: "oklch(33% 0.10 280)" },
+  { bg: "oklch(92% 0.05 262)", color: "oklch(34% 0.10 262)" },
+  { bg: "oklch(94% 0.04 120)", color: "oklch(30% 0.09 120)" },
+  { bg: "oklch(93% 0.05 310)", color: "oklch(32% 0.11 310)" },
+  { bg: "oklch(94% 0.04 45)",  color: "oklch(30% 0.10 45)"  },
+];
+
+function hashTag(tag: string): number {
+  let h = 0;
+  for (let i = 0; i < tag.length; i++) h = (Math.imul(31, h) + tag.charCodeAt(i)) | 0;
+  return Math.abs(h);
+}
 
 const NAV_ITEMS: {
   icon: string;
@@ -58,6 +75,8 @@ const NAV_ITEMS: {
 const Index = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const [selectedFilter, setSelectedFilter] = useState<FilterMode>(null);
+  const { data: topTags = [] } = useTopTags(8);
 
   const isActive = (to: string) =>
     to === "/" ? location.pathname === "/" : location.pathname.startsWith(to);
@@ -127,18 +146,42 @@ const Index = () => {
         {/* ── Main content ── */}
         <main className="flex-1 px-6 py-6">
           <div className="flex flex-wrap gap-2.5 mb-8">
-            {TAGS.map((tag) => (
+            {/* Pinned special filters */}
+            {PINNED_TAGS.map((tag) => (
               <button
                 key={tag.label}
-                className="px-4 py-1.5 rounded-full text-sm font-semibold cursor-pointer hover:brightness-95 active:scale-95 transition-all shadow-sm"
+                aria-pressed={selectedFilter === tag.filter}
+                onClick={() => setSelectedFilter((current) => current === tag.filter ? null : tag.filter)}
+                className={`px-4 py-1.5 rounded-full text-sm font-semibold cursor-pointer hover:brightness-95 active:scale-95 transition-all shadow-sm ${
+                  selectedFilter === tag.filter ? "ring-2 ring-offset-1 ring-current" : ""
+                }`}
                 style={{ background: tag.bg, color: tag.color }}
               >
                 {tag.label}
               </button>
             ))}
+
+            {/* Live tags from Firestore */}
+            {topTags.map((tag) => {
+              const filter: FilterMode = `tag:${tag.name}`;
+              const { bg, color } = TAG_COLOR_PALETTE[hashTag(tag.name) % TAG_COLOR_PALETTE.length];
+              return (
+                <button
+                  key={tag.name}
+                  aria-pressed={selectedFilter === filter}
+                  onClick={() => setSelectedFilter((current) => current === filter ? null : filter)}
+                  className={`px-4 py-1.5 rounded-full text-sm font-semibold cursor-pointer hover:brightness-95 active:scale-95 transition-all shadow-sm ${
+                    selectedFilter === filter ? "ring-2 ring-offset-1 ring-current" : ""
+                  }`}
+                  style={{ background: bg, color }}
+                >
+                  #{tag.name}
+                </button>
+              );
+            })}
           </div>
 
-          <Noticeboard />
+          <Noticeboard filter={selectedFilter} />
         </main>
       </div>
 

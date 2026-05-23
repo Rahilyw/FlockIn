@@ -35,7 +35,7 @@ export default function EventList() {
     return (
       !q ||
       e.title.toLowerCase().includes(q) ||
-      e.organizerName.toLowerCase().includes(q) ||
+      e.creatorName.toLowerCase().includes(q) ||
       e.location.toLowerCase().includes(q) ||
       e.description.toLowerCase().includes(q)
     );

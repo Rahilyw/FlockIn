@@ -21,6 +21,7 @@ import ResourceList from "./pages/ResourceList";
 import ResourceDetail from "./pages/ResourceDetail";
 import CreateEvent from "./pages/CreateEvent";
 import EditEvent from "./pages/EditEvent";
+import Admin from "./pages/Admin";
 
 const queryClient = new QueryClient();
 
@@ -40,6 +41,7 @@ const App = () => (
             <Route path="/clubs/:id" element={<ClubDetail />} />
             <Route path="/resources" element={<ResourceList />} />
             <Route path="/resources/:id" element={<ResourceDetail />} />
+            <Route path="/admin" element={<Admin />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
             <Route element={<ProtectedRoute />}>

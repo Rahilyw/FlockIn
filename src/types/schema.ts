@@ -33,21 +33,22 @@ export interface Event {
   id: string;
   title: string;
   description: string;
-  clubId: string;           // Matches database
-  createdBy: string;        // Matches database
+  creatorId: string;
+  creatorName: string;
+  creatorPhoto: string;
   isPublic: boolean;
   location: string; 
   startTime: any;           // Firestore Timestamp
   endTime: any;             // Firestore Timestamp
-  status: 'upcoming' | 'ongoing' | 'completed'; // Matches database
+  status: 'pending' | 'approved' | 'rejected';
   capacity: number;         // Matches database
-  attendeeCount: number;    // Matches database
+  rsvpCount: number;
+  rsvpBy: string[];
+  reported: boolean;
+  savedBy: string[];
+  savedCount: number;
   tags: string[];           // Lowercase tags array
-  poster: {
-    url: string;
-    fileName: string;       // Fixed camelCase
-    fileType: string;       // Fixed camelCase
-  };
+  imagePath: string | null;
   createdAt: any;           // Firestore Timestamp
   updatedAt?: any;          // Optional backup timestamp
 }
