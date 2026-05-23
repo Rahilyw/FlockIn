@@ -20,7 +20,7 @@ export const createEventSchema = z.object({
   location: z.string().min(2, "Location is required"),
   category: z.enum(EVENT_CATEGORIES, { required_error: "Select a category" }),
   creatorName: z.string().min(1, "Creator name is required"),
-  tags: z.string().optional(),
+  tags: z.array(z.string()).default([]),
 });
 
 export const updateEventSchema = createEventSchema.partial();

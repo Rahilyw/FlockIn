@@ -1,8 +1,11 @@
 import { useState, type CSSProperties } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
+import { Plus, Search } from "lucide-react";
 import Header from "@/components/Header";
 import Noticeboard, { type FilterMode } from "@/components/Noticeboard";
 import { useTopTags } from "@/hooks/useTopTags";
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
+import { EVENT_CATEGORIES } from "@/lib/eventSchemas";
 
 // ── Static pinned pills (always shown first) ──────────────────────────────────
 
@@ -27,6 +30,19 @@ function hashTag(tag: string): number {
   for (let i = 0; i < tag.length; i++) h = (Math.imul(31, h) + tag.charCodeAt(i)) | 0;
   return Math.abs(h);
 }
+
+// Category icon mapping (Material Symbols)
+const CATEGORY_ICONS: Record<string, string> = {
+  Music: "music_note",
+  Art: "palette",
+  Workshop: "build",
+  Social: "people",
+  Sport: "sports",
+  Academic: "school",
+  Career: "work",
+  Food: "restaurant",
+  Other: "category",
+};
 
 const NAV_ITEMS: {
   icon: string;
@@ -76,7 +92,8 @@ const Index = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [selectedFilter, setSelectedFilter] = useState<FilterMode>(null);
-  const { data: topTags = [] } = useTopTags(8);
+  const [tagSearch, setTagSearch] = useState("");
+  const { data: topTags = [] } = useTopTags(20);
 
   const isActive = (to: string) =>
     to === "/" ? location.pathname === "/" : location.pathname.startsWith(to);
@@ -145,7 +162,7 @@ const Index = () => {
 
         {/* ── Main content ── */}
         <main className="flex-1 px-6 py-6">
-          <div className="flex flex-wrap gap-2.5 mb-8">
+          <div className="flex flex-wrap gap-2.5 mb-8 items-center">
             {/* Pinned special filters */}
             {PINNED_TAGS.map((tag) => (
               <button
@@ -161,8 +178,31 @@ const Index = () => {
               </button>
             ))}
 
-            {/* Live tags from Firestore */}
-            {topTags.map((tag) => {
+            {/* Category filters — always shown */}
+            {EVENT_CATEGORIES.map((cat) => {
+              const filter: FilterMode = `category:${cat}`;
+              const isActive = selectedFilter === filter;
+              const { bg, color } = TAG_COLOR_PALETTE[hashTag(cat) % TAG_COLOR_PALETTE.length];
+              return (
+                <button
+                  key={cat}
+                  aria-pressed={isActive}
+                  onClick={() => setSelectedFilter((current) => current === filter ? null : filter)}
+                  className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-sm font-semibold cursor-pointer hover:brightness-95 active:scale-95 transition-all shadow-sm ${
+                    isActive ? "ring-2 ring-offset-1 ring-current" : ""
+                  }`}
+                  style={{ background: bg, color }}
+                >
+                  <span className="material-symbols-outlined text-[14px] leading-none">
+                    {CATEGORY_ICONS[cat] ?? "label"}
+                  </span>
+                  {cat}
+                </button>
+              );
+            })}
+
+            {/* Trending tag pills from Firestore (top 6) */}
+            {topTags.slice(0, 6).map((tag) => {
               const filter: FilterMode = `tag:${tag.name}`;
               const { bg, color } = TAG_COLOR_PALETTE[hashTag(tag.name) % TAG_COLOR_PALETTE.length];
               return (
@@ -179,6 +219,65 @@ const Index = () => {
                 </button>
               );
             })}
+
+            {/* + button — opens popover for more tags */}
+            <Popover onOpenChange={() => setTagSearch("")}>
+              <PopoverTrigger asChild>
+                <button
+                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-semibold cursor-pointer transition-all shadow-sm hover:brightness-95 active:scale-95"
+                  style={{
+                    background: "oklch(94% 0.03 250)",
+                    color: "oklch(38% 0.10 250)",
+                    border: "1.5px dashed oklch(70% 0.08 250 / 0.6)",
+                  }}
+                  aria-label="More tag filters"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  More
+                </button>
+              </PopoverTrigger>
+              <PopoverContent className="w-80 p-3" align="start">
+                <p className="text-xs font-bold tracking-wide uppercase text-muted-foreground/60 mb-2 px-1">
+                  Filter by tag
+                </p>
+                {/* Search input */}
+                <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-muted/50 mb-3">
+                  <Search className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                  <input
+                    value={tagSearch}
+                    onChange={(e) => setTagSearch(e.target.value)}
+                    placeholder="Search tags…"
+                    className="flex-1 bg-transparent border-none outline-none text-sm text-foreground placeholder:text-muted-foreground"
+                  />
+                </div>
+                {/* All trending tags filtered by search */}
+                <div className="flex flex-wrap gap-1.5 max-h-48 overflow-y-auto">
+                  {topTags
+                    .filter((t) => t.name.toLowerCase().includes(tagSearch.toLowerCase()))
+                    .map((tag) => {
+                      const filter: FilterMode = `tag:${tag.name}`;
+                      const isActive = selectedFilter === filter;
+                      const { bg, color } = TAG_COLOR_PALETTE[hashTag(tag.name) % TAG_COLOR_PALETTE.length];
+                      return (
+                        <button
+                          key={tag.name}
+                          onClick={() => setSelectedFilter((current) => current === filter ? null : filter)}
+                          className={`px-3 py-1 rounded-full text-xs font-semibold transition-all hover:brightness-95 active:scale-95 ${
+                            isActive ? "ring-2 ring-offset-1 ring-current" : ""
+                          }`}
+                          style={{ background: bg, color }}
+                        >
+                          #{tag.name}
+                          {isActive && " ✓"}
+                        </button>
+                      );
+                    })}
+                  {topTags.filter((t) => t.name.toLowerCase().includes(tagSearch.toLowerCase())).length === 0 && (
+                    <p className="text-sm text-muted-foreground px-1">No tags found.</p>
+                  )}
+                </div>
+              </PopoverContent>
+            </Popover>
           </div>
 
           <Noticeboard filter={selectedFilter} />

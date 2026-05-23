@@ -1,4 +1,5 @@
 import { useRef, useState } from "react";
+import { TagInput } from "@/components/TagInput";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -254,7 +255,7 @@ export default function CreateEvent() {
       location: "",
       category: undefined,
       creatorName: profile?.displayName ?? user?.displayName ?? "",
-      tags: "",
+      tags: [],
     },
   });
 
@@ -305,10 +306,6 @@ export default function CreateEvent() {
       setIsUploading(false);
     }
 
-    const tags = values.tags
-      ? values.tags.split(",").map((t) => t.trim()).filter(Boolean)
-      : [];
-
     try {
       const id = await mutateAsync({
         title: values.title,
@@ -321,7 +318,7 @@ export default function CreateEvent() {
         creatorName: values.creatorName,
         creatorPhoto: user.photoURL ?? "",
         imagePath,
-        tags,
+        tags: values.tags,
       });
       toast.success("Event posted!");
       navigate(`/events/${id}`);
@@ -504,10 +501,9 @@ export default function CreateEvent() {
                       <FormItem className="m-0">
                         <FieldRow icon={<Tag className="h-4 w-4" />}>
                           <FormControl>
-                            <input
-                              {...field}
-                              placeholder="Tags — free, outdoor, all-ages…"
-                              className="w-full bg-transparent border-none outline-none text-sm text-foreground placeholder:text-muted-foreground"
+                            <TagInput
+                              value={field.value}
+                              onChange={field.onChange}
                             />
                           </FormControl>
                         </FieldRow>

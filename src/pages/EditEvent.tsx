@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import { TagInput } from "@/components/TagInput";
 import { useNavigate, useParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -257,7 +258,7 @@ export default function EditEvent() {
       location: "",
       category: undefined,
       creatorName: "",
-      tags: "",
+      tags: [],
     },
   });
 
@@ -275,7 +276,7 @@ export default function EditEvent() {
         location: event.location,
         category: event.category,
         creatorName: event.creatorName,
-        tags: event.tags.join(", "),
+        tags: event.tags,
       });
       // Pre-fill preview from existing image path.
       if (event.imagePath) setPreviewSrc(event.imagePath);
@@ -328,10 +329,6 @@ export default function EditEvent() {
       imagePath = null;
     }
 
-    const tags = values.tags
-      ? values.tags.split(",").map((t) => t.trim()).filter(Boolean)
-      : [];
-
     try {
       await mutateAsync({
         title: values.title,
@@ -342,7 +339,7 @@ export default function EditEvent() {
         category: values.category,
         creatorName: values.creatorName,
         imagePath,
-        tags,
+        tags: values.tags,
       });
       toast.success("Event updated!");
       navigate(`/events/${id}`);
@@ -563,10 +560,9 @@ export default function EditEvent() {
                       <FormItem className="m-0">
                         <FieldRow icon={<Tag className="h-4 w-4" />}>
                           <FormControl>
-                            <input
-                              {...field}
-                              placeholder="Tags — free, outdoor, all-ages…"
-                              className="w-full bg-transparent border-none outline-none text-sm text-foreground placeholder:text-muted-foreground"
+                            <TagInput
+                              value={field.value ?? []}
+                              onChange={field.onChange}
                             />
                           </FormControl>
                         </FieldRow>
