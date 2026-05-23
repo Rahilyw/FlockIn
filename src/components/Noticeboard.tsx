@@ -216,7 +216,7 @@ const Noticeboard = ({ filter = null }: NoticeboardProps) => {
                 date={event.date}
                 location={event.location}
                 description={event.description}
-                imagePath={event.imagePath}
+                imagePath={event.imagePath ?? event.posterUrl ?? null}
                 rotation={seededRotation(event.id)}
                 marginTop={MARGIN_TOPS[i % MARGIN_TOPS.length]}
                 actionLabel={action.label}

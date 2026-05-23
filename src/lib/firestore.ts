@@ -122,21 +122,42 @@ export interface GetEventsOptions {
 }
 
 export async function getEvents(options: GetEventsOptions = {}): Promise<Event[]> {
+  // Use only equality where-clauses in Firestore to avoid composite index requirements.
+  // Sorting and range filtering are done client-side.
   const constraints: QueryConstraint[] = [];
-  if (options.category) constraints.push(where("category", "==", options.category));
   if (options.approvedOnly) constraints.push(where("status", "==", "approved"));
-  if (options.activeOnly) constraints.push(where("endTime", ">=", Timestamp.now()));
-  constraints.push(orderBy(options.activeOnly ? "endTime" : "date", "asc"));
-  if (options.limitCount) constraints.push(limit(options.limitCount));
+  if (options.category) constraints.push(where("category", "==", options.category));
+  // Fetch extra to account for client-side filtering
+  const fetchLimit = options.limitCount ? options.limitCount * 3 : 60;
+  constraints.push(limit(fetchLimit));
+
   const snap = await getDocs(query(eventsCol(), ...constraints));
-  return snap.docs.map((d) => d.data() as Event);
+  let events = snap.docs.map((d) => d.data() as Event);
+
+  if (options.activeOnly) {
+    const now = new Date();
+    events = events.filter((e) => !e.endTime || e.endTime.toDate() >= now);
+  }
+
+  // Sort by date ascending client-side
+  events.sort((a, b) => {
+    const aMs = a.date?.toMillis?.() ?? 0;
+    const bMs = b.date?.toMillis?.() ?? 0;
+    return aMs - bMs;
+  });
+
+  return options.limitCount ? events.slice(0, options.limitCount) : events;
 }
 
 export async function getPendingEvents(): Promise<Event[]> {
+  // orderBy("createdAt") alone avoids a composite index requirement.
+  // Filter by status client-side for MVP compatibility.
   const snap = await getDocs(
-    query(eventsCol(), where("status", "==", "pending"), orderBy("createdAt", "asc")),
+    query(eventsCol(), orderBy("createdAt", "asc"), limit(100)),
   );
-  return snap.docs.map((d) => d.data() as Event);
+  return snap.docs
+    .map((d) => d.data() as Event)
+    .filter((e) => e.status === "pending");
 }
 
 export async function approveEvent(id: string): Promise<void> {
@@ -381,16 +402,17 @@ export async function getClubsByIds(ids: string[]): Promise<Club[]> {
  * Used to enforce the 3-events-per-day limit.
  */
 export async function getUserEventCountToday(userId: string): Promise<number> {
+  // Single equality filter only — avoids composite index requirement.
+  // Date filtering is done client-side.
   const startOfToday = new Date();
   startOfToday.setHours(0, 0, 0, 0);
   const snap = await getDocs(
-    query(
-      eventsCol(),
-      where("creatorId", "==", userId),
-      where("createdAt", ">=", Timestamp.fromDate(startOfToday)),
-    ),
+    query(eventsCol(), where("creatorId", "==", userId), limit(50)),
   );
-  return snap.size;
+  return snap.docs.filter((d) => {
+    const ts = d.data().createdAt as Timestamp | undefined;
+    return ts ? ts.toDate() >= startOfToday : false;
+  }).length;
 }
 
 /**

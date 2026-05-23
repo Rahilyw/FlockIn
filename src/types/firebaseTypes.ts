@@ -45,6 +45,8 @@ export interface Event {
   rsvpCount: number;
   rsvpBy: string[];
   imagePath: string | null;
+  /** @deprecated Legacy field — old events written before schema migration. Use imagePath. */
+  posterUrl?: string | null;
   status: "pending" | "approved" | "rejected";
   reported: boolean;
   savedBy: string[];

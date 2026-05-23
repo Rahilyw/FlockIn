@@ -20,7 +20,10 @@
       "Bash(npm bin *)",
       "Bash(npm config *)",
       "Bash(node \"C:\\\\Users\\\\rahil\\\\.claude\\\\skills\\\\impeccable\\\\scripts\\\\load-context.mjs\")",
-      "Bash(powershell.exe -Command \"Get-Content 'C:\\\\Users\\\\rahil\\\\.claude\\\\skills\\\\impeccable\\\\reference\\\\product.md'\")"
+      "Bash(powershell.exe -Command \"Get-Content 'C:\\\\Users\\\\rahil\\\\.claude\\\\skills\\\\impeccable\\\\reference\\\\product.md'\")",
+      "Bash(ls firebase.json)",
+      "Bash(ls .firebaserc)",
+      "Bash(find . -name \"*.rules\")"
     ]
   }
 }
