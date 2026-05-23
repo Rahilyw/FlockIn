@@ -1,19 +1,38 @@
 import type React from "react";
 import type { Timestamp } from "firebase/firestore";
 
+function hashId(id: string): number {
+  let h = 0;
+  for (let i = 0; i < id.length; i++) {
+    h = (Math.imul(31, h) + id.charCodeAt(i)) | 0;
+  }
+  return Math.abs(h);
+}
+
+const GRADIENT_PALETTE = [
+  "linear-gradient(160deg, #f97316 0%, #a855f7 50%, #3b82f6 100%)",
+  "linear-gradient(160deg, #134e4a 0%, #0ea5e9 60%, #67e8f9 100%)",
+  "linear-gradient(160deg, #166534 0%, #84cc16 60%, #fde68a 100%)",
+  "linear-gradient(160deg, #1e1b4b 0%, #7c3aed 55%, #ec4899 100%)",
+  "linear-gradient(160deg, #7f1d1d 0%, #f97316 55%, #fde68a 100%)",
+  "linear-gradient(160deg, #0c4a6e 0%, #0ea5e9 55%, #a7f3d0 100%)",
+  "linear-gradient(160deg, #4a044e 0%, #d946ef 55%, #f0abfc 100%)",
+  "linear-gradient(160deg, #1c1917 0%, #d97706 55%, #fef3c7 100%)",
+];
+
 interface PosterCardProps {
+  eventId: string;
   title: string;
   date: Timestamp;
   location: string;
   description: string;
-  posterUrl: string | null;
+  imagePath: string | null;
   rotation: number;
   attachmentType: "pushpin" | "washi";
   pushpinColor?: string;
   washiColor?: string;
   washiSide?: "left" | "right";
   washiRotation?: number;
-  fallbackGradient: string;
   actionLabel: string;
   actionClassName: string;
   marginTop?: number;
@@ -41,18 +60,18 @@ function isPdfUrl(url: string): boolean {
 }
 
 const PosterCard = ({
+  eventId,
   title,
   date,
   location,
   description,
-  posterUrl,
+  imagePath,
   rotation,
   attachmentType,
   pushpinColor = "#FF5252",
   washiColor = "rgba(178, 235, 242, 0.70)",
   washiSide = "right",
   washiRotation = -12,
-  fallbackGradient,
   actionLabel,
   actionClassName,
   marginTop = 0,
@@ -64,8 +83,9 @@ const PosterCard = ({
   onToggleSave,
   onToggleAttendance,
 }: PosterCardProps) => {
-  const showImage = posterUrl && !isPdfUrl(posterUrl);
-  const showPdf = posterUrl && isPdfUrl(posterUrl);
+  const fallbackGradient = GRADIENT_PALETTE[hashId(eventId) % GRADIENT_PALETTE.length];
+  const showImage = imagePath && !isPdfUrl(imagePath);
+  const showPdf = imagePath && isPdfUrl(imagePath);
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
     if (event.key === "Enter" || event.key === " ") {
@@ -107,7 +127,7 @@ const PosterCard = ({
           {/* Poster image */}
           {showImage && (
             <img
-              src={posterUrl}
+              src={imagePath}
               alt={title}
               className="absolute inset-0 w-full h-full object-cover"
               loading="lazy"
@@ -126,7 +146,7 @@ const PosterCard = ({
           )}
 
           {/* No poster fallback */}
-          {!posterUrl && (
+          {!imagePath && (
             <div
               className="absolute inset-0 flex flex-col items-center justify-center p-4 text-white/90"
               style={{ background: fallbackGradient }}

@@ -3,7 +3,7 @@ import { updateEvent } from "@/lib/firestore";
 import { queryKeys } from "@/hooks/queryKeys";
 import type { Event } from "@/types/firebaseTypes";
 
-type UpdateEventInput = Partial<Omit<Event, "id" | "organizerId" | "attendeeCount" | "attendeeIds" | "createdAt" | "updatedAt">>;
+type UpdateEventInput = Partial<Omit<Event, "id" | "creatorId" | "rsvpCount" | "rsvpBy" | "createdAt" | "updatedAt">>;
 
 interface UseUpdateEventOptions {
   eventId: string;

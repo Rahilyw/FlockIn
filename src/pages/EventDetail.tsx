@@ -36,7 +36,7 @@ export default function EventDetail() {
 
   const isAttending = profile?.joinedEvents?.includes(id!) ?? false;
   const isBookmarked = savedEvents.includes(id!);
-  const isOrganizer = event?.organizerId === user?.uid;
+  const isOrganizer = event?.creatorId === user?.uid;
 
   const handleJoinLeave = async () => {
     if (!user) { navigate("/login"); return; }
@@ -108,8 +108,8 @@ export default function EventDetail() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <div className="aspect-[3/4] overflow-hidden rounded-xl">
-            {event.posterUrl ? (
-              <img src={event.posterUrl} alt={event.title} className="w-full h-full object-cover" />
+            {event.imagePath ? (
+              <img src={event.imagePath} alt={event.title} className="w-full h-full object-cover" />
             ) : (
               <div className="w-full h-full bg-gradient-primary flex items-center justify-center">
                 <span className="text-primary-foreground text-6xl font-bold opacity-40">
@@ -123,7 +123,7 @@ export default function EventDetail() {
             <div>
               <Badge className="mb-3">{event.category}</Badge>
               <h1 className="text-3xl font-bold mb-2">{event.title}</h1>
-              <p className="text-muted-foreground">by {event.organizerName}</p>
+              <p className="text-muted-foreground">by {event.creatorName}</p>
             </div>
 
             <div className="space-y-3">
@@ -137,7 +137,7 @@ export default function EventDetail() {
               </div>
               <div className="flex items-center gap-3 text-sm">
                 <Users className="h-4 w-4 text-primary shrink-0" />
-                <span>{event.attendeeCount} attending</span>
+                <span>{event.rsvpCount} attending</span>
               </div>
             </div>
 

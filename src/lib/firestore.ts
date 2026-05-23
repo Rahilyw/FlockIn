@@ -15,6 +15,7 @@ import {
   arrayUnion,
   arrayRemove,
   increment,
+  Timestamp,
   type QueryConstraint,
 } from "firebase/firestore";
 import { getFirebaseDb } from "@/lib/firebase";
@@ -88,14 +89,18 @@ export async function completeOnboarding(
 // ── Event operations ──────────────────────────────────────────────────────
 
 export async function createEvent(
-  data: Omit<Event, "id" | "attendeeCount" | "attendeeIds" | "createdAt" | "updatedAt">,
+  data: Omit<Event, "id" | "rsvpCount" | "rsvpBy" | "status" | "reported" | "savedBy" | "savedCount" | "createdAt" | "updatedAt">,
 ): Promise<string> {
   const ref = doc(eventsCol());
   await setDoc(ref, {
     ...data,
     id: ref.id,
-    attendeeCount: 0,
-    attendeeIds: [],
+    status: "pending",
+    reported: false,
+    savedBy: [],
+    savedCount: 0,
+    rsvpBy: [],
+    rsvpCount: 0,
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
   });
@@ -110,18 +115,44 @@ export async function getEvent(id: string): Promise<Event | null> {
 export interface GetEventsOptions {
   category?: EventCategory;
   limitCount?: number;
+  approvedOnly?: boolean;
+  activeOnly?: boolean;
 }
 
 export async function getEvents(options: GetEventsOptions = {}): Promise<Event[]> {
-  const constraints: QueryConstraint[] = [orderBy("date", "asc")];
+  const constraints: QueryConstraint[] = [];
   if (options.category) constraints.push(where("category", "==", options.category));
+  if (options.approvedOnly) constraints.push(where("status", "==", "approved"));
+  if (options.activeOnly) constraints.push(where("endTime", ">=", Timestamp.now()));
+  constraints.push(orderBy(options.activeOnly ? "endTime" : "date", "asc"));
   if (options.limitCount) constraints.push(limit(options.limitCount));
   const snap = await getDocs(query(eventsCol(), ...constraints));
   return snap.docs.map((d) => d.data() as Event);
 }
 
+export async function getPendingEvents(): Promise<Event[]> {
+  const snap = await getDocs(
+    query(eventsCol(), where("status", "==", "pending"), orderBy("createdAt", "asc")),
+  );
+  return snap.docs.map((d) => d.data() as Event);
+}
+
+export async function approveEvent(id: string): Promise<void> {
+  await updateDoc(doc(eventsCol(), id), {
+    status: "approved",
+    updatedAt: serverTimestamp(),
+  });
+}
+
+export async function rejectEvent(id: string): Promise<void> {
+  await updateDoc(doc(eventsCol(), id), {
+    status: "rejected",
+    updatedAt: serverTimestamp(),
+  });
+}
+
 /**
- * Atomically adds userId to event.attendeeIds, increments attendeeCount,
+ * Atomically adds userId to event.rsvpBy, increments rsvpCount,
  * and adds eventId to user.joinedEvents. No-ops if already joined.
  */
 export async function joinEvent(eventId: string, userId: string): Promise<void> {
@@ -131,11 +162,11 @@ export async function joinEvent(eventId: string, userId: string): Promise<void> 
   await runTransaction(db(), async (tx) => {
     const eventSnap = await tx.get(eventRef);
     if (!eventSnap.exists()) throw new Error("Event not found.");
-    if ((eventSnap.data() as Event).attendeeIds.includes(userId)) return;
+    if ((eventSnap.data() as Event).rsvpBy.includes(userId)) return;
 
     tx.update(eventRef, {
-      attendeeIds: arrayUnion(userId),
-      attendeeCount: increment(1),
+      rsvpBy: arrayUnion(userId),
+      rsvpCount: increment(1),
       updatedAt: serverTimestamp(),
     });
     tx.update(userRef, {
@@ -146,7 +177,7 @@ export async function joinEvent(eventId: string, userId: string): Promise<void> 
 }
 
 /**
- * Atomically removes userId from event.attendeeIds and decrements attendeeCount.
+ * Atomically removes userId from event.rsvpBy and decrements rsvpCount.
  * No-ops if not currently attending.
  */
 export async function leaveEvent(eventId: string, userId: string): Promise<void> {
@@ -156,11 +187,11 @@ export async function leaveEvent(eventId: string, userId: string): Promise<void>
   await runTransaction(db(), async (tx) => {
     const eventSnap = await tx.get(eventRef);
     if (!eventSnap.exists()) throw new Error("Event not found.");
-    if (!(eventSnap.data() as Event).attendeeIds.includes(userId)) return;
+    if (!(eventSnap.data() as Event).rsvpBy.includes(userId)) return;
 
     tx.update(eventRef, {
-      attendeeIds: arrayRemove(userId),
-      attendeeCount: increment(-1),
+      rsvpBy: arrayRemove(userId),
+      rsvpCount: increment(-1),
       updatedAt: serverTimestamp(),
     });
     tx.update(userRef, {
@@ -171,13 +202,13 @@ export async function leaveEvent(eventId: string, userId: string): Promise<void>
 }
 
 /**
- * Updates event fields. Only the organizer can update their event.
- * Throws if event doesn't exist or user is not the organizer.
+ * Updates event fields. Only the creator can update their event.
+ * Throws if event doesn't exist or user is not the creator.
  */
 export async function updateEvent(
   eventId: string,
   userId: string,
-  updates: Partial<Omit<Event, "id" | "organizerId" | "attendeeCount" | "attendeeIds" | "createdAt" | "updatedAt">>,
+  updates: Partial<Omit<Event, "id" | "creatorId" | "rsvpCount" | "rsvpBy" | "createdAt" | "updatedAt">>,
 ): Promise<void> {
   const eventRef = doc(eventsCol(), eventId);
 
@@ -185,7 +216,7 @@ export async function updateEvent(
     const eventSnap = await tx.get(eventRef);
     if (!eventSnap.exists()) throw new Error("Event not found.");
     const event = eventSnap.data() as Event;
-    if (event.organizerId !== userId) throw new Error("Only the organizer can update this event.");
+    if (event.creatorId !== userId) throw new Error("Only the creator can update this event.");
 
     tx.update(eventRef, {
       ...updates,
@@ -195,9 +226,9 @@ export async function updateEvent(
 }
 
 /**
- * Deletes an event and atomically removes it from all attendees' joinedEvents.
- * Only the organizer can delete their event.
- * Throws if event doesn't exist or user is not the organizer.
+ * Deletes an event and atomically removes it from all RSVP users' joinedEvents.
+ * Only the creator can delete their event.
+ * Throws if event doesn't exist or user is not the creator.
  */
 export async function deleteEvent(eventId: string, userId: string): Promise<void> {
   const eventRef = doc(eventsCol(), eventId);
@@ -206,11 +237,11 @@ export async function deleteEvent(eventId: string, userId: string): Promise<void
     const eventSnap = await tx.get(eventRef);
     if (!eventSnap.exists()) throw new Error("Event not found.");
     const event = eventSnap.data() as Event;
-    if (event.organizerId !== userId) throw new Error("Only the organizer can delete this event.");
+    if (event.creatorId !== userId) throw new Error("Only the creator can delete this event.");
 
-    // Remove event from all attendees' joinedEvents
-    for (const attendeeId of event.attendeeIds) {
-      const userRef = doc(usersCol(), attendeeId);
+    // Remove event from all RSVP users' joinedEvents
+    for (const rsvpUserId of event.rsvpBy) {
+      const userRef = doc(usersCol(), rsvpUserId);
       tx.update(userRef, {
         joinedEvents: arrayRemove(eventId),
         updatedAt: serverTimestamp(),
@@ -287,9 +318,22 @@ export async function leaveClub(clubId: string, userId: string): Promise<void> {
 // ── Bookmark operations ───────────────────────────────────────────────────
 
 export async function toggleSavedEvent(userId: string, eventId: string, save: boolean): Promise<void> {
-  await updateDoc(doc(usersCol(), userId), {
-    savedEvents: save ? arrayUnion(eventId) : arrayRemove(eventId),
-    updatedAt: serverTimestamp(),
+  const userRef = doc(usersCol(), userId);
+  const eventRef = doc(eventsCol(), eventId);
+
+  await runTransaction(db(), async (tx) => {
+    const eventSnap = await tx.get(eventRef);
+    if (!eventSnap.exists()) throw new Error("Event not found.");
+
+    tx.update(userRef, {
+      savedEvents: save ? arrayUnion(eventId) : arrayRemove(eventId),
+      updatedAt: serverTimestamp(),
+    });
+    tx.update(eventRef, {
+      savedBy: save ? arrayUnion(userId) : arrayRemove(userId),
+      savedCount: increment(save ? 1 : -1),
+      updatedAt: serverTimestamp(),
+    });
   });
 }
 

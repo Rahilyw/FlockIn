@@ -33,9 +33,9 @@ export function EventCard({ event, isBookmarked = false, onBookmark, style }: Pr
     >
       <CardContent className="p-0">
         <div className="aspect-[3/4] overflow-hidden rounded-t-lg relative">
-          {event.posterUrl ? (
+          {event.imagePath ? (
             <img
-              src={event.posterUrl}
+              src={event.imagePath}
               alt={event.title}
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
             />
@@ -67,7 +67,7 @@ export function EventCard({ event, isBookmarked = false, onBookmark, style }: Pr
           <h3 className="font-semibold text-base line-clamp-2 group-hover:text-primary transition-colors">
             {event.title}
           </h3>
-          <p className="text-muted-foreground text-xs">by {event.organizerName}</p>
+          <p className="text-muted-foreground text-xs">by {event.creatorName}</p>
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
             <Calendar className="h-3 w-3" />
             <span>{formatDate(event.date)}</span>
@@ -78,7 +78,7 @@ export function EventCard({ event, isBookmarked = false, onBookmark, style }: Pr
           </div>
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
             <Users className="h-3 w-3" />
-            <span>{event.attendeeCount} attending</span>
+            <span>{event.rsvpCount} attending</span>
           </div>
         </div>
       </CardContent>

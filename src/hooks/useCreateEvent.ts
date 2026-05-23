@@ -3,7 +3,7 @@ import { createEvent } from "@/lib/firestore";
 import { queryKeys } from "@/hooks/queryKeys";
 import type { Event } from "@/types/firebaseTypes";
 
-type CreateEventInput = Omit<Event, "id" | "attendeeCount" | "attendeeIds" | "createdAt" | "updatedAt">;
+type CreateEventInput = Omit<Event, "id" | "rsvpCount" | "rsvpBy" | "status" | "reported" | "savedBy" | "savedCount" | "createdAt" | "updatedAt">;
 
 export function useCreateEvent() {
   const queryClient = useQueryClient();

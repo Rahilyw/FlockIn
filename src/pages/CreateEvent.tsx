@@ -1,3 +1,4 @@
+import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -5,11 +6,12 @@ import { Timestamp } from "firebase/firestore";
 import {
   ArrowLeft,
   Calendar,
+  ImageIcon,
   MapPin,
   User,
   Tag,
-  Link2,
   AlignLeft,
+  X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -28,6 +30,7 @@ import {
   EVENT_CATEGORIES,
   type CreateEventFormValues,
 } from "@/lib/eventSchemas";
+import { uploadEventImage } from "@/lib/storage";
 import { toast } from "@/components/ui/sonner";
 
 // ── Category metadata ─────────────────────────────────────────────────────────
@@ -48,14 +51,14 @@ const CATEGORY_EMOJI: Record<string, string> = {
 
 interface PreviewProps {
   title: string;
-  posterUrl: string;
+  imageSrc: string;
   date: string;
   location: string;
   category: string;
-  organizerName: string;
+  creatorName: string;
 }
 
-function EventPreview({ title, posterUrl, date, location, category, organizerName }: PreviewProps) {
+function EventPreview({ title, imageSrc, date, location, category, creatorName }: PreviewProps) {
   const formattedDate = date
     ? new Date(date).toLocaleDateString("en-US", {
         weekday: "short",
@@ -68,27 +71,21 @@ function EventPreview({ title, posterUrl, date, location, category, organizerNam
 
   return (
     <div className="sticky top-24 space-y-3">
-      {/* Portrait poster card */}
       <div className="relative w-full aspect-[3/4] rounded-3xl overflow-hidden shadow-2xl">
-        {/* Background */}
         <div className="absolute inset-0">
-          {posterUrl ? (
+          {imageSrc ? (
             <img
-              src={posterUrl}
+              src={imageSrc}
               alt=""
               className="w-full h-full object-cover"
-              onError={(e) => {
-                (e.target as HTMLImageElement).style.display = "none";
-              }}
+              onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
             />
           ) : (
             <div className="w-full h-full bg-gradient-to-br from-violet-600 via-purple-700 to-indigo-900" />
           )}
-          {/* Scrim */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-black/10" />
         </div>
 
-        {/* Top-left: category badge */}
         <div className="absolute top-5 left-5">
           {category ? (
             <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/15 backdrop-blur-md border border-white/20 text-white text-xs font-semibold">
@@ -102,7 +99,6 @@ function EventPreview({ title, posterUrl, date, location, category, organizerNam
           )}
         </div>
 
-        {/* Top-right: public badge */}
         <div className="absolute top-5 right-5">
           <span className="flex items-center gap-1.5 bg-white/15 backdrop-blur-md text-white text-xs font-medium px-3 py-1.5 rounded-full border border-white/20">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
@@ -110,13 +106,12 @@ function EventPreview({ title, posterUrl, date, location, category, organizerNam
           </span>
         </div>
 
-        {/* Bottom: event info */}
         <div className="absolute bottom-0 inset-x-0 p-6 text-white">
           <h2 className="text-2xl font-bold leading-tight mb-2 drop-shadow-sm">
             {title || <span className="text-white/30 font-normal">Event name</span>}
           </h2>
-          {organizerName && (
-            <p className="text-white/60 text-xs mb-3">by {organizerName}</p>
+          {creatorName && (
+            <p className="text-white/60 text-xs mb-3">by {creatorName}</p>
           )}
           <div className="space-y-1.5">
             {formattedDate && (
@@ -153,6 +148,89 @@ function FieldRow({ icon, children }: { icon: React.ReactNode; children: React.R
   );
 }
 
+// ── Image upload zone ─────────────────────────────────────────────────────────
+
+interface ImageUploadZoneProps {
+  previewSrc: string;
+  error: string | null;
+  onFile: (file: File) => void;
+  onClear: () => void;
+}
+
+function ImageUploadZone({ previewSrc, error, onFile, onClear }: ImageUploadZoneProps) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [isDragOver, setIsDragOver] = useState(false);
+
+  const handleFile = (file: File) => {
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please select an image file.");
+      return;
+    }
+    onFile(file);
+  };
+
+  return (
+    <div
+      className={`relative border-2 border-dashed rounded-2xl transition-colors cursor-pointer ${
+        isDragOver
+          ? "border-primary bg-primary/5"
+          : "border-border hover:border-primary/40 hover:bg-muted/30"
+      }`}
+      onClick={() => !previewSrc && inputRef.current?.click()}
+      onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }}
+      onDragLeave={() => setIsDragOver(false)}
+      onDrop={(e) => {
+        e.preventDefault();
+        setIsDragOver(false);
+        const f = e.dataTransfer.files[0];
+        if (f) handleFile(f);
+      }}
+    >
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f); }}
+      />
+
+      {previewSrc ? (
+        <div className="relative">
+          <img
+            src={previewSrc}
+            alt="Poster preview"
+            className="w-full h-48 object-cover rounded-2xl"
+          />
+          <div className="absolute inset-0 bg-black/20 rounded-2xl" />
+          <button
+            type="button"
+            className="absolute top-3 right-3 w-7 h-7 bg-black/60 hover:bg-black/80 rounded-full flex items-center justify-center text-white transition-colors"
+            onClick={(e) => { e.stopPropagation(); onClear(); }}
+            aria-label="Remove image"
+          >
+            <X className="h-3.5 w-3.5" />
+          </button>
+          <button
+            type="button"
+            className="absolute bottom-3 right-3 px-3 py-1 bg-black/60 hover:bg-black/80 rounded-full text-white text-xs font-medium transition-colors"
+            onClick={(e) => { e.stopPropagation(); inputRef.current?.click(); }}
+          >
+            Change
+          </button>
+        </div>
+      ) : (
+        <div className="flex flex-col items-center gap-2 py-8 px-4 text-muted-foreground">
+          <ImageIcon className="h-8 w-8 opacity-40" />
+          <span className="text-sm font-medium">Click to upload poster image</span>
+          <span className="text-xs opacity-60">PNG, JPG, WEBP · max 5 MB</span>
+        </div>
+      )}
+
+      {error && <p className="text-xs text-destructive px-4 pb-3">{error}</p>}
+    </div>
+  );
+}
+
 // ── Page ─────────────────────────────────────────────────────────────────────
 
 export default function CreateEvent() {
@@ -160,24 +238,60 @@ export default function CreateEvent() {
   const { user, profile } = useAuth();
   const { mutateAsync, isPending } = useCreateEvent();
 
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [previewSrc, setPreviewSrc] = useState("");
+  const [imageError, setImageError] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+
   const form = useForm<CreateEventFormValues>({
     resolver: zodResolver(createEventSchema),
     defaultValues: {
       title: "",
       description: "",
       date: "",
+      endTime: "",
       location: "",
       category: undefined,
-      organizerName: profile?.displayName ?? user?.displayName ?? "",
-      posterUrl: "",
+      creatorName: profile?.displayName ?? user?.displayName ?? "",
       tags: "",
     },
   });
 
   const watched = form.watch();
 
+  const handleImageFile = (file: File) => {
+    if (file.size > 5 * 1024 * 1024) {
+      setImageError("Image must be under 5 MB.");
+      return;
+    }
+    setImageError(null);
+    setImageFile(file);
+    const prev = URL.createObjectURL(file);
+    setPreviewSrc((old) => { if (old) URL.revokeObjectURL(old); return prev; });
+  };
+
+  const clearImage = () => {
+    if (previewSrc) URL.revokeObjectURL(previewSrc);
+    setImageFile(null);
+    setPreviewSrc("");
+    setImageError(null);
+  };
+
   const onSubmit = async (values: CreateEventFormValues) => {
     if (!user) { navigate("/login"); return; }
+
+    let imagePath: string | null = null;
+    if (imageFile) {
+      setIsUploading(true);
+      try {
+        imagePath = await uploadEventImage(user.uid, imageFile);
+      } catch {
+        toast.error("Image upload failed. Please try again.");
+        setIsUploading(false);
+        return;
+      }
+      setIsUploading(false);
+    }
 
     const tags = values.tags
       ? values.tags.split(",").map((t) => t.trim()).filter(Boolean)
@@ -188,11 +302,13 @@ export default function CreateEvent() {
         title: values.title,
         description: values.description,
         date: Timestamp.fromDate(new Date(values.date)),
+        endTime: Timestamp.fromDate(new Date(values.endTime)),
         location: values.location,
         category: values.category,
-        organizerId: user.uid,
-        organizerName: values.organizerName,
-        posterUrl: values.posterUrl?.trim() || null,
+        creatorId: user.uid,
+        creatorName: values.creatorName,
+        creatorPhoto: user.photoURL ?? "",
+        imagePath,
         tags,
       });
       toast.success("Event posted!");
@@ -201,6 +317,8 @@ export default function CreateEvent() {
       toast.error("Failed to post event. Please try again.");
     }
   };
+
+  const busy = isPending || isUploading;
 
   return (
     <div className="min-h-screen bg-background">
@@ -216,9 +334,9 @@ export default function CreateEvent() {
           <Button
             onClick={form.handleSubmit(onSubmit)}
             className="bg-gradient-primary hover:opacity-90 px-8 rounded-full"
-            disabled={isPending}
+            disabled={busy}
           >
-            {isPending ? "Posting…" : "Publish Event"}
+            {isUploading ? "Uploading…" : isPending ? "Posting…" : "Publish Event"}
           </Button>
         </div>
 
@@ -275,6 +393,14 @@ export default function CreateEvent() {
                   )}
                 />
 
+                {/* Image upload */}
+                <ImageUploadZone
+                  previewSrc={previewSrc}
+                  error={imageError}
+                  onFile={handleImageFile}
+                  onClear={clearImage}
+                />
+
                 {/* Grouped icon-row card */}
                 <div className="border border-border rounded-2xl overflow-hidden divide-y divide-border bg-card">
 
@@ -282,6 +408,26 @@ export default function CreateEvent() {
                   <FormField
                     control={form.control}
                     name="date"
+                    render={({ field }) => (
+                      <FormItem className="m-0">
+                        <FieldRow icon={<Calendar className="h-4 w-4" />}>
+                          <FormControl>
+                            <input
+                              type="datetime-local"
+                              {...field}
+                              className="w-full bg-transparent border-none outline-none text-sm text-foreground placeholder:text-muted-foreground"
+                            />
+                          </FormControl>
+                        </FieldRow>
+                        <FormMessage className="px-4 pb-2 text-xs" />
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* End time */}
+                  <FormField
+                    control={form.control}
+                    name="endTime"
                     render={({ field }) => (
                       <FormItem className="m-0">
                         <FieldRow icon={<Calendar className="h-4 w-4" />}>
@@ -321,7 +467,7 @@ export default function CreateEvent() {
                   {/* Hosted by */}
                   <FormField
                     control={form.control}
-                    name="organizerName"
+                    name="creatorName"
                     render={({ field }) => (
                       <FormItem className="m-0">
                         <FieldRow icon={<User className="h-4 w-4" />}>
@@ -358,27 +504,6 @@ export default function CreateEvent() {
                     )}
                   />
 
-                  {/* Poster URL */}
-                  <FormField
-                    control={form.control}
-                    name="posterUrl"
-                    render={({ field }) => (
-                      <FormItem className="m-0">
-                        <FieldRow icon={<Link2 className="h-4 w-4" />}>
-                          <FormControl>
-                            <input
-                              {...field}
-                              type="url"
-                              placeholder="Poster image URL (optional)"
-                              className="w-full bg-transparent border-none outline-none text-sm text-foreground placeholder:text-muted-foreground"
-                            />
-                          </FormControl>
-                        </FieldRow>
-                        <FormMessage className="px-4 pb-2 text-xs" />
-                      </FormItem>
-                    )}
-                  />
-
                   {/* Description */}
                   <FormField
                     control={form.control}
@@ -405,9 +530,9 @@ export default function CreateEvent() {
                   <Button
                     type="submit"
                     className="w-full bg-gradient-primary hover:opacity-90 rounded-full"
-                    disabled={isPending}
+                    disabled={busy}
                   >
-                    {isPending ? "Posting…" : "Publish Event"}
+                    {isUploading ? "Uploading…" : isPending ? "Posting…" : "Publish Event"}
                   </Button>
                 </div>
               </div>
@@ -416,11 +541,11 @@ export default function CreateEvent() {
               <div className="hidden lg:block">
                 <EventPreview
                   title={watched.title ?? ""}
-                  posterUrl={watched.posterUrl ?? ""}
+                  imageSrc={previewSrc}
                   date={watched.date ?? ""}
                   location={watched.location ?? ""}
                   category={watched.category ?? ""}
-                  organizerName={watched.organizerName ?? ""}
+                  creatorName={watched.creatorName ?? ""}
                 />
               </div>
 
