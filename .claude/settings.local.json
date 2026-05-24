@@ -23,7 +23,8 @@
       "Bash(powershell.exe -Command \"Get-Content 'C:\\\\Users\\\\rahil\\\\.claude\\\\skills\\\\impeccable\\\\reference\\\\product.md'\")",
       "Bash(ls firebase.json)",
       "Bash(ls .firebaserc)",
-      "Bash(find . -name \"*.rules\")"
+      "Bash(find . -name \"*.rules\")",
+      "Bash(grep -E \"\\\\.ts$|\\\\.tsx$\")"
     ]
   }
 }

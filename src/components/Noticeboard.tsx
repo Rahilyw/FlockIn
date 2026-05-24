@@ -1,5 +1,12 @@
-import { useState } from "react";
+import { useState, Component } from "react";
+import type { ReactNode } from "react";
 import PosterCard from "./PosterCard";
+
+class PosterErrorBoundary extends Component<{ children: ReactNode }, { crashed: boolean }> {
+  state = { crashed: false };
+  static getDerivedStateFromError() { return { crashed: true }; }
+  render() { return this.state.crashed ? null : this.props.children; }
+}
 import { useLocation, useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "@/components/ui/sonner";
@@ -10,7 +17,7 @@ import { useEvents } from "@/hooks/useEvents";
 import { queryKeys } from "@/hooks/queryKeys";
 import type { Event, EventCategory } from "@/types/firebaseTypes";
 
-export type FilterMode = "happening-now" | "today" | "this-week" | "next-week" | `tag:${string}` | `category:${string}` | null;
+export type FilterMode = "happening-now" | "today" | "this-week" | "next-week" | `tag:${string}` | `category:${string}`;
 
 // ── Visual presets ────────────────────────────────────────────────────────────
 
@@ -130,10 +137,10 @@ function SkeletonCard({ index }: { index: number }) {
 // ── Noticeboard ───────────────────────────────────────────────────────────────
 
 interface NoticeboardProps {
-  filter?: FilterMode;
+  filters?: Set<string>;
 }
 
-const Noticeboard = ({ filter = null }: NoticeboardProps) => {
+const Noticeboard = ({ filters = new Set() }: NoticeboardProps) => {
   const navigate = useNavigate();
   const location = useLocation();
   const queryClient = useQueryClient();
@@ -228,8 +235,10 @@ const Noticeboard = ({ filter = null }: NoticeboardProps) => {
           const action = ACTION_BY_CATEGORY[event.category] ?? ACTION_BY_CATEGORY.Other;
           const isSaved = savedEvents.includes(event.id);
           const isAttending = profile?.joinedEvents?.includes(event.id) ?? false;
-          const matches = matchesFilter(event, filter);
-          const filterActive = filter !== null;
+          const filterActive = filters.size > 0;
+          const matches = filterActive
+            ? [...filters].every((f) => matchesFilter(event, f as FilterMode))
+            : true;
 
           return (
             <div
@@ -246,27 +255,30 @@ const Noticeboard = ({ filter = null }: NoticeboardProps) => {
                   : "scale(1)",
               }}
             >
-              <PosterCard
-                eventId={event.id}
-                title={event.title}
-                date={event.date}
-                location={event.location}
-                description={event.description}
-                imagePath={event.imagePath ?? event.posterUrl ?? null}
-                rotation={seededRotation(event.id)}
-                marginTop={MARGIN_TOPS[i % MARGIN_TOPS.length]}
-                actionLabel={action.label}
-                actionClassName={action.className}
-                onOpen={() => navigate(`/events/${event.id}`)}
-                isSaved={isSaved}
-                isAttending={isAttending}
-                isSavePending={savingEventId === event.id}
-                isAttendancePending={attendingEventId === event.id}
-                onToggleSave={() => handleToggleSave(event)}
-                onToggleAttendance={() => handleToggleAttendance(event)}
-                onReport={() => handleReport(event)}
-                {...attachment}
-              />
+              <PosterErrorBoundary key={event.id}>
+                <PosterCard
+                  eventId={event.id}
+                  title={event.title}
+                  date={event.date}
+                  endTime={event.endTime}
+                  location={event.location}
+                  description={event.description}
+                  imagePath={event.imagePath ?? event.posterUrl ?? null}
+                  rotation={seededRotation(event.id)}
+                  marginTop={MARGIN_TOPS[i % MARGIN_TOPS.length]}
+                  actionLabel={action.label}
+                  actionClassName={action.className}
+                  onOpen={() => navigate(`/events/${event.id}`)}
+                  isSaved={isSaved}
+                  isAttending={isAttending}
+                  isSavePending={savingEventId === event.id}
+                  isAttendancePending={attendingEventId === event.id}
+                  onToggleSave={() => handleToggleSave(event)}
+                  onToggleAttendance={() => handleToggleAttendance(event)}
+                  onReport={() => handleReport(event)}
+                  {...attachment}
+                />
+              </PosterErrorBoundary>
             </div>
           );
         })}

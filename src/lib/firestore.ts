@@ -136,7 +136,13 @@ export async function getEvents(options: GetEventsOptions = {}): Promise<Event[]
 
   if (options.activeOnly) {
     const now = new Date();
-    events = events.filter((e) => !e.endTime || e.endTime.toDate() >= now);
+    events = events.filter((e) => {
+      if (!e.endTime) return true;
+      const et = e.endTime as { toDate?: () => Date } | string;
+      if (typeof et === "string") return true;
+      if (typeof et.toDate !== "function") return true;
+      return et.toDate() >= now;
+    });
   }
 
   // Sort by date ascending client-side

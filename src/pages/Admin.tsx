@@ -1,14 +1,18 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Calendar, Check, Clock, Tag, User, X } from "lucide-react";
+import { Navigate } from "react-router-dom";
 import Header from "@/components/Header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "@/components/ui/sonner";
+import { useAuth } from "@/contexts/AuthContext";
 import { approveEvent, getPendingEvents, rejectEvent } from "@/lib/firestore";
 import type { Event } from "@/types/firebaseTypes";
 import type { Timestamp } from "firebase/firestore";
+
+const ADMIN_UID = import.meta.env.VITE_ADMIN_UID as string | undefined;
 
 const pendingEventsKey = ["admin", "pending-events"] as const;
 
@@ -148,7 +152,8 @@ function useEventStatusMutation(status: "approved" | "rejected") {
   });
 }
 
-export default function Admin() {
+// Inner component — all data hooks live here, runs only when auth is confirmed.
+function AdminContent() {
   const { data: pendingEvents = [], isLoading, isError } = useQuery({
     queryKey: pendingEventsKey,
     queryFn: getPendingEvents,
@@ -222,4 +227,34 @@ export default function Admin() {
       </main>
     </div>
   );
+}
+
+export default function Admin() {
+  const { user, loading: authLoading } = useAuth();
+
+  if (authLoading) return null;
+
+  // No VITE_ADMIN_UID set yet — show config helper to the signed-in user.
+  if (user && !ADMIN_UID) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-8">
+        <div className="max-w-md text-center space-y-3">
+          <p className="font-bold text-lg">Admin not configured</p>
+          <p className="text-muted-foreground text-sm">
+            Add this to <code className="bg-muted px-1 rounded">.env.local</code> then restart the dev server:
+          </p>
+          <code className="block bg-muted rounded-xl px-4 py-3 text-sm font-mono select-all break-all">
+            VITE_ADMIN_UID={user.uid}
+          </code>
+        </div>
+      </div>
+    );
+  }
+
+  // Not logged in, or UID doesn't match — redirect away.
+  if (!user || user.uid !== ADMIN_UID) {
+    return <Navigate to="/" replace />;
+  }
+
+  return <AdminContent />;
 }

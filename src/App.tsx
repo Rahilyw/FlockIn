@@ -2,12 +2,11 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import BottomTabBar from "@/components/BottomTabBar";
 import Index from "./pages/Index";
-import Posters from "./pages/Posters";
 import EventList from "./pages/EventList";
 import EventDetail from "./pages/EventDetail";
 import ClubList from "./pages/ClubList";
@@ -35,7 +34,7 @@ const App = () => (
         <AuthProvider>
           <Routes>
             <Route path="/" element={<Index />} />
-            <Route path="/posters" element={<Posters />} />
+            <Route path="/posters" element={<Navigate to="/" replace />} />
             <Route path="/events" element={<EventList />} />
             <Route path="/events/:id" element={<EventDetail />} />
             <Route path="/clubs" element={<ClubList />} />

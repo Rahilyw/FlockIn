@@ -29,7 +29,8 @@ const GRADIENT_PALETTE = [
 interface PosterCardProps {
   eventId: string;
   title: string;
-  date: Timestamp;
+  date: Timestamp | string | null | undefined;
+  endTime: Timestamp | string | null | undefined;
   location: string;
   description: string;
   imagePath: string | null;
@@ -52,14 +53,22 @@ interface PosterCardProps {
   onReport?: () => void;
 }
 
-function formatDate(ts: Timestamp): string {
+function formatDate(ts: Timestamp | string | null | undefined): string {
+  if (!ts) return "Date TBD";
+  if (typeof ts === "string") return ts;
+  if (typeof ts.toDate !== "function") return "Date TBD";
   return ts.toDate().toLocaleDateString("en-CA", {
     weekday: "short",
     month: "short",
     day: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
   });
+}
+
+function formatTime(ts: Timestamp | string | null | undefined): string | null {
+  if (!ts) return null;
+  if (typeof ts === "string") return ts; // legacy string storage e.g. "9:00 PM"
+  if (typeof ts.toDate !== "function") return null;
+  return ts.toDate().toLocaleTimeString("en-CA", { hour: "numeric", minute: "2-digit" });
 }
 
 function isPdfUrl(url: string): boolean {
@@ -70,6 +79,7 @@ const PosterCard = ({
   eventId,
   title,
   date,
+  endTime,
   location,
   description,
   imagePath,
@@ -199,7 +209,15 @@ const PosterCard = ({
             <h3 className="font-bold text-xl mb-2 leading-tight">{title}</h3>
             <div className="flex items-center gap-2 mb-1 text-white/80">
               <span className="material-symbols-outlined text-[18px]">calendar_today</span>
-              <span className="text-xs font-semibold tracking-wide">{formatDate(date)}</span>
+              <span className="text-xs font-semibold tracking-wide">
+                {(() => {
+                  const startT = formatTime(date);
+                  const endT = formatTime(endTime);
+                  return endT
+                    ? `${formatDate(date)} · ${startT} → ${endT}`
+                    : `${formatDate(date)}${startT ? ` · ${startT}` : ""}`;
+                })()}
+              </span>
             </div>
             <div className="flex items-center gap-2 mb-4 text-white/80">
               <span className="material-symbols-outlined text-[18px]">location_on</span>

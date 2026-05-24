@@ -10,9 +10,10 @@ import { EVENT_CATEGORIES } from "@/lib/eventSchemas";
 // ── Static pinned time-filter pills ───────────────────────────────────────────
 
 const PINNED_TAGS: { label: string; filter: FilterMode; bg: string; color: string }[] = [
-  { label: "#today",      filter: "today",      bg: "oklch(93% 0.06 30)",  color: "oklch(36% 0.15 30)"  },
-  { label: "#this-week",  filter: "this-week",  bg: "oklch(94% 0.05 55)",  color: "oklch(36% 0.13 55)"  },
-  { label: "#next-week",  filter: "next-week",  bg: "oklch(95% 0.04 120)", color: "oklch(34% 0.10 140)" },
+  { label: "#happening-now", filter: "happening-now", bg: "oklch(91% 0.08 15)",  color: "oklch(34% 0.18 15)"  },
+  { label: "#today",         filter: "today",         bg: "oklch(93% 0.06 30)",  color: "oklch(36% 0.15 30)"  },
+  { label: "#this-week",     filter: "this-week",     bg: "oklch(94% 0.05 55)",  color: "oklch(36% 0.13 55)"  },
+  { label: "#next-week",     filter: "next-week",     bg: "oklch(95% 0.04 120)", color: "oklch(34% 0.10 140)" },
 ];
 
 // ── Deterministic color palette for dynamic tags ──────────────────────────────
@@ -92,12 +93,19 @@ const NAV_ITEMS: {
 const Index = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [selectedFilter, setSelectedFilter] = useState<FilterMode>(null);
+  const [activeFilters, setActiveFilters] = useState<Set<string>>(new Set());
   const [tagSearch, setTagSearch] = useState("");
   const { data: topTags = [] } = useTopTags(20);
 
   const isActive = (to: string) =>
     to === "/" ? location.pathname === "/" : location.pathname.startsWith(to);
+
+  const toggleFilter = (f: string) =>
+    setActiveFilters((prev) => {
+      const next = new Set(prev);
+      next.has(f) ? next.delete(f) : next.add(f);
+      return next;
+    });
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
@@ -166,17 +174,17 @@ const Index = () => {
         <main className="flex-1 min-w-0 px-6 py-6">
           {/* ── Filter pill bar ── */}
           <div className="flex flex-wrap gap-2.5 mb-8 items-center">
-              {/* Clear — slides in when anything is active */}
-              {selectedFilter && (
+              {/* Clear — slides in when any filter is active */}
+              {activeFilters.size > 0 && (
                 <button
-                  onClick={() => setSelectedFilter(null)}
+                  onClick={() => setActiveFilters(new Set())}
                   className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold transition-all duration-200 hover:-translate-y-px active:scale-95"
                   style={{
                     background: "oklch(44% 0.14 25)",
                     color: "oklch(97% 0.01 25)",
                     boxShadow: "0 2px 8px oklch(44% 0.14 25 / 0.30)",
                   }}
-                  aria-label="Clear filter"
+                  aria-label="Clear all filters"
                 >
                   ✕ clear
                 </button>
@@ -184,14 +192,14 @@ const Index = () => {
 
               {/* Pinned time filters */}
               {PINNED_TAGS.map((tag) => {
-                const isActive = selectedFilter === tag.filter;
+                const on = activeFilters.has(tag.filter as string);
                 return (
                   <button
                     key={tag.label}
-                    aria-pressed={isActive}
-                    onClick={() => setSelectedFilter((c) => c === tag.filter ? null : tag.filter)}
+                    aria-pressed={on}
+                    onClick={() => toggleFilter(tag.filter as string)}
                     className="px-4 py-1.5 rounded-full text-sm font-semibold cursor-pointer transition-all duration-200 hover:-translate-y-px active:scale-95"
-                    style={isActive ? {
+                    style={on ? {
                       background: "oklch(44% 0.14 25)",
                       color: "oklch(97% 0.01 25)",
                       boxShadow: "0 3px 10px oklch(44% 0.14 25 / 0.35)",
@@ -212,16 +220,16 @@ const Index = () => {
 
               {/* Category filters */}
               {EVENT_CATEGORIES.map((cat) => {
-                const filter: FilterMode = `category:${cat}`;
-                const isActive = selectedFilter === filter;
+                const filter = `category:${cat}`;
+                const on = activeFilters.has(filter);
                 const { bg, color } = TAG_COLOR_PALETTE[hashTag(cat) % TAG_COLOR_PALETTE.length];
                 return (
                   <button
                     key={cat}
-                    aria-pressed={isActive}
-                    onClick={() => setSelectedFilter((c) => c === filter ? null : filter)}
+                    aria-pressed={on}
+                    onClick={() => toggleFilter(filter)}
                     className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-sm font-semibold cursor-pointer transition-all duration-200 hover:-translate-y-px active:scale-95"
-                    style={isActive ? {
+                    style={on ? {
                       background: "oklch(44% 0.14 25)",
                       color: "oklch(97% 0.01 25)",
                       boxShadow: "0 3px 10px oklch(44% 0.14 25 / 0.35)",
@@ -240,18 +248,18 @@ const Index = () => {
                 );
               })}
 
-              {/* Trending tags from Firestore */}
+              {/* Trending tags from Firestore — with count badge */}
               {topTags.slice(0, 6).map((tag) => {
-                const filter: FilterMode = `tag:${tag.name}`;
-                const isActive = selectedFilter === filter;
+                const filter = `tag:${tag.name}`;
+                const on = activeFilters.has(filter);
                 const { bg, color } = TAG_COLOR_PALETTE[hashTag(tag.name) % TAG_COLOR_PALETTE.length];
                 return (
                   <button
                     key={tag.name}
-                    aria-pressed={isActive}
-                    onClick={() => setSelectedFilter((c) => c === filter ? null : filter)}
-                    className="px-4 py-1.5 rounded-full text-sm font-semibold cursor-pointer transition-all duration-200 hover:-translate-y-px active:scale-95"
-                    style={isActive ? {
+                    aria-pressed={on}
+                    onClick={() => toggleFilter(filter)}
+                    className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-semibold cursor-pointer transition-all duration-200 hover:-translate-y-px active:scale-95"
+                    style={on ? {
                       background: "oklch(44% 0.14 25)",
                       color: "oklch(97% 0.01 25)",
                       boxShadow: "0 3px 10px oklch(44% 0.14 25 / 0.35)",
@@ -263,6 +271,16 @@ const Index = () => {
                     }}
                   >
                     #{tag.name}
+                    {tag.count > 0 && (
+                      <span
+                        className="text-[10px] font-black px-1.5 py-px rounded-full leading-none"
+                        style={on
+                          ? { background: "rgba(255,255,255,0.25)", color: "oklch(97% 0.01 25)" }
+                          : { background: "oklch(0% 0 0 / 0.10)", color }}
+                      >
+                        {tag.count}
+                      </span>
+                    )}
                   </button>
                 );
               })}
@@ -300,20 +318,24 @@ const Index = () => {
                     {topTags
                       .filter((t) => t.name.toLowerCase().includes(tagSearch.toLowerCase()))
                       .map((tag) => {
-                        const filter: FilterMode = `tag:${tag.name}`;
-                        const isActive = selectedFilter === filter;
+                        const filter = `tag:${tag.name}`;
+                        const on = activeFilters.has(filter);
                         const { bg, color } = TAG_COLOR_PALETTE[hashTag(tag.name) % TAG_COLOR_PALETTE.length];
                         return (
                           <button
                             key={tag.name}
-                            onClick={() => setSelectedFilter((c) => c === filter ? null : filter)}
-                            className="px-3 py-1 rounded-full text-xs font-semibold transition-all active:scale-95"
-                            style={isActive ? {
+                            onClick={() => toggleFilter(filter)}
+                            className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold transition-all active:scale-95"
+                            style={on ? {
                               background: "oklch(44% 0.14 25)",
                               color: "oklch(97% 0.01 25)",
                             } : { background: bg, color }}
                           >
-                            #{tag.name}{isActive ? " ✓" : ""}
+                            #{tag.name}
+                            {on && <span className="opacity-70">✓</span>}
+                            {tag.count > 0 && (
+                              <span className="ml-0.5 opacity-60 text-[10px]">{tag.count}</span>
+                            )}
                           </button>
                         );
                       })}
@@ -325,7 +347,7 @@ const Index = () => {
               </Popover>
           </div>
 
-          <Noticeboard filter={selectedFilter} />
+          <Noticeboard filters={activeFilters} />
         </main>
       </div>
 

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import type { CSSProperties } from "react";
 import Header from "@/components/Header";
 import { EventCard } from "@/components/EventCard";
@@ -157,7 +157,11 @@ type TabId = typeof TABS[number]["id"];
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<TabId>("my-events");
+  const location = useLocation();
+  const initialTab = (location.state as { tab?: string } | null)?.tab;
+  const [activeTab, setActiveTab] = useState<TabId>(
+    initialTab === "saved" || initialTab === "going" ? initialTab : "my-events"
+  );
   const { user, profile } = useAuth();
   const { savedEvents, toggleEvent } = useBookmarks();
 
