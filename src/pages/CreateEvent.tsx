@@ -142,7 +142,10 @@ function EventPreview({ title, imageSrc, date, location, category, creatorName }
 function FieldRow({ icon, children }: { icon: React.ReactNode; children: React.ReactNode }) {
   return (
     <div className="flex items-start gap-3 px-4 py-3.5 group">
-      <span className="mt-0.5 text-muted-foreground/60 shrink-0 group-focus-within:text-primary transition-colors">
+      <span
+        className="mt-0.5 shrink-0 transition-colors"
+        style={{ color: "oklch(72% 0.06 25)" }}
+      >
         {icon}
       </span>
       <div className="flex-1 min-w-0">{children}</div>
@@ -173,11 +176,13 @@ function ImageUploadZone({ previewSrc, error, onFile, onClear }: ImageUploadZone
 
   return (
     <div
-      className={`relative border-2 border-dashed rounded-2xl transition-colors cursor-pointer ${
-        isDragOver
-          ? "border-primary bg-primary/5"
-          : "border-border hover:border-primary/40 hover:bg-muted/30"
-      }`}
+      className="relative border-2 border-dashed rounded-2xl transition-colors cursor-pointer"
+      style={isDragOver ? {
+        borderColor: "oklch(44% 0.14 25)",
+        background: "oklch(97% 0.03 25)",
+      } : {
+        borderColor: "oklch(86% 0.04 30)",
+      }}
       onClick={() => !previewSrc && inputRef.current?.click()}
       onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }}
       onDragLeave={() => setIsDragOver(false)}
@@ -221,10 +226,12 @@ function ImageUploadZone({ previewSrc, error, onFile, onClear }: ImageUploadZone
           </button>
         </div>
       ) : (
-        <div className="flex flex-col items-center gap-2 py-8 px-4 text-muted-foreground">
-          <ImageIcon className="h-8 w-8 opacity-40" />
-          <span className="text-sm font-medium">Click to upload poster image</span>
-          <span className="text-xs opacity-60">PNG, JPG, WEBP · max 5 MB</span>
+        <div className="flex flex-col items-center gap-2 py-8 px-4">
+          <div className="w-12 h-12 rounded-2xl flex items-center justify-center mb-1" style={{ background: "oklch(96% 0.03 25)" }}>
+            <ImageIcon className="h-5 w-5" style={{ color: "oklch(50% 0.14 25)" }} />
+          </div>
+          <span className="text-sm font-semibold" style={{ color: "oklch(38% 0.08 30)" }}>Add your poster image</span>
+          <span className="text-xs" style={{ color: "oklch(62% 0.05 30)" }}>PNG, JPG, WEBP · max 5 MB · optional</span>
         </div>
       )}
 
@@ -335,18 +342,30 @@ export default function CreateEvent() {
 
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 max-w-5xl">
         {/* Top bar */}
-        <div className="flex items-center justify-between mb-10">
+        <div className="flex items-center justify-between mb-8">
           <Button variant="ghost" className="-ml-2" onClick={() => navigate(-1)}>
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back
           </Button>
-          <Button
+          <button
+            type="button"
             onClick={form.handleSubmit(onSubmit)}
-            className="bg-gradient-primary hover:opacity-90 px-8 rounded-full"
             disabled={busy}
+            className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full text-sm font-bold transition-all hover:brightness-110 active:scale-95 disabled:opacity-60"
+            style={{ background: "oklch(44% 0.14 25)", color: "oklch(97% 0.01 25)", boxShadow: "0 4px 14px oklch(44% 0.14 25 / 0.35)" }}
           >
-            {isUploading ? "Uploading…" : isPending ? "Posting…" : "Publish Event"}
-          </Button>
+            {isUploading ? "Uploading…" : isPending ? "Posting…" : "Publish Event →"}
+          </button>
+        </div>
+
+        {/* Page intro */}
+        <div className="mb-8">
+          <p className="text-[10px] font-black tracking-[0.12em] uppercase mb-1" style={{ color: "oklch(44% 0.14 25)" }}>
+            Post to the Noticeboard
+          </p>
+          <p className="text-[13px]" style={{ color: "oklch(55% 0.06 30)" }}>
+            We'll do a quick review before it goes live on the board.
+          </p>
         </div>
 
         <Form {...form}>
@@ -401,11 +420,17 @@ export default function CreateEvent() {
                                 : withoutOld;
                               form.setValue("tags", updated, { shouldDirty: true });
                             }}
-                            className={`inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-medium transition-all border ${
-                              field.value === cat
-                                ? "bg-primary text-primary-foreground border-primary shadow-sm scale-105"
-                                : "bg-background border-border text-muted-foreground hover:border-primary/50 hover:text-foreground"
-                            }`}
+                            className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-semibold transition-all duration-150 select-none hover:-translate-y-px active:scale-95"
+                            style={field.value === cat ? {
+                              background: "oklch(44% 0.14 25)",
+                              color: "oklch(97% 0.01 25)",
+                              border: "1.5px solid oklch(44% 0.14 25)",
+                              boxShadow: "0 2px 10px oklch(44% 0.14 25 / 0.30)",
+                            } : {
+                              background: "oklch(99% 0.01 30)",
+                              color: "oklch(40% 0.08 30)",
+                              border: "1.5px solid oklch(86% 0.04 30 / 0.9)",
+                            }}
                           >
                             <span>{CATEGORY_EMOJI[cat]}</span>
                             {cat}
@@ -426,7 +451,10 @@ export default function CreateEvent() {
                 />
 
                 {/* Grouped icon-row card */}
-                <div className="border border-border rounded-2xl overflow-hidden divide-y divide-border bg-card">
+                <div
+                  className="rounded-2xl overflow-hidden divide-y backdrop-blur-sm"
+                  style={{ background: "oklch(99% 0.01 30 / 0.65)", border: "1px solid oklch(88% 0.04 30 / 0.5)", boxShadow: "0 1px 8px oklch(60% 0.04 30 / 0.08)", borderColor: "oklch(88% 0.04 30 / 0.5)" }}
+                >
 
                   {/* Date & time */}
                   <FormField
@@ -550,13 +578,14 @@ export default function CreateEvent() {
 
                 {/* Mobile publish */}
                 <div className="lg:hidden pt-2 pb-8">
-                  <Button
+                  <button
                     type="submit"
-                    className="w-full bg-gradient-primary hover:opacity-90 rounded-full"
                     disabled={busy}
+                    className="w-full py-3 rounded-full text-sm font-bold transition-all hover:brightness-110 active:scale-95 disabled:opacity-60"
+                    style={{ background: "oklch(44% 0.14 25)", color: "oklch(97% 0.01 25)", boxShadow: "0 4px 14px oklch(44% 0.14 25 / 0.35)" }}
                   >
-                    {isUploading ? "Uploading…" : isPending ? "Posting…" : "Publish Event"}
-                  </Button>
+                    {isUploading ? "Uploading…" : isPending ? "Posting…" : "Publish Event →"}
+                  </button>
                 </div>
               </div>
 

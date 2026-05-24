@@ -69,7 +69,12 @@ const CATEGORY_STYLE: Record<string, { bg: string; color: string }> = {
 function InfoRow({ icon, children }: { icon: string; children: React.ReactNode }) {
   return (
     <div className="flex items-start gap-3">
-      <span className="material-symbols-outlined text-[20px] text-primary/70 mt-0.5 shrink-0">{icon}</span>
+      <span
+        className="material-symbols-outlined text-[20px] mt-0.5 shrink-0"
+        style={{ color: "oklch(50% 0.14 25)" }}
+      >
+        {icon}
+      </span>
       <div className="text-[14px] text-foreground leading-snug">{children}</div>
     </div>
   );
@@ -78,11 +83,11 @@ function InfoRow({ icon, children }: { icon: string; children: React.ReactNode }
 function CreatorAvatar({ photo, name }: { photo?: string; name: string }) {
   const initials = name.split(" ").map(w => w[0]).slice(0, 2).join("").toUpperCase() || "?";
   return photo ? (
-    <img src={photo} alt={name} className="w-9 h-9 rounded-full object-cover ring-2 ring-white/60" />
+    <img src={photo} alt={name} className="w-10 h-10 rounded-full object-cover ring-2 ring-white/60" />
   ) : (
     <div
-      className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold text-white ring-2 ring-white/60"
-      style={{ background: "hsl(var(--primary))" }}
+      className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold ring-2 ring-white/60"
+      style={{ background: "oklch(44% 0.14 25)", color: "oklch(97% 0.01 25)" }}
     >
       {initials}
     </div>
@@ -318,7 +323,7 @@ export default function EventDetail() {
             </div>
 
             {/* Date / time / location */}
-            <div className="flex flex-col gap-3 py-4 px-4 rounded-2xl" style={{ background: "rgba(255,255,255,0.55)", border: "1px solid oklch(88% 0.04 30 / 0.5)" }}>
+            <div className="flex flex-col gap-3 py-4 px-4 rounded-2xl" style={{ background: "oklch(99% 0.02 25 / 0.65)", border: "1px solid oklch(88% 0.05 25 / 0.45)", boxShadow: "0 1px 8px oklch(60% 0.05 25 / 0.08)" }}>
               <InfoRow icon="calendar_today">
                 <span className="font-semibold">{date}</span>
               </InfoRow>
@@ -339,8 +344,8 @@ export default function EventDetail() {
                 name={event.creatorName || "Organiser"}
               />
               <div>
-                <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Organised by</p>
-                <p className="text-sm font-semibold text-foreground">{event.creatorName || "Campus Organiser"}</p>
+                <p className="text-[10px] font-black tracking-[0.12em] uppercase" style={{ color: "oklch(60% 0.08 25)" }}>Organised by</p>
+                <p className="text-sm font-bold text-foreground mt-0.5">{event.creatorName || "Campus Organiser"}</p>
               </div>
             </div>
 
@@ -349,7 +354,7 @@ export default function EventDetail() {
 
             {/* Description */}
             <div>
-              <p className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-2">About this event</p>
+              <p className="text-[10px] font-black tracking-[0.12em] uppercase mb-3" style={{ color: "oklch(50% 0.14 25)" }}>About this event</p>
               <p className="text-foreground leading-relaxed whitespace-pre-line text-[15px]">{event.description}</p>
             </div>
 
@@ -359,8 +364,8 @@ export default function EventDetail() {
                 {event.tags.map((tag) => (
                   <span
                     key={tag}
-                    className="px-3 py-1 rounded-full text-xs font-semibold"
-                    style={{ background: "oklch(94% 0.02 260)", color: "oklch(40% 0.08 260)", border: "1px solid oklch(84% 0.05 260 / 0.6)" }}
+                    className="px-3 py-1 rounded-full text-xs font-bold"
+                    style={{ background: "oklch(96% 0.03 25)", color: "oklch(44% 0.12 25)", border: "1.5px solid oklch(82% 0.07 25 / 0.7)" }}
                   >
                     #{tag}
                   </span>
@@ -436,16 +441,16 @@ function ActionButtons({
         disabled={joining}
         className="flex-1 py-3 rounded-2xl text-sm font-bold transition-all duration-200 hover:brightness-110 active:scale-95 disabled:opacity-60"
         style={isAttending ? {
-          background: "oklch(94% 0.05 20)",
-          color: "oklch(32% 0.13 20)",
-          border: "1.5px solid oklch(66% 0.16 20 / 0.5)",
+          background: "oklch(96% 0.03 25)",
+          color: "oklch(44% 0.14 25)",
+          border: "1.5px solid oklch(44% 0.14 25 / 0.4)",
         } : {
-          background: "hsl(var(--primary))",
-          color: "white",
-          boxShadow: "0 4px 16px oklch(55% 0.20 196 / 0.35)",
+          background: "oklch(44% 0.14 25)",
+          color: "oklch(97% 0.01 25)",
+          boxShadow: "0 4px 16px oklch(44% 0.14 25 / 0.35)",
         }}
       >
-        {joining ? "…" : isAttending ? "✓ You're going" : "I'm going!"}
+        {joining ? "…" : isAttending ? "✓ You're going" : "I'm going! 🎉"}
       </button>
 
       {/* Bookmark */}
