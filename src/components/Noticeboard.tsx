@@ -223,17 +223,28 @@ const Noticeboard = ({ filter = null }: NoticeboardProps) => {
           </div>
         )}
 
-        {events?.filter((event) => matchesFilter(event, filter)).map((event, i) => {
+        {events?.map((event, i) => {
           const attachment = ATTACHMENTS[i % ATTACHMENTS.length];
           const action = ACTION_BY_CATEGORY[event.category] ?? ACTION_BY_CATEGORY.Other;
           const isSaved = savedEvents.includes(event.id);
           const isAttending = profile?.joinedEvents?.includes(event.id) ?? false;
+          const matches = matchesFilter(event, filter);
+          const filterActive = filter !== null;
 
           return (
             <div
               key={event.id}
               className="animate-card-enter"
-              style={{ animationDelay: `${Math.min(i * 55, 900)}ms` }}
+              style={{
+                animationDelay: `${Math.min(i * 55, 900)}ms`,
+                transition: "opacity 320ms cubic-bezier(0.25,1,0.5,1), transform 320ms cubic-bezier(0.25,1,0.5,1)",
+                opacity: filterActive && !matches ? 0.18 : 1,
+                transform: filterActive && matches
+                  ? "scale(1.02) translateY(-3px)"
+                  : filterActive && !matches
+                  ? "scale(0.95)"
+                  : "scale(1)",
+              }}
             >
               <PosterCard
                 eventId={event.id}

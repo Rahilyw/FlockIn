@@ -444,7 +444,21 @@ export default function EditEvent() {
                           <button
                             key={cat}
                             type="button"
-                            onClick={() => field.onChange(field.value === cat ? undefined : cat)}
+                            onClick={() => {
+                              const prev = field.value;
+                              const next = prev === cat ? undefined : cat;
+                              field.onChange(next);
+                              const currentTags: string[] = form.getValues("tags") ?? [];
+                              const withoutOld = prev
+                                ? currentTags.filter(t => t !== prev.toLowerCase())
+                                : currentTags;
+                              const updated = next
+                                ? withoutOld.includes(next.toLowerCase())
+                                  ? withoutOld
+                                  : [...withoutOld, next.toLowerCase()]
+                                : withoutOld;
+                              form.setValue("tags", updated, { shouldDirty: true });
+                            }}
                             className={`inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-medium transition-all border ${
                               field.value === cat
                                 ? "bg-primary text-primary-foreground border-primary shadow-sm scale-105"

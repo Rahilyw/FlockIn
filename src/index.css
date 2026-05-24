@@ -115,6 +115,7 @@
     min-height: 100vh;
     position: relative;
     isolation: isolate;
+    overflow-x: hidden;
   }
 }
 
@@ -275,6 +276,14 @@ body::before {
   gap: 40px;
   padding: 40px;
   align-items: start;
+}
+
+@media (max-width: 640px) {
+  .masonry-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+    padding: 16px;
+  }
 }
 
 /* ── Material Symbols ── */

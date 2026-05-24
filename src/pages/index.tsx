@@ -54,7 +54,7 @@ const NAV_ITEMS: {
 }[] = [
   {
     icon: "dynamic_feed",
-    label: "Your Feed",
+    label: "Noticeboard",
     to: "/",
     active:   { background: "oklch(84% 0.15 196 / 0.30)", border: "1.5px solid oklch(64% 0.19 196 / 0.52)", color: "oklch(23% 0.13 196)" },
     inactive: { background: "oklch(91% 0.07 196 / 0.20)", border: "1.5px solid oklch(84% 0.10 196 / 0.32)", color: "oklch(40% 0.11 196)" },
@@ -110,8 +110,9 @@ const Index = () => {
           <div className="sticky top-[4.5rem] p-3">
             {/* The floating card — rounded on all sides, detached from edges */}
             <aside
-              className="flex flex-col rounded-[28px] bg-white/72 backdrop-blur-xl"
+              className="flex flex-col rounded-[28px] backdrop-blur-xl"
               style={{
+                backgroundColor: 'rgba(255,255,255,0.72)',
                 boxShadow: [
                   "0 6px 32px oklch(50% 0.10 196 / 0.11)",   /* outer depth */
                   "0 1px 8px oklch(60% 0.08 196 / 0.08)",    /* close shadow */
@@ -162,21 +163,14 @@ const Index = () => {
         </div>
 
         {/* ── Main content ── */}
-        <main className="flex-1 px-6 py-6">
+        <main className="flex-1 min-w-0 px-6 py-6">
           {/* ── Filter pill bar ── */}
-          <div className="relative mb-8">
-            {/* Right-edge fade — hints at horizontal scroll */}
-            <div className="absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l from-background to-transparent pointer-events-none z-10" />
-
-            <div
-              className="flex items-center gap-2 overflow-x-auto py-1.5 pr-14 pl-0.5"
-              style={{ scrollbarWidth: "none", msOverflowStyle: "none" } as React.CSSProperties}
-            >
+          <div className="flex flex-wrap gap-2.5 mb-8 items-center">
               {/* Clear — slides in when anything is active */}
               {selectedFilter && (
                 <button
                   onClick={() => setSelectedFilter(null)}
-                  className="shrink-0 inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold transition-all duration-200 hover:-translate-y-px active:scale-95"
+                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold transition-all duration-200 hover:-translate-y-px active:scale-95"
                   style={{
                     background: "oklch(44% 0.14 25)",
                     color: "oklch(97% 0.01 25)",
@@ -196,7 +190,7 @@ const Index = () => {
                     key={tag.label}
                     aria-pressed={isActive}
                     onClick={() => setSelectedFilter((c) => c === tag.filter ? null : tag.filter)}
-                    className="shrink-0 px-4 py-1.5 rounded-full text-sm font-semibold cursor-pointer transition-all duration-200 hover:-translate-y-px active:scale-95"
+                    className="px-4 py-1.5 rounded-full text-sm font-semibold cursor-pointer transition-all duration-200 hover:-translate-y-px active:scale-95"
                     style={isActive ? {
                       background: "oklch(44% 0.14 25)",
                       color: "oklch(97% 0.01 25)",
@@ -226,7 +220,7 @@ const Index = () => {
                     key={cat}
                     aria-pressed={isActive}
                     onClick={() => setSelectedFilter((c) => c === filter ? null : filter)}
-                    className="shrink-0 inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-sm font-semibold cursor-pointer transition-all duration-200 hover:-translate-y-px active:scale-95"
+                    className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-sm font-semibold cursor-pointer transition-all duration-200 hover:-translate-y-px active:scale-95"
                     style={isActive ? {
                       background: "oklch(44% 0.14 25)",
                       color: "oklch(97% 0.01 25)",
@@ -256,7 +250,7 @@ const Index = () => {
                     key={tag.name}
                     aria-pressed={isActive}
                     onClick={() => setSelectedFilter((c) => c === filter ? null : filter)}
-                    className="shrink-0 px-4 py-1.5 rounded-full text-sm font-semibold cursor-pointer transition-all duration-200 hover:-translate-y-px active:scale-95"
+                    className="px-4 py-1.5 rounded-full text-sm font-semibold cursor-pointer transition-all duration-200 hover:-translate-y-px active:scale-95"
                     style={isActive ? {
                       background: "oklch(44% 0.14 25)",
                       color: "oklch(97% 0.01 25)",
@@ -277,7 +271,7 @@ const Index = () => {
               <Popover onOpenChange={() => setTagSearch("")}>
                 <PopoverTrigger asChild>
                   <button
-                    className="shrink-0 inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-sm font-semibold cursor-pointer transition-all duration-200 hover:-translate-y-px active:scale-95"
+                    className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-sm font-semibold cursor-pointer transition-all duration-200 hover:-translate-y-px active:scale-95"
                     style={{
                       background: "oklch(94% 0.02 260)",
                       color: "oklch(42% 0.08 260)",
@@ -329,7 +323,6 @@ const Index = () => {
                   </div>
                 </PopoverContent>
               </Popover>
-            </div>
           </div>
 
           <Noticeboard filter={selectedFilter} />
