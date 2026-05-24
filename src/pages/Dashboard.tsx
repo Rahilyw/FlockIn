@@ -1,207 +1,334 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import type { CSSProperties } from "react";
 import Header from "@/components/Header";
 import { EventCard } from "@/components/EventCard";
-import { ClubCard } from "@/components/ClubCard";
 import { useAuth } from "@/contexts/AuthContext";
 import { useEventsByIds } from "@/hooks/useEventsByIds";
-import { useClubsByIds } from "@/hooks/useClubsByIds";
 import { useBookmarks } from "@/hooks/useBookmarks";
-import { Button } from "@/components/ui/button";
+import { useMyEvents } from "@/hooks/useMyEvents";
+import type { Event } from "@/types/firebaseTypes";
 
-function EmptyState({ message, linkTo, linkLabel }: { message: string; linkTo: string; linkLabel: string }) {
-  const navigate = useNavigate();
+// ── Status badge ──────────────────────────────────────────────────────────────
+
+const STATUS_CONFIG = {
+  approved: {
+    label: "Approved",
+    icon: "check_circle",
+    style: { background: "oklch(94% 0.06 162)", color: "oklch(26% 0.12 162)", border: "1px solid oklch(72% 0.13 162 / 0.5)" },
+  },
+  pending: {
+    label: "Pending review",
+    icon: "schedule",
+    style: { background: "oklch(95% 0.07 75)", color: "oklch(30% 0.13 75)", border: "1px solid oklch(74% 0.14 75 / 0.5)" },
+  },
+  rejected: {
+    label: "Not approved",
+    icon: "cancel",
+    style: { background: "oklch(94% 0.05 20)", color: "oklch(32% 0.13 20)", border: "1px solid oklch(66% 0.16 20 / 0.5)" },
+  },
+} as const;
+
+function StatusBadge({ status }: { status: Event["status"] }) {
+  const cfg = STATUS_CONFIG[status];
   return (
-    <div className="text-center py-16 space-y-4">
-      <p className="text-muted-foreground">{message}</p>
-      <Button variant="outline" onClick={() => navigate(linkTo)}>{linkLabel}</Button>
+    <span
+      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold tracking-wide"
+      style={cfg.style as CSSProperties}
+    >
+      <span className="material-symbols-outlined text-[13px] leading-none">{cfg.icon}</span>
+      {cfg.label}
+    </span>
+  );
+}
+
+// ── My Event row card ─────────────────────────────────────────────────────────
+
+function MyEventRow({ event }: { event: Event }) {
+  const navigate = useNavigate();
+  const dateStr = event.date?.toDate?.()?.toLocaleDateString("en-CA", {
+    weekday: "short", month: "short", day: "numeric",
+  }) ?? "TBD";
+
+  const gradient = [
+    "linear-gradient(135deg, #f97316, #a855f7)",
+    "linear-gradient(135deg, #0ea5e9, #84cc16)",
+    "linear-gradient(135deg, #7c3aed, #ec4899)",
+    "linear-gradient(135deg, #d97706, #0ea5e9)",
+    "linear-gradient(135deg, #166534, #fde68a)",
+  ][Math.abs([...event.id].reduce((h, c) => (Math.imul(31, h) + c.charCodeAt(0)) | 0, 0)) % 5];
+
+  return (
+    <div
+      className="group flex items-center gap-4 p-3 rounded-2xl cursor-pointer transition-all duration-200 hover:bg-white/60"
+      onClick={() => navigate(`/events/${event.id}`)}
+      style={{ boxShadow: "0 0 0 1px oklch(88% 0.04 30 / 0.4)" }}
+    >
+      {/* Thumbnail */}
+      <div className="shrink-0 w-14 h-14 rounded-xl overflow-hidden">
+        {event.imagePath ? (
+          <img src={event.imagePath} alt={event.title} className="w-full h-full object-cover" />
+        ) : (
+          <div className="w-full h-full" style={{ background: gradient }} />
+        )}
+      </div>
+
+      {/* Info */}
+      <div className="flex-1 min-w-0">
+        <p className="font-semibold text-[14px] leading-tight line-clamp-1 text-foreground group-hover:text-primary transition-colors">
+          {event.title}
+        </p>
+        <div className="flex items-center gap-1.5 mt-0.5 text-[12px] text-muted-foreground">
+          <span className="material-symbols-outlined text-[13px]">calendar_today</span>
+          {dateStr}
+          <span className="opacity-40 mx-0.5">·</span>
+          <span className="material-symbols-outlined text-[13px]">group</span>
+          {event.rsvpCount}
+        </div>
+      </div>
+
+      {/* Status + edit */}
+      <div className="shrink-0 flex flex-col items-end gap-2">
+        <StatusBadge status={event.status} />
+        {event.status !== "rejected" && (
+          <button
+            className="text-[11px] font-semibold text-primary/70 hover:text-primary transition-colors"
+            onClick={(e) => { e.stopPropagation(); navigate(`/events/${event.id}/edit`); }}
+          >
+            Edit →
+          </button>
+        )}
+      </div>
     </div>
   );
 }
 
+// ── Empty state ───────────────────────────────────────────────────────────────
+
+function EmptyState({ icon, message, cta, onCta }: { icon: string; message: string; cta: string; onCta: () => void }) {
+  return (
+    <div className="flex flex-col items-center justify-center py-20 gap-4 text-center">
+      <span className="material-symbols-outlined text-[56px] text-muted-foreground/30">{icon}</span>
+      <p className="text-muted-foreground text-sm max-w-xs">{message}</p>
+      <button
+        onClick={onCta}
+        className="px-5 py-2.5 rounded-full text-sm font-bold text-white transition-all hover:brightness-110 active:scale-95"
+        style={{ background: "hsl(var(--primary))", boxShadow: "0 4px 16px oklch(55% 0.20 196 / 0.35)" }}
+      >
+        {cta}
+      </button>
+    </div>
+  );
+}
+
+// ── Skeleton loader ───────────────────────────────────────────────────────────
+
+function SkeletonGrid({ count = 4 }: { count?: number }) {
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+      {Array.from({ length: count }).map((_, i) => (
+        <div key={i} className="aspect-[3/4] rounded-2xl bg-muted/60 animate-pulse" />
+      ))}
+    </div>
+  );
+}
+
+function SkeletonRows({ count = 3 }: { count?: number }) {
+  return (
+    <div className="flex flex-col gap-3">
+      {Array.from({ length: count }).map((_, i) => (
+        <div key={i} className="h-20 rounded-2xl bg-muted/60 animate-pulse" />
+      ))}
+    </div>
+  );
+}
+
+// ── Tab pill button ───────────────────────────────────────────────────────────
+
+const TABS = [
+  { id: "my-events",  icon: "edit_calendar", label: "My Events" },
+  { id: "saved",      icon: "favorite",      label: "Saved"     },
+  { id: "going",      icon: "celebration",   label: "Going"     },
+] as const;
+
+type TabId = typeof TABS[number]["id"];
+
+// ── Dashboard ─────────────────────────────────────────────────────────────────
+
 export default function Dashboard() {
-  const [activeTab, setActiveTab] = useState("joined-events");
-  const { profile } = useAuth();
-  const { savedEvents, savedClubs, toggleEvent, toggleClub } = useBookmarks();
+  const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState<TabId>("my-events");
+  const { user, profile } = useAuth();
+  const { savedEvents, toggleEvent } = useBookmarks();
 
-  const joinedEventIds = profile?.joinedEvents ?? [];
-  const joinedClubIds = profile?.joinedClubs ?? [];
+  const { data: myEvents = [],        isLoading: loadingMyEvents   } = useMyEvents(user?.uid);
+  const { data: savedEventsList = [], isLoading: loadingSaved      } = useEventsByIds(savedEvents);
+  const { data: goingEventsList = [], isLoading: loadingGoing      } = useEventsByIds(profile?.joinedEvents ?? []);
 
-  const { data: joinedEvents = [], isLoading: loadingJoinedEvents } = useEventsByIds(joinedEventIds);
-  const { data: joinedClubs = [], isLoading: loadingJoinedClubs } = useClubsByIds(joinedClubIds);
-  const { data: savedEventsList = [], isLoading: loadingSavedEvents } = useEventsByIds(savedEvents);
-  const { data: savedClubsList = [], isLoading: loadingSavedClubs } = useClubsByIds(savedClubs);
+  const counts: Record<TabId, number> = {
+    "my-events": myEvents.length,
+    "saved":     savedEvents.length,
+    "going":     (profile?.joinedEvents ?? []).length,
+  };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen flex flex-col">
       <Header />
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-2 text-primary">
-            My Space
-          </h1>
-          <p className="text-muted-foreground text-lg">
-            Everything you've joined and saved, in one place.
-          </p>
+
+      <div className="flex-1 container mx-auto px-4 sm:px-6 lg:px-8 py-8 max-w-5xl">
+
+        {/* ── Page header ── */}
+        <div className="mb-8 flex items-end justify-between gap-4 flex-wrap">
+          <div>
+            <h1 className="text-3xl font-extrabold tracking-tight">
+              My Space
+            </h1>
+            <p className="text-muted-foreground mt-1">
+              {profile?.displayName ? `Hey ${profile.displayName.split(" ")[0]} 👋 ` : ""}Your events, saved & RSVPs in one spot.
+            </p>
+          </div>
+          <button
+            onClick={() => navigate("/events/new")}
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-white text-sm font-bold transition-all hover:brightness-110 active:scale-95"
+            style={{ background: "hsl(var(--primary))", boxShadow: "0 4px 16px oklch(55% 0.20 196 / 0.35)" }}
+          >
+            <span className="material-symbols-outlined text-[18px]">add_circle</span>
+            Post an Event
+          </button>
         </div>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="mb-8">
-            <TabsTrigger value="joined-events">
-              Joined Events
-              {joinedEventIds.length > 0 && (
-                <span className="ml-2 text-xs bg-primary/10 text-primary rounded-full px-2 py-0.5">
-                  {joinedEventIds.length}
-                </span>
-              )}
-            </TabsTrigger>
-            <TabsTrigger value="joined-clubs">
-              Joined Clubs
-              {joinedClubIds.length > 0 && (
-                <span className="ml-2 text-xs bg-primary/10 text-primary rounded-full px-2 py-0.5">
-                  {joinedClubIds.length}
-                </span>
-              )}
-            </TabsTrigger>
-            <TabsTrigger value="saved-events">
-              Saved Events
-              {savedEvents.length > 0 && (
-                <span className="ml-2 text-xs bg-primary/10 text-primary rounded-full px-2 py-0.5">
-                  {savedEvents.length}
-                </span>
-              )}
-            </TabsTrigger>
-            <TabsTrigger value="saved-clubs">
-              Saved Clubs
-              {savedClubs.length > 0 && (
-                <span className="ml-2 text-xs bg-primary/10 text-primary rounded-full px-2 py-0.5">
-                  {savedClubs.length}
-                </span>
-              )}
-            </TabsTrigger>
-          </TabsList>
+        {/* ── Tab pills ── */}
+        <div className="flex gap-2 mb-8 flex-wrap">
+          {TABS.map(({ id, icon, label }) => {
+            const active = activeTab === id;
+            const count = counts[id];
+            return (
+              <button
+                key={id}
+                onClick={() => setActiveTab(id)}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200 hover:-translate-y-px active:scale-95"
+                style={active ? {
+                  background: "oklch(44% 0.14 25)",
+                  color: "oklch(97% 0.01 25)",
+                  boxShadow: "0 3px 12px oklch(44% 0.14 25 / 0.35)",
+                  transform: "translateY(-1px)",
+                } : {
+                  background: "oklch(96% 0.02 30)",
+                  color: "oklch(40% 0.08 30)",
+                  boxShadow: "0 1px 4px oklch(50% 0.05 30 / 0.12)",
+                }}
+              >
+                <span className="material-symbols-outlined text-[16px] leading-none">{icon}</span>
+                {label}
+                {count > 0 && (
+                  <span
+                    className="text-[10px] font-black px-1.5 py-0.5 rounded-full"
+                    style={active
+                      ? { background: "rgba(255,255,255,0.25)", color: "oklch(97% 0.01 25)" }
+                      : { background: "oklch(44% 0.14 25 / 0.12)", color: "oklch(44% 0.14 25)" }
+                    }
+                  >
+                    {count}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
 
-          <TabsContent value="joined-events">
-            <div key={`joined-events-${activeTab}`} className="animate-content-fade">
-              {loadingJoinedEvents ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                  {Array.from({ length: 4 }).map((_, i) => (
-                    <div key={i} className="aspect-[3/4] rounded-lg bg-muted animate-pulse" />
-                  ))}
+        {/* ── Tab: My Events ── */}
+        {activeTab === "my-events" && (
+          <div className="animate-content-fade">
+            {loadingMyEvents ? (
+              <SkeletonRows count={4} />
+            ) : myEvents.length === 0 ? (
+              <EmptyState
+                icon="edit_calendar"
+                message="You haven't posted any events yet. Share something happening on campus!"
+                cta="Post your first event"
+                onCta={() => navigate("/events/new")}
+              />
+            ) : (
+              <div className="flex flex-col gap-3">
+                {/* Summary counts */}
+                <div className="flex gap-3 mb-2 flex-wrap">
+                  {(["approved", "pending", "rejected"] as const).map((s) => {
+                    const n = myEvents.filter(e => e.status === s).length;
+                    if (n === 0) return null;
+                    const cfg = STATUS_CONFIG[s];
+                    return (
+                      <span key={s} className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold" style={cfg.style as CSSProperties}>
+                        <span className="material-symbols-outlined text-[14px] leading-none">{cfg.icon}</span>
+                        {n} {cfg.label}
+                      </span>
+                    );
+                  })}
                 </div>
-              ) : joinedEvents.length === 0 ? (
-                <EmptyState
-                  message="You haven't joined any events yet."
-                  linkTo="/events"
-                  linkLabel="Browse Events"
-                />
-              ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                  {joinedEvents.map((event, index) => (
-                    <EventCard
-                      key={event.id}
-                      event={event}
-                      isBookmarked={savedEvents.includes(event.id)}
-                      onBookmark={toggleEvent}
-                      style={{ animationDelay: `${Math.min(index * 40, 480)}ms` }}
-                    />
-                  ))}
-                </div>
-              )}
-            </div>
-          </TabsContent>
 
-          <TabsContent value="joined-clubs">
-            <div key={`joined-clubs-${activeTab}`} className="animate-content-fade">
-              {loadingJoinedClubs ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {Array.from({ length: 3 }).map((_, i) => (
-                    <div key={i} className="h-48 rounded-lg bg-muted animate-pulse" />
-                  ))}
-                </div>
-              ) : joinedClubs.length === 0 ? (
-                <EmptyState
-                  message="You haven't joined any clubs yet."
-                  linkTo="/clubs"
-                  linkLabel="Browse Clubs"
-                />
-              ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {joinedClubs.map((club, index) => (
-                    <ClubCard
-                      key={club.id}
-                      club={club}
-                      isBookmarked={savedClubs.includes(club.id)}
-                      onBookmark={toggleClub}
-                      style={{ animationDelay: `${Math.min(index * 40, 480)}ms` }}
-                    />
-                  ))}
-                </div>
-              )}
-            </div>
-          </TabsContent>
+                {myEvents.map((event) => (
+                  <MyEventRow key={event.id} event={event} />
+                ))}
+              </div>
+            )}
+          </div>
+        )}
 
-          <TabsContent value="saved-events">
-            <div key={`saved-events-${activeTab}`} className="animate-content-fade">
-              {loadingSavedEvents ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                  {Array.from({ length: 4 }).map((_, i) => (
-                    <div key={i} className="aspect-[3/4] rounded-lg bg-muted animate-pulse" />
-                  ))}
-                </div>
-              ) : savedEventsList.length === 0 ? (
-                <EmptyState
-                  message="You haven't saved any events yet. Hit the bookmark icon on any event."
-                  linkTo="/events"
-                  linkLabel="Browse Events"
-                />
-              ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                  {savedEventsList.map((event, index) => (
-                    <EventCard
-                      key={event.id}
-                      event={event}
-                      isBookmarked={savedEvents.includes(event.id)}
-                      onBookmark={toggleEvent}
-                      style={{ animationDelay: `${Math.min(index * 40, 480)}ms` }}
-                    />
-                  ))}
-                </div>
-              )}
-            </div>
-          </TabsContent>
+        {/* ── Tab: Saved ── */}
+        {activeTab === "saved" && (
+          <div className="animate-content-fade">
+            {loadingSaved ? (
+              <SkeletonGrid count={4} />
+            ) : savedEventsList.length === 0 ? (
+              <EmptyState
+                icon="favorite"
+                message="Nothing saved yet — tap the ♥ on any poster to save it here."
+                cta="Browse the Noticeboard"
+                onCta={() => navigate("/")}
+              />
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+                {savedEventsList.map((event, i) => (
+                  <EventCard
+                    key={event.id}
+                    event={event}
+                    isBookmarked={true}
+                    onBookmark={toggleEvent}
+                    style={{ animationDelay: `${Math.min(i * 40, 400)}ms` }}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        )}
 
-          <TabsContent value="saved-clubs">
-            <div key={`saved-clubs-${activeTab}`} className="animate-content-fade">
-              {loadingSavedClubs ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {Array.from({ length: 3 }).map((_, i) => (
-                    <div key={i} className="h-48 rounded-lg bg-muted animate-pulse" />
-                  ))}
-                </div>
-              ) : savedClubsList.length === 0 ? (
-                <EmptyState
-                  message="You haven't saved any clubs yet. Hit the bookmark icon on any club."
-                  linkTo="/clubs"
-                  linkLabel="Browse Clubs"
-                />
-              ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {savedClubsList.map((club, index) => (
-                    <ClubCard
-                      key={club.id}
-                      club={club}
-                      isBookmarked={savedClubs.includes(club.id)}
-                      onBookmark={toggleClub}
-                      style={{ animationDelay: `${Math.min(index * 40, 480)}ms` }}
-                    />
-                  ))}
-                </div>
-              )}
-            </div>
-          </TabsContent>
-        </Tabs>
+        {/* ── Tab: Going ── */}
+        {activeTab === "going" && (
+          <div className="animate-content-fade">
+            {loadingGoing ? (
+              <SkeletonGrid count={4} />
+            ) : goingEventsList.length === 0 ? (
+              <EmptyState
+                icon="celebration"
+                message="You haven't RSVPd to any events yet. Find something fun!"
+                cta="Browse the Noticeboard"
+                onCta={() => navigate("/")}
+              />
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+                {goingEventsList.map((event, i) => (
+                  <EventCard
+                    key={event.id}
+                    event={event}
+                    isBookmarked={savedEvents.includes(event.id)}
+                    onBookmark={toggleEvent}
+                    style={{ animationDelay: `${Math.min(i * 40, 400)}ms` }}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
       </div>
     </div>
   );

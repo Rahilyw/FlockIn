@@ -316,7 +316,7 @@ export default function CreateEvent() {
         category: values.category,
         creatorId: user.uid,
         creatorName: values.creatorName,
-        creatorPhoto: user.photoURL ?? "",
+        creatorPhoto: profile?.photoURL ?? user.photoURL ?? "",
         imagePath,
         tags: values.tags,
       });

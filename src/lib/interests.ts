@@ -26,3 +26,30 @@ export const INTERESTS = [
 ] as const;
 
 export type Interest = (typeof INTERESTS)[number];
+
+export const INTEREST_EMOJI: Record<Interest, string> = {
+  Technology:   "💻",
+  Music:        "🎵",
+  Art:          "🎨",
+  Sports:       "⚽",
+  Gaming:       "🎮",
+  Film:         "🎬",
+  Literature:   "📚",
+  Science:      "🔬",
+  Business:     "💼",
+  Politics:     "🗳️",
+  Cooking:      "🍳",
+  Travel:       "✈️",
+  Fashion:      "👗",
+  Photography:  "📸",
+  Dance:        "💃",
+  Fitness:      "🏃",
+  Nature:       "🌿",
+  Volunteering: "🤝",
+  Coding:       "👾",
+  Career:       "🚀",
+  Academic:     "📖",
+  Social:       "🎉",
+  Workshop:     "🛠️",
+  Food:         "🍕",
+};

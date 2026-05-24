@@ -10,6 +10,7 @@ export const queryKeys = {
       activeOnly?: boolean,
     ) => ["events", "list", { category, limit, approvedOnly, activeOnly }] as const,
     detail: (id: string) => ["events", "detail", id] as const,
+    byCreator: (uid: string) => ["events", "byCreator", uid] as const,
   },
   clubs: {
     all: ["clubs"] as const,

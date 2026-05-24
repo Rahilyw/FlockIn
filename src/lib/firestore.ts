@@ -149,6 +149,20 @@ export async function getEvents(options: GetEventsOptions = {}): Promise<Event[]
   return options.limitCount ? events.slice(0, options.limitCount) : events;
 }
 
+/** Fetch all events created by a specific user (any status), sorted newest first.
+ *  Uses a single equality where-clause to avoid composite index requirements;
+ *  sorting is done client-side.
+ */
+export async function getEventsByCreator(creatorId: string): Promise<Event[]> {
+  const snap = await getDocs(
+    query(eventsCol(), where("creatorId", "==", creatorId), limit(100)),
+  );
+  const events = snap.docs.map((d) => d.data() as Event);
+  // Sort newest first client-side
+  events.sort((a, b) => (b.createdAt?.toMillis?.() ?? 0) - (a.createdAt?.toMillis?.() ?? 0));
+  return events;
+}
+
 export async function getPendingEvents(): Promise<Event[]> {
   // orderBy("createdAt") alone avoids a composite index requirement.
   // Filter by status client-side for MVP compatibility.
