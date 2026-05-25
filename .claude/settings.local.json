@@ -24,7 +24,12 @@
       "Bash(ls firebase.json)",
       "Bash(ls .firebaserc)",
       "Bash(find . -name \"*.rules\")",
-      "Bash(grep -E \"\\\\.ts$|\\\\.tsx$\")"
+      "Bash(grep -E \"\\\\.ts$|\\\\.tsx$\")",
+      "WebFetch(domain:api.anthropic.com)",
+      "mcp__stitch__list_projects",
+      "mcp__stitch__list_screens",
+      "WebFetch(domain:contribution.usercontent.google.com)",
+      "mcp__stitch__get_screen"
     ]
   }
 }

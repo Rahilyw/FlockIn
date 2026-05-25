@@ -1,12 +1,5 @@
 import { useState, Component } from "react";
 import type { ReactNode } from "react";
-import PosterCard from "./PosterCard";
-
-class PosterErrorBoundary extends Component<{ children: ReactNode }, { crashed: boolean }> {
-  state = { crashed: false };
-  static getDerivedStateFromError() { return { crashed: true }; }
-  render() { return this.state.crashed ? null : this.props.children; }
-}
 import { useLocation, useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "@/components/ui/sonner";
@@ -16,6 +9,14 @@ import { useBookmarks } from "@/hooks/useBookmarks";
 import { useEvents } from "@/hooks/useEvents";
 import { queryKeys } from "@/hooks/queryKeys";
 import type { Event, EventCategory } from "@/types/firebaseTypes";
+import PosterCard from "./PosterCard";
+import { EventDetailModal } from "./EventDetailModal";
+
+class PosterErrorBoundary extends Component<{ children: ReactNode }, { crashed: boolean }> {
+  state = { crashed: false };
+  static getDerivedStateFromError() { return { crashed: true }; }
+  render() { return this.state.crashed ? null : this.props.children; }
+}
 
 export type FilterMode = "happening-now" | "today" | "this-week" | "next-week" | `tag:${string}` | `category:${string}`;
 
@@ -151,6 +152,7 @@ const Noticeboard = ({ filters = new Set() }: NoticeboardProps) => {
     approvedOnly: true,
     activeOnly: true,
   });
+  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [savingEventId, setSavingEventId] = useState<string | null>(null);
   const [attendingEventId, setAttendingEventId] = useState<string | null>(null);
 
@@ -217,6 +219,7 @@ const Noticeboard = ({ filters = new Set() }: NoticeboardProps) => {
   };
 
   return (
+    <>
     <div className="relative rounded-[32px] p-4 bg-[#5D4037] shadow-2xl border-[12px] border-[#3E2723]">
       <div className="board-texture rounded-[20px] min-h-[900px] w-full relative masonry-grid">
 
@@ -268,7 +271,7 @@ const Noticeboard = ({ filters = new Set() }: NoticeboardProps) => {
                   marginTop={MARGIN_TOPS[i % MARGIN_TOPS.length]}
                   actionLabel={action.label}
                   actionClassName={action.className}
-                  onOpen={() => navigate(`/events/${event.id}`)}
+                  onOpen={() => setSelectedEvent(event)}
                   isSaved={isSaved}
                   isAttending={isAttending}
                   isSavePending={savingEventId === event.id}
@@ -284,6 +287,20 @@ const Noticeboard = ({ filters = new Set() }: NoticeboardProps) => {
         })}
       </div>
     </div>
+
+    {selectedEvent && (
+      <EventDetailModal
+        event={selectedEvent}
+        isSaved={savedEvents.includes(selectedEvent.id)}
+        isAttending={profile?.joinedEvents?.includes(selectedEvent.id) ?? false}
+        isSavePending={savingEventId === selectedEvent.id}
+        isAttendancePending={attendingEventId === selectedEvent.id}
+        onClose={() => setSelectedEvent(null)}
+        onToggleSave={() => handleToggleSave(selectedEvent)}
+        onToggleAttendance={() => handleToggleAttendance(selectedEvent)}
+      />
+    )}
+    </>
   );
 };
 

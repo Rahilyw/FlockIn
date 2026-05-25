@@ -119,7 +119,7 @@
   }
 }
 
-/* ── Fluid pastel app background ── */
+/* ── Fluid pastel app background (design-handoff source of truth) ── */
 #root::before {
   content: "";
   position: fixed;
@@ -127,15 +127,17 @@
   z-index: -2;
   pointer-events: none;
   background:
-    radial-gradient(ellipse 72% 58% at 86% 10%, rgba(254, 109, 115, 0.9) 0 22%, rgba(255, 203, 119, 0.5) 38%, transparent 68%),
-    radial-gradient(ellipse 66% 72% at 18% 88%, rgba(37, 132, 167, 0.92) 0 24%, rgba(36, 229, 210, 0.56) 42%, transparent 72%),
-    radial-gradient(ellipse 78% 58% at 82% 78%, rgba(36, 229, 210, 0.78) 0 22%, rgba(254, 109, 115, 0.46) 40%, transparent 74%),
-    radial-gradient(ellipse 70% 58% at 42% 72%, rgba(255, 203, 119, 0.56) 0 24%, rgba(255, 248, 233, 0.26) 46%, transparent 76%),
-    radial-gradient(ellipse 92% 76% at 50% 50%, rgba(36, 229, 210, 0.22) 0 28%, rgba(254, 109, 115, 0.18) 52%, transparent 82%),
+    radial-gradient(ellipse 52% 50% at 88% 12%, rgba(254, 109, 115, 0.42) 0 22%, transparent 70%),
+    radial-gradient(ellipse 50% 52% at 14% 14%, rgba(255, 203, 119, 0.42) 0 22%, transparent 70%),
+    radial-gradient(ellipse 50% 48% at 78% 82%, rgba(36, 229, 210, 0.42) 0 22%, transparent 70%),
+    radial-gradient(ellipse 50% 50% at 20% 86%, rgba(98, 108, 218, 0.34) 0 20%, transparent 70%),
+    radial-gradient(ellipse 46% 44% at 50% 48%, rgba(216, 24, 138, 0.26) 0 18%, transparent 68%),
+    radial-gradient(ellipse 48% 44% at 88% 50%, rgba(251, 255, 150, 0.40) 0 22%, transparent 70%),
+    radial-gradient(ellipse 48% 44% at 12% 52%, rgba(31, 138, 110, 0.24) 0 20%, transparent 70%),
     linear-gradient(145deg, #fff8e9 0%, #effdfb 42%, #fff8e9 100%);
-  background-size: 142% 142%, 148% 148%, 152% 152%, 144% 144%, 118% 118%, 100% 100%;
+  background-size: 138% 138%, 142% 142%, 148% 148%, 144% 144%, 130% 130%, 140% 140%, 140% 140%, 100% 100%;
   animation: fluid-pastel-shift 14s ease-in-out infinite;
-  filter: blur(24px) saturate(118%) brightness(1.03);
+  filter: blur(24px) saturate(108%) brightness(1.04);
   transform: scale(1.08);
 }
 
@@ -149,18 +151,13 @@
     radial-gradient(ellipse 68% 58% at 12% 18%, rgba(36, 229, 210, 0.34), transparent 68%),
     radial-gradient(ellipse 62% 66% at 88% 72%, rgba(254, 109, 115, 0.34), transparent 70%),
     radial-gradient(ellipse 70% 50% at 58% 22%, rgba(255, 203, 119, 0.28), transparent 72%),
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180' viewBox='0 0 180 180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='0.42'/%3E%3C/svg%3E"),
     radial-gradient(ellipse 72% 52% at 48% 48%, rgba(255, 255, 255, 0.2), transparent 62%),
     linear-gradient(180deg, rgba(255, 248, 233, 0.22), rgba(255, 248, 233, 0.08));
-  background-size: 150% 150%, 145% 145%, 155% 155%, 180px 180px, 100% 100%, 100% 100%;
+  background-size: 150% 150%, 145% 145%, 155% 155%, 100% 100%, 100% 100%;
   animation: fluid-reflection-shift 16s ease-in-out infinite reverse;
   mix-blend-mode: soft-light;
   backdrop-filter: blur(8px) saturate(108%);
   -webkit-backdrop-filter: blur(8px) saturate(108%);
-}
-
-body::before {
-  content: none;
 }
 
 .bg-background {
@@ -168,36 +165,18 @@ body::before {
 }
 
 @keyframes fluid-pastel-shift {
-  0% {
-    background-position: 78% 8%, 16% 88%, 84% 76%, 42% 74%, 50% 50%, 0 0;
-  }
-  25% {
-    background-position: 48% 24%, 36% 62%, 60% 58%, 68% 42%, 44% 54%, 0 0;
-  }
-  50% {
-    background-position: 28% 44%, 62% 28%, 36% 36%, 34% 52%, 56% 42%, 0 0;
-  }
-  75% {
-    background-position: 64% 58%, 24% 42%, 74% 84%, 58% 70%, 46% 58%, 0 0;
-  }
-  100% {
-    background-position: 78% 8%, 16% 88%, 84% 76%, 42% 74%, 50% 50%, 0 0;
-  }
+  0%   { background-position: 78% 8%,  16% 88%, 84% 76%, 42% 74%, 50% 50%, 0 0, 0 0, 0 0; }
+  25%  { background-position: 48% 24%, 36% 62%, 60% 58%, 68% 42%, 44% 54%, 0 0, 0 0, 0 0; }
+  50%  { background-position: 28% 44%, 62% 28%, 36% 36%, 34% 52%, 56% 42%, 0 0, 0 0, 0 0; }
+  75%  { background-position: 64% 58%, 24% 42%, 74% 84%, 58% 70%, 46% 58%, 0 0, 0 0, 0 0; }
+  100% { background-position: 78% 8%,  16% 88%, 84% 76%, 42% 74%, 50% 50%, 0 0, 0 0, 0 0; }
 }
 
 @keyframes fluid-reflection-shift {
-  0% {
-    background-position: 8% 18%, 92% 78%, 58% 8%, 0 0, 50% 50%, 0 0;
-  }
-  33% {
-    background-position: 68% 58%, 28% 24%, 78% 48%, 24px 18px, 44% 52%, 0 0;
-  }
-  66% {
-    background-position: 32% 78%, 72% 36%, 22% 70%, -18px 28px, 54% 48%, 0 0;
-  }
-  100% {
-    background-position: 8% 18%, 92% 78%, 58% 8%, 0 0, 50% 50%, 0 0;
-  }
+  0%   { background-position: 8% 18%,  92% 78%, 58% 8%,  50% 50%, 0 0; }
+  33%  { background-position: 68% 58%, 28% 24%, 78% 48%, 44% 52%, 0 0; }
+  66%  { background-position: 32% 78%, 72% 36%, 22% 70%, 54% 48%, 0 0; }
+  100% { background-position: 8% 18%,  92% 78%, 58% 8%,  50% 50%, 0 0; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -289,4 +268,191 @@ body::before {
 /* ── Material Symbols ── */
 .material-symbols-outlined {
   font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  vertical-align: middle;
+}
+.material-symbols-outlined.fill {
+  font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 24;
+}
+
+/* ── FlockIn!! Design System tokens ──────────────────────────────────────── */
+:root {
+  /* Primary palette */
+  --fk-paprika:      #C95D36;
+  --fk-sandy:        #FAA55A;
+  --fk-royal:        #626CDA;
+  --fk-lime:         #FBFF96;
+  --fk-honeydew:     #EAFFF5;
+
+  /* Secondary palette */
+  --fk-old-lace:     #FFF8E9;
+  --fk-grapefruit:   #FE6D73;
+  --fk-apricot:      #FFCB77;
+  --fk-turquoise:    #24E5D2;
+  --fk-cerulean:     #2584A7;
+
+  /* Wordmark — George the Peacock */
+  --fk-mark-cobalt:  #2A6FC8;
+  --fk-mark-teal:    #1F8A6E;
+  --fk-mark-gold:    #E89B3C;
+  --fk-mark-navy:    #0F3D5C;
+
+  /* Physical surfaces */
+  --fk-felt:         #3A7D52;
+  --fk-felt-deep:    #2c5d3e;
+  --fk-wood:         #5D4037;
+  --fk-wood-deep:    #3E2723;
+  --fk-pin-red:      #FF5252;
+  --fk-pin-yellow:   #FFB300;
+  --fk-pin-pink:     #F06292;
+  --fk-pin-teal:     #4DD0E1;
+  --fk-washi-mint:   rgba(178,235,242,0.70);
+  --fk-washi-yellow: rgba(220,231,117,0.70);
+  --fk-washi-lilac:  rgba(200,180,255,0.70);
+
+  /* Semantic surfaces */
+  --fk-bg:              #FFF8E9;
+  --fk-bg-elevated:     #FFFFFF;
+  --fk-surface:         rgba(255,255,255,0.72);
+  --fk-surface-strong:  rgba(255,255,255,0.92);
+  --fk-surface-variant: #F0EEE9;
+  --fk-card:            #FFFFFF;
+
+  /* Semantic text */
+  --fk-fg:          #1B1C19;
+  --fk-fg-muted:    #524341;
+  --fk-fg-soft:     #8a7c79;
+  --fk-fg-on-dark:  #FFF8E9;
+  --fk-fg-inverse:  #F2F1EC;
+
+  /* Intent tokens */
+  --fk-primary:        #24E5D2;
+  --fk-primary-hover:  #1ECBB9;
+  --fk-primary-fg:     #07453E;
+  --fk-primary-tint:   #C6F8F1;
+  --fk-primary-shadow: rgba(36,229,210,0.45);
+
+  --fk-accent:         #C95D36;
+  --fk-accent-fg:      #FFFFFF;
+
+  --fk-success:        #EAFFF5;
+  --fk-success-fg:     #0e6258;
+  --fk-warning:        #FFCB77;
+  --fk-warning-fg:     #6B3A06;
+  --fk-danger:         #FE6D73;
+  --fk-danger-fg:      #5A0E12;
+  --fk-info:           #2584A7;
+  --fk-info-fg:        #FFFFFF;
+
+  /* Borders */
+  --fk-border:        #E4E0D9;
+  --fk-border-strong: #D7C2BE;
+  --fk-border-glass:  rgba(255,255,255,0.82);
+
+  /* Radii */
+  --fk-r-xs:   4px;
+  --fk-r-sm:   8px;
+  --fk-r-md:   12px;
+  --fk-r-lg:   16px;
+  --fk-r-xl:   20px;
+  --fk-r-2xl:  24px;
+  --fk-r-3xl:  28px;
+  --fk-r-pill: 999px;
+
+  /* Shadows */
+  --fk-shadow-sm:    0 1px 4px rgba(50,40,35,0.08);
+  --fk-shadow-card:  0 4px 14px -2px rgba(50,40,35,0.10), 0 2px 4px rgba(50,40,35,0.05);
+  --fk-shadow-lift:  0 10px 28px -6px rgba(50,40,35,0.18), 0 4px 8px rgba(50,40,35,0.06);
+  --fk-shadow-pin:   0 2px 4px rgba(0,0,0,0.35), inset 0 -2px 2px rgba(0,0,0,0.2);
+  --fk-shadow-glow:  0 0 24px rgba(201,93,54,0.30);
+  --fk-shadow-pill:  0 3px 10px rgba(201,93,54,0.30);
+  --fk-shadow-glass: 0 6px 32px rgba(50,40,35,0.10), 0 1px 8px rgba(50,40,35,0.05),
+                     0 0 0 1.5px rgba(255,255,255,0.55), inset 0 1.5px 0 rgba(255,255,255,0.82);
+
+  /* Spacing */
+  --fk-sp-1:  4px;
+  --fk-sp-2:  8px;
+  --fk-sp-3:  12px;
+  --fk-sp-4:  16px;
+  --fk-sp-5:  20px;
+  --fk-sp-6:  24px;
+  --fk-sp-8:  32px;
+  --fk-sp-10: 40px;
+  --fk-sp-12: 48px;
+  --fk-sp-16: 64px;
+
+  /* Motion */
+  --fk-ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+  --fk-ease-out-expo:  cubic-bezier(0.16, 1, 0.3, 1);
+  --fk-ease-board:     cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --fk-dur-fast:       150ms;
+  --fk-dur-base:       200ms;
+  --fk-dur-card:       280ms;
+  --fk-dur-lift:       320ms;
+
+  /* Typography */
+  --fk-font-sans: 'Montserrat', 'Helvetica Neue', system-ui, sans-serif;
+  --fk-text-2xs:  10px;
+  --fk-text-xs:   12px;
+  --fk-text-sm:   14px;
+  --fk-text-base: 15px;
+  --fk-text-md:   16px;
+  --fk-text-lg:   18px;
+  --fk-text-xl:   20px;
+  --fk-text-2xl:  24px;
+  --fk-text-3xl:  30px;
+  --fk-text-4xl:  36px;
+  --fk-text-5xl:  48px;
+  --fk-ls-tight:    -0.02em;
+  --fk-ls-wide:      0.04em;
+  --fk-ls-eyebrow:   0.18em;
+  --fk-lh-tight: 1.1;
+  --fk-lh-snug:  1.25;
+  --fk-lh-base:  1.5;
+}
+
+/* ── Press utility — active scale ── */
+.fk-press {
+  transition: transform var(--fk-dur-fast) var(--fk-ease-out-quart);
+}
+.fk-press:active {
+  transform: scale(0.94);
+}
+
+/* ── Eyebrow label ── */
+.fk-eyebrow {
+  font-size: var(--fk-text-2xs);
+  font-weight: 900;
+  letter-spacing: var(--fk-ls-eyebrow);
+  text-transform: uppercase;
+  color: var(--fk-paprika);
+}
+
+/* ── Wordmark ── */
+.fk-wordmark .l1 { color: var(--fk-mark-cobalt); }
+.fk-wordmark .l2 { color: var(--fk-mark-teal); }
+.fk-wordmark .l3 { color: var(--fk-mark-gold); }
+.fk-wordmark .l4 { color: var(--fk-mark-navy); }
+
+/* ── Empty state entry animation ── */
+@keyframes fk-empty-enter {
+  from { opacity: 0; transform: scale(0.96) translateY(6px); }
+  to   { opacity: 1; transform: scale(1)    translateY(0);   }
+}
+
+/* ── Event detail modal — responsive grid ── */
+@media (max-width: 640px) {
+  .fk-detail-grid {
+    grid-template-columns: 1fr !important;
+    gap: 20px !important;
+    padding: 20px !important;
+  }
+}
+
+/* ── Hide sidebar on mobile, show bottom tabs ── */
+@media (max-width: 768px) {
+  .fk-sidebar { display: none; }
+  .fk-bottom-tabs { display: flex !important; }
+}
+@media (min-width: 769px) {
+  .fk-bottom-tabs { display: none !important; }
 }

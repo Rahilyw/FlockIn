@@ -178,7 +178,14 @@ const PosterCard = ({
           )}
 
           {/* Hover glass overlay */}
-          <div className="glass-overlay absolute inset-0 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity duration-300 flex flex-col p-6 text-white justify-end">
+          <div
+            className="absolute inset-0 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity duration-300 flex flex-col p-6 text-white justify-end"
+            style={{
+              background: 'linear-gradient(180deg, rgba(20,15,12,0.0) 0%, rgba(20,15,12,0.55) 35%, rgba(20,15,12,0.94) 75%)',
+              backdropFilter: 'blur(2px)',
+              WebkitBackdropFilter: 'blur(2px)',
+            }}
+          >
 
             {/* ··· report menu — top-right */}
             {onReport && (
@@ -207,9 +214,9 @@ const PosterCard = ({
             )}
 
             <h3 className="font-bold text-xl mb-2 leading-tight">{title}</h3>
-            <div className="flex items-center gap-2 mb-1 text-white/80">
-              <span className="material-symbols-outlined text-[18px]">calendar_today</span>
-              <span className="text-xs font-semibold tracking-wide">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="material-symbols-outlined text-[18px]" style={{ color: '#FFCB77' }}>calendar_today</span>
+              <span className="text-xs font-semibold tracking-wide text-white/90">
                 {(() => {
                   const startT = formatTime(date);
                   const endT = formatTime(endTime);
@@ -219,11 +226,11 @@ const PosterCard = ({
                 })()}
               </span>
             </div>
-            <div className="flex items-center gap-2 mb-4 text-white/80">
-              <span className="material-symbols-outlined text-[18px]">location_on</span>
-              <span className="text-xs font-semibold tracking-wide">{location}</span>
+            <div className="flex items-center gap-2 mb-4">
+              <span className="material-symbols-outlined text-[18px]" style={{ color: '#24E5D2' }}>location_on</span>
+              <span className="text-xs font-semibold tracking-wide text-white/90">{location}</span>
             </div>
-            <p className="text-sm mb-5 line-clamp-3 text-white/70">{description}</p>
+            <p className="text-sm mb-5 line-clamp-3 font-medium" style={{ color: 'rgba(255,255,255,0.96)' }}>{description}</p>
             <div className="flex items-center justify-between">
               <button
                 type="button"
@@ -247,9 +254,11 @@ const PosterCard = ({
               </button>
               <button
                 type="button"
-                className={`px-5 py-2 rounded-full font-bold text-sm hover:scale-105 transition-transform disabled:cursor-wait disabled:opacity-75 ${
-                  isAttending ? "bg-white/20 text-white ring-1 ring-white/30" : actionClassName
-                }`}
+                className="px-5 py-2 rounded-full font-bold text-sm hover:scale-105 transition-transform disabled:cursor-wait disabled:opacity-75"
+                style={isAttending
+                  ? { background: 'rgba(255,255,255,0.20)', color: '#fff', boxShadow: '0 0 0 1px rgba(255,255,255,0.3)' }
+                  : { background: '#24E5D2', color: '#07453E' }
+                }
                 aria-pressed={isAttending}
                 disabled={isAttendancePending}
                 onClick={(event) => {
@@ -257,7 +266,7 @@ const PosterCard = ({
                   onToggleAttendance();
                 }}
               >
-                {isAttendancePending ? "Saving..." : isAttending ? "Leave" : actionLabel}
+                {isAttendancePending ? "Saving…" : isAttending ? "✓ Going" : "I'm going!"}
               </button>
             </div>
           </div>

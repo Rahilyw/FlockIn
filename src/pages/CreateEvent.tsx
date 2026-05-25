@@ -139,15 +139,30 @@ function EventPreview({ title, imageSrc, date, location, category, creatorName }
 
 // ── Icon-row field ────────────────────────────────────────────────────────────
 
-function FieldRow({ icon, children }: { icon: React.ReactNode; children: React.ReactNode }) {
+function FieldRow({
+  icon,
+  prefix,
+  prefixColor,
+  children,
+}: {
+  icon: React.ReactNode;
+  prefix?: string;
+  prefixColor?: string;
+  children: React.ReactNode;
+}) {
   return (
-    <div className="flex items-start gap-3 px-4 py-3.5 group">
-      <span
-        className="mt-0.5 shrink-0 transition-colors"
-        style={{ color: "oklch(72% 0.06 25)" }}
-      >
+    <div className="flex items-start gap-3 px-4 py-3.5">
+      <span className="mt-0.5 shrink-0" style={{ color: "#b5907e" }}>
         {icon}
       </span>
+      {prefix && (
+        <span
+          className="shrink-0 text-[11px] font-black tracking-wide mt-[3px]"
+          style={{ color: prefixColor ?? "#b5907e", minWidth: 42 }}
+        >
+          {prefix}
+        </span>
+      )}
       <div className="flex-1 min-w-0">{children}</div>
     </div>
   );
@@ -178,10 +193,10 @@ function ImageUploadZone({ previewSrc, error, onFile, onClear }: ImageUploadZone
     <div
       className="relative border-2 border-dashed rounded-2xl transition-colors cursor-pointer"
       style={isDragOver ? {
-        borderColor: "oklch(44% 0.14 25)",
-        background: "oklch(97% 0.03 25)",
+        borderColor: "var(--fk-paprika)",
+        background: "rgba(255,224,213,.4)",
       } : {
-        borderColor: "oklch(86% 0.04 30)",
+        borderColor: "var(--fk-border)",
       }}
       onClick={() => !previewSrc && inputRef.current?.click()}
       onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }}
@@ -227,11 +242,11 @@ function ImageUploadZone({ previewSrc, error, onFile, onClear }: ImageUploadZone
         </div>
       ) : (
         <div className="flex flex-col items-center gap-2 py-8 px-4">
-          <div className="w-12 h-12 rounded-2xl flex items-center justify-center mb-1" style={{ background: "oklch(96% 0.03 25)" }}>
-            <ImageIcon className="h-5 w-5" style={{ color: "oklch(50% 0.14 25)" }} />
+          <div className="w-12 h-12 rounded-2xl flex items-center justify-center mb-1" style={{ background: "rgba(255,224,213,.7)" }}>
+            <ImageIcon className="h-5 w-5" style={{ color: "#E07A5F" }} />
           </div>
-          <span className="text-sm font-semibold" style={{ color: "oklch(38% 0.08 30)" }}>Add your poster image</span>
-          <span className="text-xs" style={{ color: "oklch(62% 0.05 30)" }}>PNG, JPG, WEBP · max 5 MB · optional</span>
+          <span className="text-sm font-semibold" style={{ color: "var(--fk-fg)" }}>Add your poster image</span>
+          <span className="text-xs" style={{ color: "var(--fk-fg-soft)" }}>PNG, JPG, WEBP · max 5 MB · optional</span>
         </div>
       )}
 
@@ -352,7 +367,7 @@ export default function CreateEvent() {
             onClick={form.handleSubmit(onSubmit)}
             disabled={busy}
             className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full text-sm font-bold transition-all hover:brightness-110 active:scale-95 disabled:opacity-60"
-            style={{ background: "oklch(44% 0.14 25)", color: "oklch(97% 0.01 25)", boxShadow: "0 4px 14px oklch(44% 0.14 25 / 0.35)" }}
+            style={{ background: "var(--fk-paprika)", color: "#fff", boxShadow: "0 4px 14px oklch(44% 0.14 25 / 0.35)" }}
           >
             {isUploading ? "Uploading…" : isPending ? "Posting…" : "Publish Event →"}
           </button>
@@ -360,7 +375,7 @@ export default function CreateEvent() {
 
         {/* Page intro */}
         <div className="mb-8">
-          <p className="text-[10px] font-black tracking-[0.12em] uppercase mb-1" style={{ color: "oklch(44% 0.14 25)" }}>
+          <p className="text-[10px] font-black tracking-[0.12em] uppercase mb-1" style={{ color: "var(--fk-paprika)" }}>
             Post to the Noticeboard
           </p>
           <p className="text-[13px]" style={{ color: "oklch(55% 0.06 30)" }}>
@@ -422,13 +437,13 @@ export default function CreateEvent() {
                             }}
                             className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-semibold transition-all duration-150 select-none hover:-translate-y-px active:scale-95"
                             style={field.value === cat ? {
-                              background: "oklch(44% 0.14 25)",
-                              color: "oklch(97% 0.01 25)",
-                              border: "1.5px solid oklch(44% 0.14 25)",
+                              background: "var(--fk-paprika)",
+                              color: "#fff",
+                              border: "1.5px solid var(--fk-paprika)",
                               boxShadow: "0 2px 10px oklch(44% 0.14 25 / 0.30)",
                             } : {
-                              background: "oklch(99% 0.01 30)",
-                              color: "oklch(40% 0.08 30)",
+                              background: "#fff",
+                              color: "var(--fk-fg-muted)",
                               border: "1.5px solid oklch(86% 0.04 30 / 0.9)",
                             }}
                           >
@@ -453,7 +468,7 @@ export default function CreateEvent() {
                 {/* Grouped icon-row card */}
                 <div
                   className="rounded-2xl overflow-hidden divide-y backdrop-blur-sm"
-                  style={{ background: "oklch(99% 0.01 30 / 0.65)", border: "1px solid oklch(88% 0.04 30 / 0.5)", boxShadow: "0 1px 8px oklch(60% 0.04 30 / 0.08)", borderColor: "oklch(88% 0.04 30 / 0.5)" }}
+                  style={{ background: "rgba(255,253,247,.65)", border: "1px solid rgba(170,140,120,.3)", boxShadow: "0 1px 8px rgba(0,0,0,0.06)" }}
                 >
 
                   {/* Date & time */}
@@ -462,7 +477,11 @@ export default function CreateEvent() {
                     name="date"
                     render={({ field }) => (
                       <FormItem className="m-0">
-                        <FieldRow icon={<Calendar className="h-4 w-4" />}>
+                        <FieldRow
+                          icon={<Calendar className="h-4 w-4" />}
+                          prefix="Starts"
+                          prefixColor="var(--fk-paprika)"
+                        >
                           <FormControl>
                             <input
                               type="datetime-local"
@@ -482,7 +501,11 @@ export default function CreateEvent() {
                     name="endTime"
                     render={({ field }) => (
                       <FormItem className="m-0">
-                        <FieldRow icon={<Calendar className="h-4 w-4" />}>
+                        <FieldRow
+                          icon={<Calendar className="h-4 w-4" />}
+                          prefix="Ends"
+                          prefixColor="var(--fk-royal)"
+                        >
                           <FormControl>
                             <input
                               type="datetime-local"
@@ -582,7 +605,7 @@ export default function CreateEvent() {
                     type="submit"
                     disabled={busy}
                     className="w-full py-3 rounded-full text-sm font-bold transition-all hover:brightness-110 active:scale-95 disabled:opacity-60"
-                    style={{ background: "oklch(44% 0.14 25)", color: "oklch(97% 0.01 25)", boxShadow: "0 4px 14px oklch(44% 0.14 25 / 0.35)" }}
+                    style={{ background: "var(--fk-paprika)", color: "#fff", boxShadow: "0 4px 14px oklch(44% 0.14 25 / 0.35)" }}
                   >
                     {isUploading ? "Uploading…" : isPending ? "Posting…" : "Publish Event →"}
                   </button>

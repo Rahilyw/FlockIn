@@ -1,13 +1,12 @@
 import { useNavigate, useLocation } from "react-router-dom";
-import { Grid2X2, Bookmark, Plus, User } from "lucide-react";
 
 const HIDDEN_ON = ["/login", "/signup", "/admin", "/onboarding"];
 
 const TABS = [
-  { id: "noticeboard", label: "Noticeboard", icon: Grid2X2, route: "/" },
-  { id: "saved",       label: "Saved",       icon: Bookmark, route: "/dashboard", tabState: "saved" },
-  { id: "post",        label: "Post",         icon: Plus,     route: "/events/new", isButton: true },
-  { id: "myspace",     label: "My Space",     icon: User,     route: "/dashboard" },
+  { id: "noticeboard", label: "Noticeboard", icon: "dynamic_feed", route: "/" },
+  { id: "saved",       label: "Saved",       icon: "bookmark",     route: "/dashboard", tabState: "saved" },
+  { id: "post",        label: "Post",         icon: "add",          route: "/events/new", isButton: true },
+  { id: "myspace",     label: "My Space",     icon: "person",       route: "/dashboard" },
 ] as const;
 
 const BottomTabBar = () => {
@@ -20,14 +19,22 @@ const BottomTabBar = () => {
 
   const isActive = (route: string, tabId: string) => {
     if (route === "/") return location.pathname === "/";
-    if (tabId === "saved") return false; // never highlight Saved — My Space owns /dashboard highlight
-    return location.pathname === route;
+    if (tabId === "saved") return false;
+    return location.pathname === route || location.pathname.startsWith(route + "/");
   };
 
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-surface-variant flex items-center justify-around h-16 pb-4">
+    <nav
+      className="md:hidden fixed bottom-0 left-0 right-0 z-50 flex items-end justify-around"
+      style={{
+        background: "#fff",
+        borderTop: "1px solid var(--fk-border)",
+        height: 70,
+        padding: "0 4px 12px",
+        boxShadow: "0 -4px 16px rgba(50,40,35,.06)",
+      }}
+    >
       {TABS.map((tab) => {
-        const Icon = tab.icon;
         const active = isActive(tab.route, tab.id);
 
         if (tab.isButton) {
@@ -35,11 +42,24 @@ const BottomTabBar = () => {
             <button
               key={tab.id}
               onClick={() => navigate(tab.route)}
-              className="flex flex-col items-center justify-center gap-1 relative -top-6 w-16 h-16 rounded-full transition-all active:scale-90"
-              style={{ backgroundColor: "#E07A5F" }}
               aria-label="Post an event"
+              className="fk-press flex items-center justify-center"
+              style={{
+                position: "relative",
+                top: -18,
+                width: 58,
+                height: 58,
+                borderRadius: 999,
+                background: "var(--fk-paprika)",
+                color: "#fff",
+                border: "none",
+                boxShadow: "0 8px 22px rgba(201,93,54,.45)",
+                cursor: "pointer",
+              }}
             >
-              <Icon size={28} color="white" strokeWidth={2} />
+              <span className="material-symbols-outlined" style={{ fontSize: 28 }}>
+                {tab.icon}
+              </span>
             </button>
           );
         }
@@ -56,10 +76,25 @@ const BottomTabBar = () => {
           <button
             key={tab.id}
             onClick={handleClick}
-            className="flex flex-col items-center justify-center gap-1 flex-1 transition-colors"
+            className="flex flex-col items-center justify-center gap-0.5 flex-1 transition-colors"
+            style={{ background: "none", border: "none", cursor: "pointer" }}
           >
-            <Icon size={24} strokeWidth={2} color={active ? "#E07A5F" : "#524341"} />
-            <span className="text-xs font-medium" style={{ color: active ? "#E07A5F" : "#524341" }}>
+            <span
+              className="material-symbols-outlined"
+              style={{
+                fontSize: 22,
+                color: active ? "var(--fk-paprika)" : "var(--fk-fg-muted)",
+                fontVariationSettings: active
+                  ? "'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 24"
+                  : undefined,
+              }}
+            >
+              {tab.icon}
+            </span>
+            <span
+              className="text-[10px] font-bold"
+              style={{ color: active ? "var(--fk-paprika)" : "var(--fk-fg-muted)" }}
+            >
               {tab.label}
             </span>
           </button>

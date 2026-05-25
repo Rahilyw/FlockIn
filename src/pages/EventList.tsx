@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Search, Filter } from "lucide-react";
+import { EmptyState } from "@/components/EmptyState";
 import { useSearchParams } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -87,15 +88,7 @@ export default function EventList() {
             ))}
           </div>
         ) : filtered.length === 0 ? (
-          <div className="text-center py-16 space-y-4">
-            <p className="text-muted-foreground">No events match your search. Try different keywords or a different category.</p>
-            <button
-              className="text-sm text-primary font-medium hover:underline"
-              onClick={() => { setSearch(""); setCategory("all"); }}
-            >
-              Clear filters
-            </button>
-          </div>
+          <EmptyState variant="no-results" onCta={() => { setSearch(""); setCategory("all"); }} />
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {filtered.map((event, index) => (

@@ -10,21 +10,34 @@ import { EVENT_CATEGORIES } from "@/lib/eventSchemas";
 // ── Static pinned time-filter pills ───────────────────────────────────────────
 
 const PINNED_TAGS: { label: string; filter: FilterMode; bg: string; color: string }[] = [
-  { label: "#happening-now", filter: "happening-now", bg: "oklch(91% 0.08 15)",  color: "oklch(34% 0.18 15)"  },
-  { label: "#today",         filter: "today",         bg: "oklch(93% 0.06 30)",  color: "oklch(36% 0.15 30)"  },
-  { label: "#this-week",     filter: "this-week",     bg: "oklch(94% 0.05 55)",  color: "oklch(36% 0.13 55)"  },
-  { label: "#next-week",     filter: "next-week",     bg: "oklch(95% 0.04 120)", color: "oklch(34% 0.10 140)" },
+  { label: "#happening-now", filter: "happening-now", bg: "#E2E4FB", color: "#3a44b8" },
+  { label: "#today",         filter: "today",         bg: "#FFE0D5", color: "#7c2d12" },
+  { label: "#this-week",     filter: "this-week",     bg: "#FFE8C7", color: "#7a4a10" },
+  { label: "#next-week",     filter: "next-week",     bg: "#DFF5E8", color: "#1c5a3e" },
 ];
 
-// ── Deterministic color palette for dynamic tags ──────────────────────────────
+// ── Per-category colors from design kit ──────────────────────────────────────
 
+const CATEGORY_COLORS: Record<string, { bg: string; color: string }> = {
+  Music:    { bg: "#E2E4FB", color: "#3a44b8" },
+  Art:      { bg: "#FFF4D8", color: "#7a5a10" },
+  Workshop: { bg: "#DDF3DD", color: "#1f5a2a" },
+  Social:   { bg: "#F6D8FF", color: "#5d2a7a" },
+  Sport:    { bg: "#D8E3FF", color: "#1f3a8c" },
+  Academic: { bg: "#FFE8C7", color: "#7a4a10" },
+  Career:   { bg: "#E2E4FB", color: "#3a44b8" },
+  Food:     { bg: "#FFE0D5", color: "#7c2d12" },
+  Other:    { bg: "#E4E2DD", color: "#524341" },
+};
+
+// Fallback palette for trending tags (no fixed category)
 const TAG_COLOR_PALETTE = [
-  { bg: "oklch(94% 0.04 162)", color: "oklch(30% 0.09 162)" },
-  { bg: "oklch(93% 0.04 280)", color: "oklch(33% 0.10 280)" },
-  { bg: "oklch(92% 0.05 262)", color: "oklch(34% 0.10 262)" },
-  { bg: "oklch(94% 0.04 120)", color: "oklch(30% 0.09 120)" },
-  { bg: "oklch(93% 0.05 310)", color: "oklch(32% 0.11 310)" },
-  { bg: "oklch(94% 0.04 45)",  color: "oklch(30% 0.10 45)"  },
+  { bg: "#E2E4FB", color: "#3a44b8" },
+  { bg: "#FFE0D5", color: "#7c2d12" },
+  { bg: "#FFE8C7", color: "#7a4a10" },
+  { bg: "#DFF5E8", color: "#1c5a3e" },
+  { bg: "#F6D8FF", color: "#5d2a7a" },
+  { bg: "#DDF3DD", color: "#1f5a2a" },
 ];
 
 function hashTag(tag: string): number {
@@ -57,36 +70,36 @@ const NAV_ITEMS: {
     icon: "dynamic_feed",
     label: "Noticeboard",
     to: "/",
-    active:   { background: "oklch(84% 0.15 196 / 0.30)", border: "1.5px solid oklch(64% 0.19 196 / 0.52)", color: "oklch(23% 0.13 196)" },
-    inactive: { background: "oklch(91% 0.07 196 / 0.20)", border: "1.5px solid oklch(84% 0.10 196 / 0.32)", color: "oklch(40% 0.11 196)" },
+    active:   { background: "rgba(36,140,200,.30)",  border: "1.5px solid rgba(36,140,200,.52)",  color: "#13556a" },
+    inactive: { background: "rgba(36,140,200,.12)",  border: "1.5px solid rgba(36,140,200,.20)",  color: "#3a6a82" },
   },
   {
     icon: "trending_up",
     label: "Trending",
     to: "/events",
-    active:   { background: "oklch(86% 0.16 65 / 0.30)", border: "1.5px solid oklch(70% 0.21 65 / 0.52)", color: "oklch(28% 0.14 65)" },
-    inactive: { background: "oklch(93% 0.07 65 / 0.20)", border: "1.5px solid oklch(86% 0.10 65 / 0.32)", color: "oklch(44% 0.12 65)" },
+    active:   { background: "rgba(250,165,90,.30)",  border: "1.5px solid rgba(232,140,60,.52)",  color: "#7a4a10" },
+    inactive: { background: "rgba(250,165,90,.16)",  border: "1.5px solid rgba(232,140,60,.25)",  color: "#8a5a20" },
   },
   {
     icon: "group",
     label: "Clubs",
     to: "/clubs",
-    active:   { background: "oklch(83% 0.13 162 / 0.30)", border: "1.5px solid oklch(62% 0.16 162 / 0.52)", color: "oklch(24% 0.11 162)" },
-    inactive: { background: "oklch(91% 0.06 162 / 0.20)", border: "1.5px solid oklch(84% 0.09 162 / 0.32)", color: "oklch(40% 0.09 162)" },
+    active:   { background: "rgba(36,229,210,.30)",  border: "1.5px solid rgba(36,180,160,.52)",  color: "#0e5a4e" },
+    inactive: { background: "rgba(36,229,210,.12)",  border: "1.5px solid rgba(36,180,160,.20)",  color: "#1d6a5e" },
   },
   {
     icon: "layers",
     label: "Resources",
     to: "/resources",
-    active:   { background: "oklch(81% 0.14 280 / 0.28)", border: "1.5px solid oklch(62% 0.18 280 / 0.50)", color: "oklch(26% 0.14 280)" },
-    inactive: { background: "oklch(90% 0.07 280 / 0.20)", border: "1.5px solid oklch(83% 0.10 280 / 0.30)", color: "oklch(42% 0.13 280)" },
+    active:   { background: "rgba(150,120,220,.30)", border: "1.5px solid rgba(120,90,200,.52)",  color: "#3a2a6e" },
+    inactive: { background: "rgba(150,120,220,.12)", border: "1.5px solid rgba(120,90,200,.20)",  color: "#5a4a8a" },
   },
   {
     icon: "bookmark",
     label: "Saved",
     to: "/dashboard",
-    active:   { background: "oklch(82% 0.14 18 / 0.30)", border: "1.5px solid oklch(63% 0.17 18 / 0.52)", color: "oklch(25% 0.12 18)" },
-    inactive: { background: "oklch(91% 0.06 18 / 0.20)", border: "1.5px solid oklch(84% 0.09 18 / 0.30)", color: "oklch(42% 0.10 18)" },
+    active:   { background: "rgba(254,109,115,.30)", border: "1.5px solid rgba(214,59,70,.52)",   color: "#7c2d12" },
+    inactive: { background: "rgba(254,109,115,.14)", border: "1.5px solid rgba(214,59,70,.20)",   color: "#8c4d3a" },
   },
 ];
 
@@ -156,10 +169,10 @@ const Index = () => {
                 {/* Post Event — directly below nav */}
                 <button
                   onClick={() => navigate("/events/new")}
-                  className="mt-5 w-full flex items-center justify-center gap-2.5 text-white font-bold text-[15px] py-3.5 px-4 rounded-2xl active:scale-95 transition-all duration-150 hover:brightness-110"
+                  className="mt-5 w-full flex items-center justify-center gap-2.5 text-white font-bold text-[15px] py-3.5 px-4 rounded-2xl active:scale-95 transition-all duration-150 hover:brightness-110 fk-press"
                   style={{
-                    background: "hsl(var(--primary))",
-                    boxShadow: "0 6px 22px oklch(55% 0.20 196 / 0.38)",
+                    background: "var(--fk-paprika)",
+                    boxShadow: "0 6px 22px rgba(201,93,54,.38)",
                   }}
                 >
                   <span className="material-symbols-outlined text-[20px] leading-none">add_circle</span>
@@ -178,11 +191,12 @@ const Index = () => {
               {activeFilters.size > 0 && (
                 <button
                   onClick={() => setActiveFilters(new Set())}
-                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold transition-all duration-200 hover:-translate-y-px active:scale-95"
+                  className="inline-flex items-center gap-1 rounded-full text-[13px] font-bold transition-all duration-200 hover:-translate-y-px active:scale-95"
                   style={{
-                    background: "oklch(44% 0.14 25)",
-                    color: "oklch(97% 0.01 25)",
-                    boxShadow: "0 2px 8px oklch(44% 0.14 25 / 0.30)",
+                    padding: "7px 14px",
+                    background: "#3D2B1F",
+                    color: "#fff",
+                    boxShadow: "0 3px 10px rgba(61,43,31,.35)",
                   }}
                   aria-label="Clear all filters"
                 >
@@ -198,16 +212,18 @@ const Index = () => {
                     key={tag.label}
                     aria-pressed={on}
                     onClick={() => toggleFilter(tag.filter as string)}
-                    className="px-4 py-1.5 rounded-full text-sm font-semibold cursor-pointer transition-all duration-200 hover:-translate-y-px active:scale-95"
+                    className="rounded-full text-[13px] font-bold cursor-pointer transition-all duration-200 hover:-translate-y-px active:scale-95"
                     style={on ? {
-                      background: "oklch(44% 0.14 25)",
-                      color: "oklch(97% 0.01 25)",
-                      boxShadow: "0 3px 10px oklch(44% 0.14 25 / 0.35)",
+                      padding: "7px 14px",
+                      background: tag.color,
+                      color: "#fff",
+                      boxShadow: `0 3px 10px ${tag.color}55`,
                       transform: "translateY(-1px) scale(1.04)",
                     } : {
+                      padding: "7px 14px",
                       background: tag.bg,
                       color: tag.color,
-                      boxShadow: "0 1px 4px oklch(50% 0.05 30 / 0.12)",
+                      boxShadow: "0 1px 4px rgba(50,40,35,.10)",
                     }}
                   >
                     {tag.label}
@@ -222,25 +238,27 @@ const Index = () => {
               {EVENT_CATEGORIES.map((cat) => {
                 const filter = `category:${cat}`;
                 const on = activeFilters.has(filter);
-                const { bg, color } = TAG_COLOR_PALETTE[hashTag(cat) % TAG_COLOR_PALETTE.length];
+                const { bg, color } = CATEGORY_COLORS[cat] ?? { bg: "#E4E2DD", color: "#524341" };
                 return (
                   <button
                     key={cat}
                     aria-pressed={on}
                     onClick={() => toggleFilter(filter)}
-                    className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-sm font-semibold cursor-pointer transition-all duration-200 hover:-translate-y-px active:scale-95"
+                    className="inline-flex items-center gap-1.5 rounded-full text-[13px] font-bold cursor-pointer transition-all duration-200 hover:-translate-y-px active:scale-95"
                     style={on ? {
-                      background: "oklch(44% 0.14 25)",
-                      color: "oklch(97% 0.01 25)",
-                      boxShadow: "0 3px 10px oklch(44% 0.14 25 / 0.35)",
+                      padding: "7px 12px",
+                      background: color,
+                      color: "#fff",
+                      boxShadow: `0 3px 10px ${color}55`,
                       transform: "translateY(-1px) scale(1.04)",
                     } : {
+                      padding: "7px 12px",
                       background: bg,
                       color,
-                      boxShadow: "0 1px 4px oklch(50% 0.05 30 / 0.12)",
+                      boxShadow: "0 1px 4px rgba(50,40,35,.10)",
                     }}
                   >
-                    <span className="material-symbols-outlined text-[13px] leading-none">
+                    <span className="material-symbols-outlined text-[14px] leading-none">
                       {CATEGORY_ICONS[cat] ?? "label"}
                     </span>
                     {cat}
@@ -258,25 +276,32 @@ const Index = () => {
                     key={tag.name}
                     aria-pressed={on}
                     onClick={() => toggleFilter(filter)}
-                    className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-semibold cursor-pointer transition-all duration-200 hover:-translate-y-px active:scale-95"
+                    className="inline-flex items-center gap-1.5 rounded-full text-[13px] font-bold cursor-pointer transition-all duration-200 hover:-translate-y-px active:scale-95"
                     style={on ? {
-                      background: "oklch(44% 0.14 25)",
-                      color: "oklch(97% 0.01 25)",
-                      boxShadow: "0 3px 10px oklch(44% 0.14 25 / 0.35)",
+                      padding: "7px 14px",
+                      background: color,
+                      color: "#fff",
+                      boxShadow: `0 3px 10px ${color}55`,
                       transform: "translateY(-1px) scale(1.04)",
                     } : {
+                      padding: "7px 14px",
                       background: bg,
                       color,
-                      boxShadow: "0 1px 4px oklch(50% 0.05 30 / 0.12)",
+                      boxShadow: "0 1px 4px rgba(50,40,35,.10)",
                     }}
                   >
                     #{tag.name}
                     {tag.count > 0 && (
                       <span
-                        className="text-[10px] font-black px-1.5 py-px rounded-full leading-none"
-                        style={on
-                          ? { background: "rgba(255,255,255,0.25)", color: "oklch(97% 0.01 25)" }
-                          : { background: "oklch(0% 0 0 / 0.10)", color }}
+                        style={{
+                          padding: "1px 6px",
+                          borderRadius: 999,
+                          fontSize: 10,
+                          fontWeight: 900,
+                          lineHeight: 1.3,
+                          background: on ? "rgba(255,255,255,.28)" : "rgba(0,0,0,.10)",
+                          color: "inherit",
+                        }}
                       >
                         {tag.count}
                       </span>
@@ -325,16 +350,30 @@ const Index = () => {
                           <button
                             key={tag.name}
                             onClick={() => toggleFilter(filter)}
-                            className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold transition-all active:scale-95"
+                            className="inline-flex items-center gap-1.5 rounded-full text-[12px] font-bold transition-all active:scale-95"
                             style={on ? {
-                              background: "oklch(44% 0.14 25)",
-                              color: "oklch(97% 0.01 25)",
-                            } : { background: bg, color }}
+                              padding: "5px 10px",
+                              background: color,
+                              color: "#fff",
+                              boxShadow: `0 2px 8px ${color}44`,
+                            } : {
+                              padding: "5px 10px",
+                              background: bg,
+                              color,
+                              boxShadow: "0 1px 3px rgba(50,40,35,.08)",
+                            }}
                           >
                             #{tag.name}
-                            {on && <span className="opacity-70">✓</span>}
                             {tag.count > 0 && (
-                              <span className="ml-0.5 opacity-60 text-[10px]">{tag.count}</span>
+                              <span style={{
+                                padding: "1px 5px",
+                                borderRadius: 999,
+                                fontSize: 9,
+                                fontWeight: 900,
+                                lineHeight: 1.3,
+                                background: on ? "rgba(255,255,255,.28)" : "rgba(0,0,0,.10)",
+                                color: "inherit",
+                              }}>{tag.count}</span>
                             )}
                           </button>
                         );
@@ -354,10 +393,10 @@ const Index = () => {
       {/* ── Mobile FAB ── */}
       <button
         onClick={() => navigate("/events/new")}
-        className="md:hidden fixed bottom-6 right-6 w-14 h-14 rounded-full text-white shadow-lg flex items-center justify-center active:scale-90 transition-transform"
+        className="md:hidden fixed bottom-6 right-6 w-14 h-14 rounded-full text-white shadow-lg flex items-center justify-center active:scale-90 transition-transform fk-press"
         style={{
-          background: "hsl(var(--primary))",
-          boxShadow: "0 6px 20px oklch(55% 0.20 196 / 0.40)",
+          background: "var(--fk-paprika)",
+          boxShadow: "0 6px 20px rgba(201,93,54,.40)",
         }}
         aria-label="Post an event"
       >

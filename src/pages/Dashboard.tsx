@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import type { CSSProperties } from "react";
 import Header from "@/components/Header";
+import { EmptyState } from "@/components/EmptyState";
 import { EventCard } from "@/components/EventCard";
 import { useAuth } from "@/contexts/AuthContext";
 import { useEventsByIds } from "@/hooks/useEventsByIds";
@@ -99,24 +100,6 @@ function MyEventRow({ event }: { event: Event }) {
           </button>
         )}
       </div>
-    </div>
-  );
-}
-
-// ── Empty state ───────────────────────────────────────────────────────────────
-
-function EmptyState({ icon, message, cta, onCta }: { icon: string; message: string; cta: string; onCta: () => void }) {
-  return (
-    <div className="flex flex-col items-center justify-center py-20 gap-4 text-center">
-      <span className="material-symbols-outlined text-[56px] text-muted-foreground/30">{icon}</span>
-      <p className="text-muted-foreground text-sm max-w-xs">{message}</p>
-      <button
-        onClick={onCta}
-        className="px-5 py-2.5 rounded-full text-sm font-bold text-white transition-all hover:brightness-110 active:scale-95"
-        style={{ background: "hsl(var(--primary))", boxShadow: "0 4px 16px oklch(55% 0.20 196 / 0.35)" }}
-      >
-        {cta}
-      </button>
     </div>
   );
 }
@@ -246,12 +229,7 @@ export default function Dashboard() {
             {loadingMyEvents ? (
               <SkeletonRows count={4} />
             ) : myEvents.length === 0 ? (
-              <EmptyState
-                icon="edit_calendar"
-                message="You haven't posted any events yet. Share something happening on campus!"
-                cta="Post your first event"
-                onCta={() => navigate("/events/new")}
-              />
+              <EmptyState variant="my-events" onCta={() => navigate("/events/new")} />
             ) : (
               <div className="flex flex-col gap-3">
                 {/* Summary counts */}
@@ -283,12 +261,7 @@ export default function Dashboard() {
             {loadingSaved ? (
               <SkeletonGrid count={4} />
             ) : savedEventsList.length === 0 ? (
-              <EmptyState
-                icon="favorite"
-                message="Nothing saved yet — tap the ♥ on any poster to save it here."
-                cta="Browse the Noticeboard"
-                onCta={() => navigate("/")}
-              />
+              <EmptyState variant="saved" onCta={() => navigate("/")} />
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
                 {savedEventsList.map((event, i) => (
@@ -311,12 +284,7 @@ export default function Dashboard() {
             {loadingGoing ? (
               <SkeletonGrid count={4} />
             ) : goingEventsList.length === 0 ? (
-              <EmptyState
-                icon="celebration"
-                message="You haven't RSVPd to any events yet. Find something fun!"
-                cta="Browse the Noticeboard"
-                onCta={() => navigate("/")}
-              />
+              <EmptyState variant="going" onCta={() => navigate("/")} />
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
                 {goingEventsList.map((event, i) => (

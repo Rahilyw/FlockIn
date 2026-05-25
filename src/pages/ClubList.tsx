@@ -5,6 +5,7 @@ import Header from "@/components/Header";
 import { ClubCard } from "@/components/ClubCard";
 import { useClubs } from "@/hooks/useClubs";
 import { useBookmarks } from "@/hooks/useBookmarks";
+import { EmptyState } from "@/components/EmptyState";
 
 export default function ClubList() {
   const [search, setSearch] = useState("");
@@ -57,15 +58,7 @@ export default function ClubList() {
             ))}
           </div>
         ) : filtered.length === 0 ? (
-          <div className="text-center py-16 space-y-4">
-            <p className="text-muted-foreground">No clubs match your search. Try different keywords.</p>
-            <button
-              className="text-sm text-primary font-medium hover:underline"
-              onClick={() => setSearch("")}
-            >
-              Clear search
-            </button>
-          </div>
+          <EmptyState variant="clubs" onCta={() => setSearch("")} />
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {filtered.map((club, index) => (
