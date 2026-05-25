@@ -304,15 +304,18 @@ export default function CreateEvent() {
   const onSubmit = async (values: CreateEventFormValues) => {
     if (!user) { navigate("/login"); return; }
 
-    // Rate limit: max 3 events per day (fail-open if query throws)
-    try {
-      const todayCount = await getUserEventCountToday(user.uid);
-      if (todayCount >= 3) {
-        toast.error("You've posted 3 events today — the daily limit. Try again tomorrow!");
-        return;
+    // Rate limit: max 3 events per day — admins are exempt
+    const ADMIN_UID = import.meta.env.VITE_ADMIN_UID as string | undefined;
+    if (user.uid !== ADMIN_UID) {
+      try {
+        const todayCount = await getUserEventCountToday(user.uid);
+        if (todayCount >= 3) {
+          toast.error("You've posted 3 events today — the daily limit. Try again tomorrow!");
+          return;
+        }
+      } catch {
+        // Non-critical — let the submission proceed if the check fails
       }
-    } catch {
-      // Non-critical — let the submission proceed if the check fails
     }
 
     let imagePath: string | null = null;

@@ -198,12 +198,14 @@ const Index = () => {
         {/* ── Main content ── */}
         <main className="flex-1 min-w-0 px-6 py-6">
           {/* ── Filter pill bar ── */}
-          <div className="flex flex-wrap gap-2.5 mb-8 items-center">
+          {/* On mobile: single scrollable row. On desktop: wrapping flex grid */}
+          <div className="-mx-6 px-6 md:mx-0 md:px-0 overflow-x-auto md:overflow-x-visible scrollbar-hide mb-4 md:mb-8">
+          <div className="flex gap-2 md:gap-2.5 items-center w-max md:w-auto md:flex-wrap">
               {/* Clear — slides in when any filter is active */}
               {activeFilters.size > 0 && (
                 <button
                   onClick={() => setActiveFilters(new Set())}
-                  className="inline-flex items-center gap-1 rounded-full text-[13px] font-bold transition-all duration-200 hover:-translate-y-px active:scale-95"
+                  className="shrink-0 inline-flex items-center gap-1 rounded-full text-[13px] font-bold transition-all duration-200 hover:-translate-y-px active:scale-95"
                   style={{
                     padding: "7px 14px",
                     background: "#3D2B1F",
@@ -224,7 +226,7 @@ const Index = () => {
                     key={tag.label}
                     aria-pressed={on}
                     onClick={() => toggleFilter(tag.filter as string)}
-                    className="rounded-full text-[13px] font-bold cursor-pointer transition-all duration-200 hover:-translate-y-px active:scale-95"
+                    className="shrink-0 rounded-full text-[13px] font-bold cursor-pointer transition-all duration-200 hover:-translate-y-px active:scale-95"
                     style={on ? {
                       padding: "7px 14px",
                       background: tag.color,
@@ -256,7 +258,7 @@ const Index = () => {
                     key={cat}
                     aria-pressed={on}
                     onClick={() => toggleFilter(filter)}
-                    className="inline-flex items-center gap-1.5 rounded-full text-[13px] font-bold cursor-pointer transition-all duration-200 hover:-translate-y-px active:scale-95"
+                    className="shrink-0 inline-flex items-center gap-1.5 rounded-full text-[13px] font-bold cursor-pointer transition-all duration-200 hover:-translate-y-px active:scale-95"
                     style={on ? {
                       padding: "7px 12px",
                       background: color,
@@ -288,7 +290,7 @@ const Index = () => {
                     key={tag.name}
                     aria-pressed={on}
                     onClick={() => toggleFilter(filter)}
-                    className="inline-flex items-center gap-1.5 rounded-full text-[13px] font-bold cursor-pointer transition-all duration-200 hover:-translate-y-px active:scale-95"
+                    className="shrink-0 inline-flex items-center gap-1.5 rounded-full text-[13px] font-bold cursor-pointer transition-all duration-200 hover:-translate-y-px active:scale-95"
                     style={on ? {
                       padding: "7px 14px",
                       background: color,
@@ -326,7 +328,7 @@ const Index = () => {
               <Popover onOpenChange={() => setTagSearch("")}>
                 <PopoverTrigger asChild>
                   <button
-                    className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-sm font-semibold cursor-pointer transition-all duration-200 hover:-translate-y-px active:scale-95"
+                    className="shrink-0 inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-sm font-semibold cursor-pointer transition-all duration-200 hover:-translate-y-px active:scale-95"
                     style={{
                       background: "oklch(94% 0.02 260)",
                       color: "oklch(42% 0.08 260)",
@@ -396,24 +398,13 @@ const Index = () => {
                   </div>
                 </PopoverContent>
               </Popover>
-          </div>
+          </div>{/* inner flex row */}
+          </div>{/* scroll wrapper */}
 
           <Noticeboard filters={activeFilters} />
         </main>
       </div>
 
-      {/* ── Mobile FAB ── */}
-      <button
-        onClick={() => navigate("/events/new")}
-        className="md:hidden fixed bottom-6 right-6 w-14 h-14 rounded-full text-white shadow-lg flex items-center justify-center active:scale-90 transition-transform fk-press"
-        style={{
-          background: "var(--fk-paprika)",
-          boxShadow: "0 6px 20px rgba(201,93,54,.40)",
-        }}
-        aria-label="Post an event"
-      >
-        <span className="material-symbols-outlined text-[28px]">add</span>
-      </button>
     </div>
   );
 };

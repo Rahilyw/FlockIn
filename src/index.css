@@ -259,10 +259,19 @@
 
 @media (max-width: 640px) {
   .masonry-grid {
-    grid-template-columns: 1fr;
-    gap: 20px;
-    padding: 16px;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    padding: 12px;
   }
+}
+
+/* ── Scrollbar hide utility ── */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
 }
 
 /* ── Material Symbols ── */

@@ -1,14 +1,9 @@
 import { useNavigate, useLocation } from "react-router-dom";
-import { useBookmarks } from "@/hooks/useBookmarks";
 
 const HIDDEN_ON = ["/login", "/signup", "/admin", "/onboarding"];
 
-const TABS = [
-  { id: "noticeboard", label: "Noticeboard", icon: "dynamic_feed", route: "/",          tabState: null },
-  { id: "saved",       label: "Saved",       icon: "favorite",     route: "/dashboard", tabState: "saved" },
-  { id: "going",       label: "Going",       icon: "celebration",  route: "/dashboard", tabState: "going" },
-  { id: "myspace",     label: "My Space",    icon: "person",       route: "/dashboard", tabState: null },
-] as const;
+const LEFT_TABS  = [{ id: "noticeboard", label: "Noticeboard", icon: "dynamic_feed", route: "/",          tabState: null }] as const;
+const RIGHT_TABS = [{ id: "myspace",     label: "My Space",    icon: "person",       route: "/dashboard", tabState: null }] as const;
 
 const PEACOCK_GRADIENT =
   "linear-gradient(145deg, #0F3D5C 0%, #2A6FC8 28%, #1F8A6E 54%, #24E5D2 78%, #0ea5e9 100%)";
@@ -23,7 +18,6 @@ const INACTIVE   = "#a8a29e";
 const BottomTabBar = () => {
   const navigate  = useNavigate();
   const { pathname } = useLocation();
-  const { savedEvents } = useBookmarks();
 
   if (HIDDEN_ON.some((p) => pathname === p || pathname.startsWith(p + "/"))) return null;
 
@@ -32,16 +26,6 @@ const BottomTabBar = () => {
     if (id === "myspace")     return pathname.startsWith("/dashboard") || pathname.startsWith("/profile");
     return false;
   };
-
-  const handleTab = (route: string, tabState: string | null) => {
-    if (tabState) navigate(route, { state: { tab: tabState } });
-    else navigate(route);
-  };
-
-  const savedCount = savedEvents.length;
-
-  /* Split tabs around the FAB */
-  const [left, right] = [TABS.slice(0, 2), TABS.slice(2)];
 
   return (
     <nav
@@ -57,23 +41,19 @@ const BottomTabBar = () => {
       {/* Tab row */}
       <div className="flex items-end h-full px-1 pb-3">
 
-        {/* Left two tabs */}
-        {left.map((tab) => {
+        {/* Left tab */}
+        {LEFT_TABS.map((tab) => {
           const active = isActive(tab.id);
           return (
             <button
               key={tab.id}
-              onClick={() => handleTab(tab.route, tab.tabState)}
-              className="relative flex-1 flex flex-col items-center gap-[2px] pt-2"
+              onClick={() => navigate(tab.route)}
+              className="flex-1 flex flex-col items-center gap-[2px] pt-2"
               style={{ background: "none", border: "none", cursor: "pointer" }}
             >
-              {/* Icon pill */}
               <div
                 className="flex items-center justify-center rounded-full transition-all duration-200"
-                style={{
-                  width: 52, height: 30,
-                  background: active ? ACTIVE_BG : "transparent",
-                }}
+                style={{ width: 52, height: 30, background: active ? ACTIVE_BG : "transparent" }}
               >
                 <span
                   className="material-symbols-outlined"
@@ -86,25 +66,6 @@ const BottomTabBar = () => {
                 >
                   {tab.icon}
                 </span>
-                {/* Saved badge */}
-                {tab.id === "saved" && savedCount > 0 && (
-                  <span
-                    className="absolute flex items-center justify-center font-black"
-                    style={{
-                      top: 4, right: "calc(50% - 30px)",
-                      minWidth: 17, height: 17,
-                      borderRadius: 999,
-                      background: "#FE6D73",
-                      color: "#fff",
-                      fontSize: 9,
-                      paddingInline: 3,
-                      lineHeight: 1,
-                      border: "1.5px solid #fff",
-                    }}
-                  >
-                    {savedCount > 9 ? "9+" : savedCount}
-                  </span>
-                )}
               </div>
               <span className="text-[9.5px] font-bold leading-none" style={{ color: active ? ACTIVE_FG : INACTIVE }}>
                 {tab.label}
@@ -116,22 +77,19 @@ const BottomTabBar = () => {
         {/* FAB spacer */}
         <div style={{ width: 72, flexShrink: 0 }} />
 
-        {/* Right two tabs */}
-        {right.map((tab) => {
+        {/* Right tab */}
+        {RIGHT_TABS.map((tab) => {
           const active = isActive(tab.id);
           return (
             <button
               key={tab.id}
-              onClick={() => handleTab(tab.route, tab.tabState)}
+              onClick={() => navigate(tab.route)}
               className="flex-1 flex flex-col items-center gap-[2px] pt-2"
               style={{ background: "none", border: "none", cursor: "pointer" }}
             >
               <div
                 className="flex items-center justify-center rounded-full transition-all duration-200"
-                style={{
-                  width: 52, height: 30,
-                  background: active ? ACTIVE_BG : "transparent",
-                }}
+                style={{ width: 52, height: 30, background: active ? ACTIVE_BG : "transparent" }}
               >
                 <span
                   className="material-symbols-outlined"
