@@ -166,17 +166,29 @@ const Index = () => {
                   })}
                 </nav>
 
-                {/* Post Event — directly below nav */}
+                {/* Post Event — peacock + rainbow ring */}
                 <button
                   onClick={() => navigate("/events/new")}
-                  className="mt-5 w-full flex items-center justify-center gap-2.5 text-white font-bold text-[15px] py-3.5 px-4 rounded-2xl active:scale-95 transition-all duration-150 hover:brightness-110 fk-press"
+                  className="mt-5 w-full active:scale-95 transition-all duration-150 fk-press"
                   style={{
-                    background: "var(--fk-paprika)",
-                    boxShadow: "0 6px 22px rgba(201,93,54,.38)",
+                    background: "conic-gradient(from 0deg, #ff0080, #ff6b00, #ffd700, #00e676, #00b4d8, #7c4dff, #ff0080)",
+                    padding: "2.5px",
+                    borderRadius: 18,
+                    border: "none",
+                    cursor: "pointer",
+                    boxShadow: "0 6px 24px rgba(0,0,0,0.18), 0 2px 10px rgba(36,229,210,0.28)",
                   }}
                 >
-                  <span className="material-symbols-outlined text-[20px] leading-none">add_circle</span>
-                  Post an Event
+                  <div
+                    className="w-full flex items-center justify-center gap-2.5 text-white font-bold text-[15px] py-3.5 px-4"
+                    style={{
+                      background: "linear-gradient(145deg, #0F3D5C 0%, #2A6FC8 28%, #1F8A6E 54%, #24E5D2 78%, #0ea5e9 100%)",
+                      borderRadius: 15.5,
+                    }}
+                  >
+                    <span className="material-symbols-outlined text-[20px] leading-none">add_circle</span>
+                    Post an Event
+                  </div>
                 </button>
               </div>
             </aside>

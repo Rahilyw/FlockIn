@@ -456,3 +456,10 @@
 @media (min-width: 769px) {
   .fk-bottom-tabs { display: none !important; }
 }
+
+/* ── Mobile: pad pages so content clears the bottom tab bar ── */
+@media (max-width: 767px) {
+  #root {
+    padding-bottom: 76px;
+  }
+}

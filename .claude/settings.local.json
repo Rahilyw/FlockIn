@@ -29,7 +29,13 @@
       "mcp__stitch__list_projects",
       "mcp__stitch__list_screens",
       "WebFetch(domain:contribution.usercontent.google.com)",
-      "mcp__stitch__get_screen"
+      "mcp__stitch__get_screen",
+      "Bash(Select-Object FullName, PSIsContainer)",
+      "Bash(Format-Table -AutoSize)",
+      "Bash(Get-ChildItem -Path . -Name)",
+      "Bash(grep -E \"\\\\.tsx$\")",
+      "Bash(grep -E \"\\\\.\\(ts|tsx\\)$\")",
+      "Bash(grep -i \"\\\\.ts$\")"
     ]
   }
 }

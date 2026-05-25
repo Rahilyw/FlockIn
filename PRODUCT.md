@@ -450,6 +450,13 @@ The phase labels below indicate **when to prioritise building** something from s
 | Schedule conflict detection | Phase 3 | Not built |
 | Push or email notifications | Phase 3 | Not built |
 | Mobile app (React Native) | Phase 3 | Not built |
+| "Expiring Soon" pulse on same-day events | Phase 2 | Not built |
+| Noticeboard "snapshot" share (html2canvas) | Phase 2 | Not built |
+| Pinned / Featured event slot (gold pushpin, admin-only) | Phase 2 | Not built |
+| Anonymous engagement analytics (Firebase Analytics) | Phase 2 | Not built |
+| Dark mode toggle | Phase 3 | Not built |
+| Event creation templates (Workshop, Social, Film Screening) | Phase 3 | Not built |
+| Duplicate event detection before admin approval | Phase 3 | Not built |
 
 **What "Phase 2/3" means in practice:**
 - If it's already built → keep it, don't touch it unless fixing a bug or explicitly asked to improve it

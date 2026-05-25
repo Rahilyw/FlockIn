@@ -218,31 +218,6 @@ const Header = () => {
           </DropdownMenu>
         )}
 
-        {/* Mobile hamburger */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button className="md:hidden p-2 hover:bg-surface-variant/40 rounded-full transition-all fk-press">
-              <span className="material-symbols-outlined" style={{ color: "var(--fk-paprika)" }}>menu</span>
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-52 p-2 gap-1 flex flex-col">
-            {NAV_LINKS.map(({ label, icon, to, bgOn, fgOn, bgOff, fgOff }) => {
-              const isActive = to === "/" ? location.pathname === "/" : location.pathname.startsWith(to);
-              return (
-                <DropdownMenuItem key={label} asChild>
-                  <Link
-                    to={to}
-                    className="inline-flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-bold w-full"
-                    style={{ background: isActive ? bgOn : bgOff, color: isActive ? fgOn : fgOff }}
-                  >
-                    <span className="material-symbols-outlined" style={{ fontSize: 16 }}>{icon}</span>
-                    {label}
-                  </Link>
-                </DropdownMenuItem>
-              );
-            })}
-          </DropdownMenuContent>
-        </DropdownMenu>
       </div>
     </header>
   );
