@@ -15,6 +15,7 @@ import {
   setPersistence,
   signInWithPopup,
   signOut,
+  OAuthProvider,
 } from "firebase/auth";
 import { getFirebaseAuth, getGoogleProvider } from "@/firebase/app";
 import { createUserProfile, getUserProfile, updateUserProfile } from "@/lib/firestore";
@@ -27,6 +28,7 @@ type AuthContextValue = {
   refreshProfile: () => Promise<void>;
   signOutUser: () => Promise<void>;
   signInWithGoogle: () => Promise<void>;
+  signInWithApple: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -99,9 +101,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  const signInWithApple = useCallback(async () => {
+    const provider = new OAuthProvider("apple.com");
+    provider.addScope("email");
+    provider.addScope("name");
+    const credential = await signInWithPopup(getFirebaseAuth(), provider);
+    const { isNewUser } = getAdditionalUserInfo(credential) ?? {};
+    if (isNewUser) {
+      await createUserProfile(
+        credential.user.uid,
+        credential.user.email ?? "",
+        credential.user.displayName,
+        credential.user.photoURL,
+      );
+    } else if (credential.user.photoURL) {
+      await updateUserProfile(credential.user.uid, { photoURL: credential.user.photoURL });
+    }
+  }, []);
+
   const value = useMemo(
-    () => ({ user, profile, loading, refreshProfile, signOutUser, signInWithGoogle }),
-    [user, profile, loading, refreshProfile, signOutUser, signInWithGoogle],
+    () => ({ user, profile, loading, refreshProfile, signOutUser, signInWithGoogle, signInWithApple }),
+    [user, profile, loading, refreshProfile, signOutUser, signInWithGoogle, signInWithApple],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

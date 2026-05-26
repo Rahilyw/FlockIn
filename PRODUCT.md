@@ -563,7 +563,7 @@ src/
 3. ✅ New events enter `pending` state, confirmed to creator, not visible on board until approved
 4. ✅ Admin can approve or reject events from the `/admin` queue
 5. ✅ Approved posters appear on the noticeboard with pushpin and ID-seeded tilt
-6. ✅ Any signed-in user can Save 🔖 or RSVP ✅ (no separate Like button)
+6. ✅ Any signed-in user can Save ❤️ or RSVP ✅ to events, with counts updating in real-time
 7. ✅ Saved and RSVP'd events appear in "My Space" correctly
 8. ✅ Creators can edit and delete only their own events; edits re-enter pending queue
 9. ✅ Noticeboard is fully browsable without logging in

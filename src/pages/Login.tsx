@@ -6,8 +6,6 @@ import { signInWithEmailAndPassword } from "firebase/auth";
 import { getFirebaseAuth } from "@/firebase/app";
 import { loginSchema, type LoginFormValues } from "@/lib/authSchemas";
 import { mapAuthError } from "@/lib/authErrors";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Form,
   FormControl,
@@ -17,17 +15,35 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Separator } from "@/components/ui/separator";
 import { toast } from "@/components/ui/sonner";
 import { useAuth } from "@/contexts/AuthContext";
+import { ChevronDown, ChevronUp } from "lucide-react";
+import { AuthBoardLayout } from "@/components/auth/AuthBoardLayout";
 
 const GoogleIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
+  <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true" className="shrink-0">
     <path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"/>
     <path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/>
     <path fill="#FBBC05" d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z"/>
     <path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z"/>
   </svg>
+);
+
+const FlockInWordmark = () => (
+  <div
+    className="font-black leading-none"
+    style={{ fontFamily: "Montserrat, sans-serif", fontSize: 34, letterSpacing: "-0.01em" }}
+  >
+    <span style={{ color: "#2A6FC8" }}>F</span>
+    <span style={{ color: "#2A6FC8" }}>l</span>
+    <span style={{ color: "#E89B3C" }}>o</span>
+    <span style={{ color: "#0F3D5C" }}>c</span>
+    <span style={{ color: "#2A6FC8" }}>k</span>
+    <span style={{ color: "#1F8A6E" }}>I</span>
+    <span style={{ color: "#E89B3C" }}>n</span>
+    <span style={{ color: "#C95D36" }}>!</span>
+    <span style={{ color: "#2A6FC8" }}>!</span>
+  </div>
 );
 
 const Login = () => {
@@ -36,6 +52,7 @@ const Login = () => {
   const { user, loading: authLoading, signInWithGoogle } = useAuth();
   const from = (location.state as { from?: Location } | null)?.from?.pathname ?? "/";
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [showEmailForm, setShowEmailForm] = useState(false);
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -60,7 +77,7 @@ const Login = () => {
     setGoogleLoading(true);
     try {
       await signInWithGoogle();
-      toast.success("Signed in with Google.");
+      toast.success("Welcome to FlockIn!!");
       navigate(from, { replace: true });
     } catch (error) {
       toast.error(mapAuthError(error));
@@ -70,78 +87,263 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
-      <Card className="w-full max-w-md shadow-lg">
-        <CardHeader>
-          <CardTitle className="text-2xl">Sign in</CardTitle>
-          <CardDescription>Welcome back to FlockIn!!</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <Button
-            type="button"
-            variant="outline"
-            className="w-full gap-2"
-            onClick={handleGoogleSignIn}
-            disabled={googleLoading}
-          >
-            <GoogleIcon />
-            {googleLoading ? "Signing in…" : "Continue with Google"}
-          </Button>
+    <AuthBoardLayout>
+      <div
+        className="relative w-full max-w-sm"
+        style={{ transform: "rotate(0.5deg)" }}
+      >
+        {/* Pushpin */}
+        <div
+          style={{
+            width: 14,
+            height: 14,
+            borderRadius: "50%",
+            background: "radial-gradient(circle at 35% 35%, #ff8a80 0%, transparent 55%), #FF5252",
+            position: "absolute",
+            top: -8,
+            left: "50%",
+            transform: "translateX(-50%)",
+            boxShadow: "0 3px 7px rgba(0,0,0,0.55), inset 0 -1px 2px rgba(0,0,0,0.2)",
+            zIndex: 10,
+          }}
+        />
 
-          <div className="flex items-center gap-3">
-            <Separator className="flex-1" />
-            <span className="text-xs text-muted-foreground">or</span>
-            <Separator className="flex-1" />
+        {/* Card */}
+        <div
+          style={{
+            background: "#FFFEF8",
+            borderRadius: 16,
+            boxShadow:
+              "0 20px 60px rgba(0,0,0,0.30), 0 6px 20px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.95)",
+            overflow: "hidden",
+          }}
+        >
+          {/* Header */}
+          <div className="flex flex-col items-center pt-10 pb-6 px-8">
+            <img
+              src="/flockin-peacock-pixel.jpeg"
+              alt="FlockIn!! logo"
+              style={{ width: 64, height: 64, borderRadius: 12, marginBottom: 10 }}
+            />
+            <FlockInWordmark />
+            <h1
+              className="font-black mt-4 mb-1"
+              style={{
+                fontFamily: "Montserrat, sans-serif",
+                fontSize: 20,
+                color: "#1B1C19",
+                letterSpacing: "-0.01em",
+              }}
+            >
+              Welcome back!
+            </h1>
+            <p
+              style={{
+                fontFamily: "Montserrat, sans-serif",
+                fontSize: 13,
+                color: "#8a7c79",
+                fontWeight: 500,
+                textAlign: "center",
+              }}
+            >
+              Sign in to check what's pinned today.
+            </p>
           </div>
 
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email</FormLabel>
-                    <FormControl>
-                      <Input type="email" autoComplete="email" placeholder="you@university.edu" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Password</FormLabel>
-                    <FormControl>
-                      <Input type="password" autoComplete="current-password" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <Button
-                type="submit"
-                className="w-full"
-                disabled={form.formState.isSubmitting}
+          {/* Body */}
+          <div className="px-8 pb-8 space-y-4">
+            {/* Google button */}
+            <button
+              type="button"
+              onClick={handleGoogleSignIn}
+              disabled={googleLoading}
+              className="w-full flex items-center justify-center gap-3 transition-all active:scale-95"
+              style={{
+                height: 48,
+                background: "#FFFFFF",
+                border: "1.5px solid #dadce0",
+                borderRadius: 10,
+                fontFamily: "Montserrat, sans-serif",
+                fontWeight: 700,
+                fontSize: 14,
+                color: "#1f1f1f",
+                cursor: googleLoading ? "not-allowed" : "pointer",
+                boxShadow: "0 1px 4px rgba(0,0,0,0.08)",
+              }}
+            >
+              <GoogleIcon />
+              {googleLoading ? "Signing in…" : "Continue with Google"}
+            </button>
+
+            <p
+              style={{
+                textAlign: "center",
+                fontFamily: "Montserrat, sans-serif",
+                fontSize: 11.5,
+                color: "#8a7c79",
+                fontWeight: 500,
+              }}
+            >
+              Any email works — students, alumni, or friends.
+            </p>
+
+            {/* Dotted divider */}
+            <div
+              style={{
+                borderTop: "1.5px dashed #E4E0D9",
+                marginTop: 4,
+                marginBottom: 4,
+              }}
+            />
+
+            {/* Developer access toggle */}
+            <div>
+              <button
+                type="button"
+                onClick={() => setShowEmailForm(!showEmailForm)}
+                className="w-full flex items-center justify-center gap-1 py-1 border-0 outline-none appearance-none transition-colors"
+                style={{
+                  fontFamily: "Montserrat, sans-serif",
+                  fontSize: 10,
+                  fontWeight: 600,
+                  color: "#c4bab8",
+                  background: "none",
+                  cursor: "pointer",
+                }}
               >
-                {form.formState.isSubmitting ? "Signing in…" : "Sign in"}
-              </Button>
-            </form>
-          </Form>
-        </CardContent>
-        <CardFooter className="flex justify-center border-t pt-6">
-          <p className="text-sm text-muted-foreground">
-            No account?{" "}
-            <Link to="/signup" className="text-primary font-medium hover:underline">
-              Create one
+                {showEmailForm ? (
+                  <><ChevronUp className="w-3 h-3" />hide email login</>
+                ) : (
+                  <><ChevronDown className="w-3 h-3" />sign in with email</>
+                )}
+              </button>
+
+              {showEmailForm && (
+                <div className="animate-card-enter space-y-3 pt-3">
+                  <Form {...form}>
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
+                      <FormField
+                        control={form.control}
+                        name="email"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel
+                              style={{
+                                fontFamily: "Montserrat, sans-serif",
+                                fontSize: 10,
+                                fontWeight: 800,
+                                letterSpacing: "0.12em",
+                                textTransform: "uppercase",
+                                color: "#8a7c79",
+                              }}
+                            >
+                              Email
+                            </FormLabel>
+                            <FormControl>
+                              <Input
+                                type="email"
+                                autoComplete="email"
+                                placeholder="you@example.com"
+                                className="h-10 bg-white text-sm"
+                                style={{ borderColor: "#E4E0D9" }}
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="password"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel
+                              style={{
+                                fontFamily: "Montserrat, sans-serif",
+                                fontSize: 10,
+                                fontWeight: 800,
+                                letterSpacing: "0.12em",
+                                textTransform: "uppercase",
+                                color: "#8a7c79",
+                              }}
+                            >
+                              Password
+                            </FormLabel>
+                            <FormControl>
+                              <Input
+                                type="password"
+                                autoComplete="current-password"
+                                className="h-10 bg-white text-sm"
+                                style={{ borderColor: "#E4E0D9" }}
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <button
+                        type="submit"
+                        disabled={form.formState.isSubmitting}
+                        className="w-full transition-all active:scale-95"
+                        style={{
+                          height: 44,
+                          background: "#C95D36",
+                          color: "#FFF",
+                          border: "none",
+                          borderRadius: 10,
+                          fontFamily: "Montserrat, sans-serif",
+                          fontWeight: 800,
+                          fontSize: 13,
+                          cursor: form.formState.isSubmitting ? "not-allowed" : "pointer",
+                          opacity: form.formState.isSubmitting ? 0.7 : 1,
+                        }}
+                      >
+                        {form.formState.isSubmitting ? "Signing in…" : "Sign in with Email"}
+                      </button>
+                    </form>
+                  </Form>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Footer */}
+          <div
+            className="flex flex-col items-center gap-2 py-5 px-8"
+            style={{ borderTop: "1px solid #F0EDE8" }}
+          >
+            <p
+              style={{
+                fontFamily: "Montserrat, sans-serif",
+                fontSize: 12,
+                color: "#8a7c79",
+                fontWeight: 500,
+              }}
+            >
+              Don't have a login yet?
+            </p>
+            <Link
+              to="/signup"
+              className="transition-colors"
+              style={{
+                padding: "6px 20px",
+                borderRadius: 999,
+                border: "1.5px solid rgba(201,93,54,0.4)",
+                fontFamily: "Montserrat, sans-serif",
+                fontWeight: 700,
+                fontSize: 12.5,
+                color: "#C95D36",
+                textDecoration: "none",
+              }}
+            >
+              Create Account →
             </Link>
-          </p>
-        </CardFooter>
-      </Card>
-    </div>
+          </div>
+        </div>
+      </div>
+    </AuthBoardLayout>
   );
 };
 
