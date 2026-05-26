@@ -184,7 +184,7 @@ const Login = () => {
                 fontWeight: 500,
               }}
             >
-              Any email works — students, alumni, or friends.
+              Any email works: students, alumni, or friends.
             </p>
 
             {/* Dotted divider */}
