@@ -169,7 +169,7 @@ const Header = () => {
             <DropdownMenuTrigger asChild>
               <button className="rounded-full transition-all active:scale-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary">
                 <Avatar className="h-9 w-9">
-                  <AvatarImage src={user.photoURL ?? undefined} alt={profile?.displayName ?? user.email ?? ""} />
+                  <AvatarImage src={profile?.photoURL ?? user.photoURL ?? undefined} alt={profile?.displayName ?? user.email ?? ""} />
                   <AvatarFallback className="text-sm">
                     {(profile?.displayName ?? user.email ?? "?")
                       .split(" ")

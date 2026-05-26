@@ -1,11 +1,14 @@
-# FlockIn — Entity Relationships
-*Seed document for MiroFish knowledge graph construction*
+# FlockIn!! — Entity Relationships & Knowledge Graph
+*MiroFish seed document — University of Victoria deployment*
+*Reflects full Phase 1 + Phase 2 + Phase 3 feature set*
 
 ---
 
 ## Overview
 
-This document describes all meaningful entities in the FlockIn world and the relationships between them. The goal is to provide MiroFish with sufficient structure to build a knowledge graph that accurately models the people, places, events, groups, concepts, and platform behaviors that constitute campus social life as FlockIn mediates it. Every relationship described here is either directly encoded in the product's data model or emerges from the social dynamics the product is designed to facilitate.
+This document describes all meaningful entities in the FlockIn!! world at the University of Victoria and the relationships between them. The goal is to give MiroFish sufficient structured information to construct a knowledge graph that accurately models the people, places, events, organizations, campus infrastructure, concepts, and behavioral dynamics that constitute UVic campus social life as mediated by FlockIn!!.
+
+Every entity and relationship described here is either directly encoded in the product's data model, present in the seeded campus data, or emerges from the documented social dynamics of UVic's specific campus context.
 
 ---
 
@@ -13,33 +16,45 @@ This document describes all meaningful entities in the FlockIn world and the rel
 
 ### User (Base Entity)
 
-Every person in the FlockIn world who has signed up is a User. A User has a unique identifier (uid), a display name, an email address (used for Google Sign-In), an optional profile photo (from Google), an optional bio of up to 200 characters, and a list of interests chosen from the 24 named interest categories. A User maintains four distinct lists that record their activity: their joined events (RSVPed to attend), their saved events (bookmarked), their joined clubs (member of), and their saved clubs (bookmarked but not joined). A User completes onboarding by selecting at minimum three interests, which determines their personalization profile. The onboardingComplete flag is the gate between signup and full access. Users are created at a point in time (createdAt) and updated whenever their profile or activity changes (updatedAt).
+A User is any person who has created a FlockIn!! account. A User has a unique system-generated identifier (uid), a display name, an email address (from Google Sign-In, any domain accepted), an optional profile photo (Google avatar), a bio of up to 200 characters, and a curated list of interests from the 24 named categories. A User maintains six activity lists: joined events (RSVPed), saved events (bookmarked), joined clubs (formal member), saved clubs (bookmarked without joining), subscribed clubs (notification opt-in), and upcoming reminders (events the user will be notified about). The `onboardingComplete` flag gates access to the full app experience.
 
-The User entity has the following direct relationships to other entities:
-- A User SELECTS one or more Interests, which drives all recommendation behavior
-- A User JOINS zero or more Events (RSVP), creating an attendance commitment
-- A User SAVES zero or more Events, creating a passive bookmark without commitment
-- A User JOINS zero or more Clubs, becoming a member
-- A User SAVES zero or more Clubs, showing interest without membership
-- A User CREATES zero or more Events, making them the Organizer of those events
-- A User REPORTS zero or more Events, flagging them for moderation review
-- A User IS an Admin (for the single designated administrator user), granting access to the Admin Queue
+**User → SELECTS → Interest** (many-to-many, updated any time via Profile page)  
+**User → RSVPS_TO → Event** (many-to-many, atomically tracked bidirectionally)  
+**User → SAVES → Event** (many-to-many, creates bookmark without commitment)  
+**User → JOINS → Club** (many-to-many, atomic member list update)  
+**User → SAVES → Club** (many-to-many, lightweight bookmark)  
+**User → SUBSCRIBES_TO → Club** (many-to-many, triggers push notifications when club posts events)  
+**User → CREATES → Event** (one-to-many, makes user the Organizer)  
+**User → REPORTS → Event** (many-to-one flag, sets reported: true)  
+**User → SHARES → Event** (generates snapshot image, distributes externally)  
+**User → EXPORTS → Event** (calendar export to iCal/Google Calendar)  
+**User → RECEIVES → PushNotification** (triggered by subscriptions and RSVPs)
 
-### Organizer (Role specialization of User)
+### Organizer (Behavioral Role)
 
-An Organizer is any User who has created at least one event. The Organizer role is not a separate account type — it is a behavioral role that any User can assume by clicking "Post an Event." An Organizer becomes the sole owner of their events: they alone can edit them, delete them, and observe their moderation status. An Organizer POSTS Events. An Organizer RECEIVES a moderation outcome (approved or rejected) for each event they post. An Organizer MANAGES their Events through the Dashboard (My Events tab). If an Organizer deletes one of their Events, all RSVP Users are automatically removed from that event in a single atomic transaction.
+An Organizer is any User who has created at least one event. Not a separate account type — any User becomes an Organizer by posting. An Organizer IS SOLELY RESPONSIBLE for the events they create: only they can edit, delete, or see the approval status. An Organizer SEES their event's RSVP count in real time from My Space. An Organizer SUBMITS events that enter the pending queue. An Organizer RECEIVES admin decisions (approved/rejected) as status changes visible in their Dashboard.
 
-### Admin (Role specialization of User)
+Real UVic examples of the Organizer role: the events coordinator of the Victoria Coding Collective, a UVSS Arts & Events committee member, a member of the UVic Photography Club, a Graduate Students Society officer.
 
-The Admin is a single designated User whose UID matches the environment variable VITE_ADMIN_UID. The Admin REVIEWS all pending Event submissions. The Admin APPROVES or REJECTS each pending Event. Approved Events become visible on the public Noticeboard. Rejected Events remain visible only to their creator with a "Not approved" badge. The Admin has no other special capabilities visible in the current implementation — they cannot create clubs, manage resources, or view user profiles. The Admin role is non-transferable in the current architecture.
+### Admin (Role)
 
-### Attendee (Role specialization of User)
+The Admin is a single User whose Firebase UID matches the environment variable VITE_ADMIN_UID. The Admin REVIEWS all pending events in the Admin Queue at `/admin`. The Admin APPROVES or REJECTS pending events. The Admin DESIGNATES one event at a time as Featured (gold pushpin, top-left Noticeboard position). The Admin RESPONDS TO reported events by reviewing and potentially rejecting them. The Admin has no other elevated capabilities in the current implementation.
 
-An Attendee is a User who has RSVPed to one or more events. Attendance is bidirectionally tracked: the User's joinedEvents list contains the event IDs, and the Event's rsvpBy list contains the User's UID. The rsvpCount field on the Event is a denormalized integer count maintained in sync with the rsvpBy array via Firestore transactions. An Attendee can un-attend an event (leaveEvent), which atomically removes them from the event's rsvpBy list and removes the event from their joinedEvents list. There is no concept of attendance confirmation or check-in — RSVP is the final state.
+### Attendee (Role)
 
-### Lurker (Behavioral role of User)
+An Attendee is a User who has RSVPed to an event. Attendance is tracked atomically in both the event's `rsvpBy` array and the user's `joinedEvents` list. An Attendee RECEIVES a 24-hour reminder push notification before their event and a 1-hour reminder push notification. An Attendee CAN CANCEL their RSVP (leaveEvent), which atomically reverses both references. An Attendee CAN EXPORT the event to their calendar.
 
-A Lurker is not a formal entity type but a meaningful behavioral pattern: a User who browses the Noticeboard, saves events, and views event details without RSVPing or creating events. Lurkers contribute to the savedBy count on events (a social signal about interest) but not to rsvpCount. Lurkers may browse club pages and resource listings without joining or bookmarking. From the platform's perspective, Lurkers are active users who never take converting actions. Their behavior is valuable for understanding discovery patterns — the ratio of saves to RSVPs (savedCount vs. rsvpCount) on an event tells you how much unconverted interest exists.
+### Club Subscriber (Role)
+
+A Club Subscriber is a User who has opted into push notifications from a specific club without necessarily being a formal member. The Subscriber RECEIVES push notifications when the subscribed club posts an event that is approved. The Subscriber IS DISTINCT FROM a club member — subscription is a lightweight, notification-only relationship. A User CAN BE both a member and a subscriber of the same club. A User CAN BE a subscriber without being a member (the typical discovery-first path).
+
+### Lurker (Behavioral Pattern)
+
+A Lurker is a User who browses the Noticeboard, saves events, and views details without RSVPing or creating events. Lurkers contribute to `savedCount` on events but not `rsvpCount`. Their behavior is visible in the platform's save-to-RSVP ratio analytics. Lurkers represent latent intent — their saves are the platform's best signal of which events have more genuine interest than the RSVP count alone reveals.
+
+### Ghost (Behavioral Pattern)
+
+A Ghost is a User who signed up, completed or partially completed onboarding, and then stopped opening the app. Ghosts are the platform's primary retention problem. A Ghost who subscribed to at least one club is reactivatable via push notification without any additional acquisition cost. A Ghost who subscribed to zero clubs and has no event reminders scheduled is only reactivatable by an external trigger (a friend's mention, an Instagram Story share).
 
 ---
 
@@ -47,21 +62,64 @@ A Lurker is not a formal entity type but a meaningful behavioral pattern: a User
 
 ### Event
 
-An Event is the core content unit of FlockIn. Every Event has a unique system-generated ID, a title (minimum 3 characters), a description (minimum 10 characters), a start date/time, an end date/time, a location string, a category (one of: Music, Art, Workshop, Social, Sport, Academic, Career, Food, Other), the UID and display name of the creator, the creator's profile photo, an optional poster image path (stored in Firebase Storage), an array of free-form tags (lowercase strings), and a status of pending, approved, or rejected.
+An Event is the primary content unit. Every Event has: a system-generated ID, title (max 80 characters), description (max 500 characters), start date/time, end date/time (required — used for board expiry and #HappeningNow), location string, one category, the creator's UID and display name, an optional poster image (Firebase Storage URL + path), an array of free-form tags, and a moderation status (pending / approved / rejected). Events also carry: `rsvpCount`, `rsvpBy[]`, `savedCount`, `savedBy[]`, `reported` (boolean), `createdAt`, and `updatedAt`.
 
-Every Event maintains live counters: rsvpCount (integer, always in sync with rsvpBy array), savedCount (integer, always in sync with savedBy array), and a reported boolean flag. Events with reported: true should be flagged for admin review, though there is no automated moderation action for reported events in the current implementation.
+Events are only visible on the public Noticeboard when `status === "approved"` AND `endTime >= now()`. Past events remain in Firestore and are accessible in the creator's My Events tab but are invisible to other users.
 
-An Event BELONGS TO a single Category. An Event HAS zero or more Tags. An Event IS CREATED BY one User (Organizer). An Event IS RSVPed BY zero or more Users (Attendees). An Event IS SAVED BY zero or more Users (Lurkers or Attendees). An Event IS APPROVED or REJECTED by the Admin. An Event BELONGS TO a specific time window which enables the time-based filter system (happening-now, today, this-week, next-week).
+**Event → HAS_CATEGORY → Category** (many-to-one)  
+**Event → HAS_TAG → Tag** (many-to-many)  
+**Event → OCCURS_AT → Location** (many-to-one, string-referenced)  
+**Event → CREATED_BY → User** (many-to-one, creator/organizer)  
+**Event → RSVPED_BY → User[]** (many-to-many, bidirectional)  
+**Event → SAVED_BY → User[]** (many-to-many, bidirectional)  
+**Event → MODERATED_BY → Admin** (approval/rejection decision)  
+**Event → POSTED_BY → StudentOrganization** (organizational authorship, implicit via creatorName)  
+**Event → NOTIFIES → ClubSubscriber** (when approved event is from a subscribed club)
 
-Events are only visible on the public Noticeboard when their status is "approved" AND their endTime is in the future. This means the Noticeboard is always showing only currently-relevant, human-reviewed content.
+Real UVic examples: Jazz & Blues Night at The Vertigo, Battle of the Bands at MacLaurin B-Wing Courtyard, End of Year Art Exhibition at University Centre, Intro to Machine Learning at ECS 108, 5K Fun Run starting at the Recreation Centre, UVic Farmers Market on Ring Road.
 
 ### Event Category
 
-A Category is a named classification for events. The nine categories are: Music, Art, Workshop, Social, Sport, Academic, Career, Food, Other. Categories are fixed — they cannot be created or deleted by users or admins. Each Category has an associated color palette used throughout the interface (for filter pills and event detail badges) and an associated action label used on Noticeboard poster cards (Workshop → "Sign Up," Career → "Register," Sport → "Join," Academic → "Learn More," Music/Art → "RSVP," Social → "Join Us," Food → "Attend," Other → "Learn More"). A Category groups Events of the same type. A Category IS FILTERABLE on the Noticeboard via the filter pill system.
+A Category is one of nine fixed classifications: Music, Art, Workshop, Social, Sport, Academic, Career, Food, Other. Each category has an associated action label on the Noticeboard poster card overlay (Workshop → "Sign Up," Career → "Register," Sport → "Join," Academic → "Learn More," Music/Art → "RSVP," Social → "Join Us," Food → "Attend"). Categories determine the color palette of filter pills and event detail badges. Categories are fixed — not user-created.
+
+**Category → APPLIES_TO → Event** (one category per event)  
+**Category → IS_FILTERABLE_ON → Noticeboard** (via category filter pills)
 
 ### Event Tag
 
-A Tag is a free-form text label attached to one or more events. Tags are stored as lowercase strings. Each tag has a corresponding document in the Firestore "tags" collection that tracks the tag's name, total usage count (incremented each time the tag is used on a new event), and the timestamp it was last used. Tags with the highest usage counts become "trending tags" and are displayed as filter pills on the Noticeboard. The trending tag system creates a live vocabulary of what topics are currently prominent on campus. A Tag APPEARS ON zero or more Events. A Tag HAS a usage count that determines its trending status. A Tag IS FILTERABLE on the Noticeboard.
+A Tag is a free-form lowercase text label used on one or more events. Each tag document in Firestore tracks: `name`, `eventCount` (active approved events using this tag), `engagementScore` (sum of saves + RSVPs on events with this tag), and `lastUsed`. Tag documents are maintained by Firebase Cloud Functions — not the client — ensuring consistency. The tag system drives the trending pill bar.
+
+**Tag → APPEARS_ON → Event** (many-to-many)  
+**Tag → SCORE_DERIVES_FROM → Engagement** (saves and RSVPs on tagged events)  
+**Tag → RANKED_BY → engagementScore** (determines trending pill order)  
+**Tag → OVERLAPS_SEMANTICALLY_WITH → Interest** (matching drives recommendations)  
+**Tag → DISPLAYED_AS → FilterPill** (on Noticeboard, up to 8 trending)
+
+Real UVic tags from seed data: Music, Social, Art, Photography, Academic, Workshop, Technology, Coding, Science, Career, Business, Nature, Food, Cooking, Volunteering, Sports, Fitness, Politics, Gaming, Literature, Dance.
+
+### Push Notification
+
+A Push Notification is a message delivered to a User's device outside the app. Notification types:
+
+- **Club event notification:** Sent to all subscribers of a club when that club's event is approved. Contains club name, event title, date, and a deep link to the event.
+- **RSVP reminder — 24 hours:** Sent to all Users in `event.rsvpBy[]` 24 hours before the event's start time.
+- **RSVP reminder — 1 hour:** Sent to all Users in `event.rsvpBy[]` 1 hour before the event.
+
+**PushNotification → DELIVERED_TO → User** (one user per notification instance)  
+**PushNotification → TRIGGERED_BY → ClubEvent OR RSVPReminder**  
+**PushNotification → LINKS_TO → Event** (deep link to event detail)  
+**PushNotification → MAY_CAUSE → RSVP** (conversion action)  
+**PushNotification → MAY_CAUSE → AppOpen** (re-engagement of dormant users)
+
+### Noticeboard Snapshot Share
+
+A Snapshot Share is a visual image generated from a FlockIn!! event using html2canvas. The image shows the poster card (event image or gradient, title, date, time, location) in the corkboard aesthetic (wooden frame, pushpin, slight rotation). The FlockIn!! wordmark is visible. The image is shared via the device native share sheet to Instagram Stories, iMessage, WhatsApp, or saved to camera roll.
+
+**Snapshot → GENERATED_FROM → Event**  
+**Snapshot → SHARED_TO → ExternalPlatform** (Instagram, iMessage, WhatsApp)  
+**Snapshot → CREATES → ExternalImpression** (views by non-FlockIn!! users)  
+**Snapshot → MAY_CAUSE → NewUserSignup** (viewer taps link and signs up)  
+**Snapshot → CARRIES → FlockInBranding** (corkboard frame as visual watermark)
 
 ---
 
@@ -69,7 +127,16 @@ A Tag is a free-form text label attached to one or more events. Tags are stored 
 
 ### Club
 
-A Club represents a campus organization in FlockIn's database. A Club has a unique ID, a name, a description, a category string, a member count, an array of member UIDs, an optional logo URL, a contact email, and an array of tags. Clubs are curator-managed (not user-created) — they represent the stable, verified layer of campus organizations on the platform. A Club HAS zero or more Members (Users). A Club HAS one Category. A Club HAS zero or more Tags. Users JOIN or LEAVE Clubs, which atomically updates both the club's memberIds array and the user's joinedClubs array. Users also SAVE Clubs without joining, creating a bookmarked interest without formal membership.
+A Club represents a campus organization in FlockIn!!'s database. Clubs are curator-managed (not user-created), representing a stable, verified layer of campus organizations. Each club has: ID, name, description, category, `memberCount`, `memberIds[]`, `subscriberCount`, `subscriberIds[]`, logo URL, contact email, and tags.
+
+**Club → HAS_MEMBER → User** (many-to-many, formal membership)  
+**Club → HAS_SUBSCRIBER → User** (many-to-many, notification opt-in only)  
+**Club → HAS_CATEGORY → Category**  
+**Club → HAS_TAG → Tag** (drives interest-based recommendations)  
+**Club → POSTS_EVENTS → Event** (organizational authorship via creatorName)  
+**Club → TRIGGERS_NOTIFICATIONS → ClubSubscriber** (on approved event)
+
+Real UVic clubs in the seed dataset: Victoria Coding Collective (Technology), UVic Photography Club (Art), Environmental Society (Nature), Philosophy & Debate Society (Academic), Culinary Arts Club (Food), Salsa & Ballroom Dance Society (Dance), Outdoor Adventures Club (Sports), Film & Media Arts Society (Film), Entrepreneurship Hub (Business), UVic Music Collective (Music), Video Games & Esports Club (Gaming), Creative Writing Circle (Literature).
 
 ---
 
@@ -77,116 +144,263 @@ A Club represents a campus organization in FlockIn's database. A Club has a uniq
 
 ### Campus Resource
 
-A Campus Resource represents a service, space, document, or link available to students on campus. Resources are of four types: "link" (external URL), "document" (downloadable file), "room" (reservable physical space), and "service" (campus support service). A Resource has a title, description, optional URL, optional physical location, and tags. Resources are curator-managed and browsable by all users, including unauthenticated visitors. A Resource IS TAGGED with interest tags, enabling interest-based recommendations. A Resource HAS a type that determines how it is displayed and linked to.
+A Campus Resource is a curated entry in the UVic services directory. Resources are of four types: link, document, room, or service. Each has: ID, title, description, type, optional URL, optional physical location, and interest tags.
+
+**Resource → HAS_TAG → Interest** (drives interest-based surfacing)  
+**Resource → HAS_TYPE → ResourceType** (link / document / room / service)  
+**Resource → LOCATED_AT → CampusLocation** (optional, for rooms and services)
+
+Real UVic resources in the seed dataset: McPherson Library Study Rooms (room), Campus Counselling Services (service), Career & Co-op Education Centre (service), UVic Recreation Centre (service), Writing Centre (service), UVic IT Help Desk (service), MyUVic Student Portal (link), Interactive Campus Map (link), UVSS Student Society (link), UVic Food Bank (service).
 
 ---
 
 ## Place Entities
 
-While FlockIn does not have a formal Place entity type in its database, location strings on Events and Resources create an implicit spatial layer that MiroFish should model. The following place types appear as event locations:
+UVic's physical campus creates a rich spatial layer that shapes event attendance patterns, archetype behavior, and community formation. Places are implicit in the event `location` field but carry important social meaning.
 
-**Campus Buildings** include lecture halls, student union buildings, laboratory buildings, arts centers, sports facilities, and administrative offices. Events tagged Academic or Workshop frequently occur in lecture halls and seminar rooms. Events tagged Career frequently occur in the business school building or a hotel-style conference center attached to campus.
+### The SUB — Student Union Building (Ring Road)
 
-**Outdoor Campus Spaces** include the campus quad, courtyards, athletic fields, and plazas. Social, Sport, and Food events frequently use these spaces.
+The SUB is the social nucleus of UVic. It houses The Vertigo (basement live music and events venue), the main concourse (club tables, UVSS services, casual meeting space), The Grad House Pub (north side, graduate student social anchor), the UVSS offices, club meeting rooms, and the UVic Food Bank. Almost every social event on campus has a connection to the SUB — it's where you promote events, where you meet friends between classes, and where the campus community literally gathers.
 
-**Greek Row** is a distinct spatial zone adjacent to campus where fraternities and sororities host Social events. Events in this zone tend to have high RSVP counts and strong word-of-mouth spread.
+**SUB → CONTAINS → TheVertigo** (live music/events venue)  
+**SUB → CONTAINS → GradHousePub** (graduate student social space)  
+**SUB → CONTAINS → ClubMeetingRooms** (formal club activity space)  
+**SUB → IS_DESTINATION_FOR → SocialArchetypes** (The Club Crawler, The Enthusiastic Connector)
 
-**Residence Halls** are where freshmen and some upperclassmen live. Events in residence halls (floor socials, hall-sponsored events) serve the residential student population.
+### The Vertigo (SUB Lower Level)
 
-**Off-Campus Locations** (local bars, coffee shops, community centers) appear infrequently but signal events that bridge campus and city community.
+The Vertigo is UVic's primary on-campus live music and events venue. Capacity of approximately 200–300. Hosts jazz nights, open mic nights, Battle of the Bands, comedy nights, and UVSS-organized social events. An event location of "The Vertigo (SUB Lower Level)" carries strong cultural cachet — it signals a well-organized, experiential event.
 
-The location string on an Event IS WHERE the Event takes place. Location proximity IS A FACTOR in whether certain user archetypes attend — a freshman living in a residence hall will more likely attend an event in their hall than an identical event across campus.
+**Vertigo → HOSTS → MusicEvents** (high-attendance Music and Social category events)  
+**Vertigo → ASSOCIATED_WITH → UVSS** (organizationally)  
+**Vertigo → SIGNALS → EventQuality** (a Vertigo location implies legitimacy)
+
+### The Grad House Pub
+
+The Grad House is UVic's on-campus pub, primarily frequented by graduate students and upper-year undergraduates. Campus Trivia Night (Graduate Students Society) is a signature recurring event here. More relaxed and adult-feeling than the SUB main space.
+
+**GradHousePub → ASSOCIATED_WITH → GradStudents**  
+**GradHousePub → HOSTS → SocialAndAcademicEvents**
+
+### McPherson Library
+
+The academic heart of campus. Study rooms bookable up to 7 days in advance. The Writing Centre and IT Help Desk are located here. Academic events (Study Skills Bootcamp, department-organized workshops) happen in library event spaces.
+
+**McPhersonLibrary → CONTAINS → StudyRooms** (bookable resource)  
+**McPhersonLibrary → CONTAINS → WritingCentre** (service resource)  
+**McPhersonLibrary → HOSTS → AcademicEvents**
+
+### Engineering & Computer Science Building (ECS)
+
+The home of UVic's Computer Science and Engineering faculties. ECS 108 and ECS 104 are the primary large classrooms used for tech events. The Intro to Machine Learning workshop and the Tech Recruiting Panel are both held here. The building has a distinct community feel — students in CS and Engineering spend significant time here and treat it as a social as well as academic space.
+
+**ECS → ASSOCIATED_WITH → TechAndCodingCommunity**  
+**ECS → HOSTS → WorkshopAndCareerEvents**  
+**ECS → ATTRACTS → QuietObserverAndCareerFocusedArchetypes**
+
+### Visual Arts Building
+
+Home of UVic's Fine Arts department, ceramics studios, sculpture workshops, and gallery spaces. Life Drawing Sessions and Ceramics Open Studios happen here. The building has a physical aesthetic that resonates with FlockIn!!'s poster/board metaphor — students in Fine Arts are surrounded by physical bulletin boards, show posters, and flyers.
+
+**VisualArtsBuilding → HOSTS → ArtEvents**  
+**VisualArtsBuilding → ASSOCIATED_WITH → ArtsAndCreativeCommunity**
+
+### Cadboro Bay / Campus Perimeter
+
+Cadboro Bay Beach is a 15-minute walk from the center of campus, used for outdoor workshops, photography walks, and social events. The Garry oak meadows on campus perimeter are used for runs and outdoor events. Victoria's proximity to nature is a defining campus characteristic — many events take the campus outside its buildings.
+
+**CadboroBay → ASSOCIATED_WITH → OutdoorAndWellnessArchetype**  
+**CadboroBay → HOSTS → PhotographyAndOutdoorEvents**
+
+### Centennial Stadium / Campus Recreation (McKinnon Building)
+
+The primary athletic facilities. Intramural flag football, the 5K Fun Run (starting point), and sports-adjacent social events happen here or in proximity. The UVic Recreation Centre is free for full-time students.
+
+**CentennialStadium → HOSTS → SportEvents**  
+**McKinnonBuilding → CONTAINS → RecreationCentre** (free for students)
+
+### Ring Road and Outdoor Campus Spaces
+
+Ring Road is the perimeter road around campus. The weekly UVic Farmers Market happens on Ring Road outside the SUB every Tuesday. Campus community gardens are a social outdoor space. These outdoor locations create a distinct event type — casual, drop-in, weather-dependent.
+
+**RingRoad → HOSTS → OutdoorFoodAndSocialEvents** (Farmers Market)  
+**RingRoad → ASSOCIATED_WITH → WeeklyRhythm** (recurring Tuesday market)
 
 ---
 
-## Group Entities
+## Organization Entities
 
-### Friend Group
+### UVSS (UVic Students' Society)
 
-A Friend Group is an informal social cluster — typically 4–15 students who regularly spend time together, share group chats, and coordinate event attendance. Friend Groups are not represented in FlockIn's data model but are a critical real-world entity because they drive attendance decisions. When one member of a Friend Group RSVPs to an event, the probability that other members RSVP increases significantly. Friend Groups create RSVP cascade dynamics. A Friend Group HAS a central connector (The Enthusiastic Friend archetype) who is most responsible for sharing event information within the group.
+The UVSS is the primary student government body at UVic. It funds registered clubs, runs The Vertigo and the Grad House, organizes campus-wide social events, and operates the UVSS website and social media channels (8,000+ Instagram followers). An endorsement from the UVSS Instagram account is the highest-reach single-channel promotion available on campus.
 
-### Student Organization
+**UVSS → OPERATES → TheVertigo**  
+**UVSS → OPERATES → GradHousePub**  
+**UVSS → FUNDS → RegisteredStudentOrganizations**  
+**UVSS → HAS_REACH → AllUVicStudents**  
+**UVSS → CAN_AMPLIFY → FlockInAdoption** (through Instagram and official channels)
 
-A Student Organization is a formal registered campus group — a club, society, chapter, or team. Student Organizations appear in FlockIn as Club entities. They also appear as event creators (when a club's officer posts an event on behalf of the organization). A Student Organization HAS a membership list. A Student Organization CREATES Events. A Student Organization RECRUITS members through events.
+### Victoria Coding Collective
 
-### Greek Chapter
+One of UVic's most active technology clubs. Weekly hack nights in ECS 108, coding challenges, and project showcases. Run by students in Computer Science and Software Engineering. Has an active Discord server. Its membership includes some of the most technically sophisticated students on campus — early adopters of new digital tools.
 
-A Greek Chapter is a specific, high-status type of Student Organization — a fraternity or sorority. Greek Chapters are particularly important to model because they have large, dense, well-connected membership networks that can rapidly amplify events. A Greek Chapter HAS 30–150 active members. A Greek Chapter HOSTS high-visibility Social events. A Greek Chapter IS EMBEDDED in a peer network of other Greek Chapters (through inter-Greek events, IFC/Panhellenic councils, and shared social spaces).
+**VictoriaCodingCollective → HOSTS → TechWorkshopEvents**  
+**VictoriaCodingCollective → HAS_COMMUNITY → TechStudents**  
+**VictoriaCodingCollective → ASSOCIATED_WITH → ECSBuilding**  
+**VictoriaCodingCollective → ATTRACTS → QuietObserverAndCareerFocusedArchetypes**
 
-### Academic Department / College
+### UVic Photography Club
 
-An Academic Department is an institutional group that creates events for its students — career fairs, research talks, orientation events, networking dinners. These events skew toward the Academic and Career categories and attract the Career-Focused Pre-Professional and Involved Senior archetypes. A Department CREATES events that are relevant to students in that major. A Department's events often have implicit credentialing value (attending a department networking event signals seriousness to faculty and recruiters).
+Known for monthly photo walks (including to Cadboro Bay), editing workshops, and a warm community across skill levels. Produces high-quality visual content — their FlockIn!! events will have the best poster images of any club on the platform, creating disproportionate engagement from the visual quality of their cards.
 
-### Cultural Student Association
+**UVicPhotographyClub → PRODUCES → HighQualityEventPosters**  
+**UVicPhotographyClub → HOSTS → OutdoorAndArtEvents**  
+**UVicPhotographyClub → ATTRACTS → ArtsAndCreativeArchetype**
 
-A Cultural Student Association is a student organization organized around national, ethnic, or regional identity (e.g., the Chinese Students Association, the South Asian Students Collective, the Black Student Union). These organizations are particularly important for The International Student and The Wellness/Activist archetype. They host Social, Food, and Workshop events with strong in-community reach and growing cross-community visibility. A Cultural Association CREATES events that celebrate and share cultural identity. A Cultural Association IS A BRIDGE between international/underrepresented students and the broader campus.
+### Environmental Society
+
+Focuses on campus sustainability activism and community action. Hosts events resonating with The Outdoor and Wellness-Focused Student and The Wellness/Activist archetype. The Sustainable Living on Campus workshop and campus clean-ups are their signature events.
+
+**EnvironmentalSociety → HOSTS → WorkshopAndVolunteerEvents**  
+**EnvironmentalSociety → ASSOCIATED_WITH → SustainabilityValues**
+
+### Entrepreneurship Hub
+
+Supports student ventures with pitch nights, startup workshops, and mentorship connections into Victoria's tech scene. Hosts the Tech Recruiting Panel. Attracts The Career-Focused Pre-Professional and The Co-op Returner.
+
+**EntrepreneurshipHub → HOSTS → CareerAndBusinessEvents**  
+**EntrepreneurshipHub → CONNECTS → Students AND VictoriaTechCommunity**
+
+### Graduate Students Society (GSS)
+
+Runs Campus Trivia Night at the Grad House and organizes social events for the graduate student population. Represents an important segment that bridges the academic and social dimensions of campus life.
+
+**GSS → HOSTS → TriviaNightAndGradSocials**  
+**GSS → ASSOCIATED_WITH → GradHousePub**
+
+### UVSS International Students Association
+
+Hosts the International Student Welcome BBQ and cultural integration events. One of the most important organizations for The International Student archetype's social integration at UVic.
+
+**UVSS_ISA → HOSTS → WelcomeBBQAndCulturalEvents**  
+**UVSS_ISA → SERVES → InternationalStudentArchetype**
 
 ---
 
 ## Concept Entities
 
-### Interest
+### Interest (Personalization Tag)
 
-An Interest is one of 24 named categories used to personalize the FlockIn experience: Technology, Music, Art, Sports, Gaming, Film, Literature, Science, Business, Politics, Cooking, Travel, Fashion, Photography, Dance, Fitness, Nature, Volunteering, Coding, Career, Academic, Social, Workshop, Food. An Interest IS SELECTED by a User during onboarding or on the Profile page. An Interest IS MATCHED against Event and Club tags to produce a relevance score. An Interest BELONGS TO a loose semantic family (creative/performing arts, food/social, athletic/outdoor, digital/technical, professional).
+One of 24 named categories used for personalized content surfacing: Technology, Music, Art, Sports, Gaming, Film, Literature, Science, Business, Politics, Cooking, Travel, Fashion, Photography, Dance, Fitness, Nature, Volunteering, Coding, Career, Academic, Social, Workshop, Food. Selected during onboarding (minimum 3, no maximum). Updated anytime via the Profile page. Used to compute recommendation scores for events, clubs, and resources.
+
+**Interest → SELECTED_BY → User**  
+**Interest → MATCHED_AGAINST → EventTags** (recommendation scoring)  
+**Interest → ORGANIZES → INTERESTS_PALETTE** (color-grouped in the UI: coral/amber/green/purple/indigo/terracotta)
 
 ### Social Proof
 
-Social Proof is the mechanism by which visible evidence of other people's behavior influences individual behavior. In FlockIn, social proof manifests primarily as the rsvpCount displayed on each poster card on the Noticeboard. A higher RSVP count creates stronger conversion pressure on new viewers. Social Proof INFLUENCES attendance decisions. Social Proof IS STRONGER when the viewer believes the attendees are from their peer group. Social Proof CREATES momentum: events that accumulate early RSVPs accumulate more RSVPs than identical events that don't.
+The visible evidence of other people's behavior that influences individual decisions. In FlockIn!!, social proof manifests as: (1) rsvpCount on poster cards ("47 going"), (2) savedCount visible to event creators, (3) Noticeboard snapshot shares (seeing a friend post a specific event), and (4) trending tag scores (high count = many events in this category, signaling a lively scene).
 
-### FOMO (Fear of Missing Out)
+**SocialProof → DRIVES → RSVPCascade** (high RSVP count creates momentum)  
+**SocialProof → AMPLIFIED_BY → ShareBehavior**  
+**SocialProof → CORRELATES_WITH → EventAttendance**  
+**SocialProof → HIGHEST_FORM → FriendRSVP** (which FlockIn!! doesn't yet show explicitly)
 
-FOMO is the anxiety that an interesting or enjoyable event is occurring without the individual. FOMO IS TRIGGERED when a user sees a high-RSVP event that aligns with their interests. FOMO IS AMPLIFIED when users see peers discussing an event they didn't know about. FOMO IS A DRIVER of both RSVP behavior and of downloading and signing up for FlockIn in the first place. On campus, FOMO is one of the most powerful psychological forces driving social event attendance. FlockIn's Noticeboard is a FOMO machine — it makes visible the full scope of what's happening and creates awareness of events that would otherwise pass by unnoticed.
+### Club Subscription Network Effect
 
-### Virality
+The aggregate value created when many users subscribe to many clubs and clubs post events that notify subscribers. As the subscription network grows, each new approved event reaches a pre-qualified audience of interested students without requiring them to be active app users at the time of posting.
 
-Virality describes the property of an event that makes people want to share it with others. In FlockIn's context, viral events are those shared in group chats, mentioned in conversation, and referenced by multiple social circles simultaneously. Virality IS TRIGGERED by visual distinctiveness (a striking poster card image), social relevance (the event is from a high-status organization), topic resonance (the event speaks to a current campus conversation), or scarcity (limited capacity, one-time occurrence). Virality on FlockIn propagates primarily through external channels (iMessage, GroupMe, Instagram DMs) because FlockIn lacks native sharing tools. Virality CREATES cross-community spread — it is how users from one social cluster learn about events that originated in another cluster.
+**ClubSubscriptionNetwork → GROWS_WITH → MoreSubscribersPerClub**  
+**ClubSubscriptionNetwork → CREATES → PassiveEngagement** (notification-mediated without proactive browsing)  
+**ClubSubscriptionNetwork → REDUCES → ChurnRisk** (subscribers stay informed without habit formation)  
+**ClubSubscriptionNetwork → POWERS → ReactivationOfGhosts**
 
-### Personalization
+### Campus Event Calendar Rhythm
 
-Personalization is the mechanism by which FlockIn tailors its content display to individual users based on their stated interests. FlockIn's personalization uses tag-intersection scoring: events whose tags overlap more with a user's interests receive higher relevance scores and appear more prominently. Personalization IS DETERMINED by Interest selection. Personalization IMPROVES over time if users update their interests on the Profile page (though the current implementation does not automatically update interests based on behavioral signals). Personalization CREATES a feedback loop: users who see relevant events RSVP more often, which may reinforce their sense that their interests were correctly identified, which may lead to more consistent use.
+UVic's academic year creates predictable peaks and troughs in event activity: high volume in Weeks 1–4 (orientation energy), mid-semester trough (academic pressure), a burst around specific anchors (Research Symposium, cultural weeks, Farmers Market season), pre-Reading Break quiet, a final push in Weeks 11–13. This rhythm shapes the Noticeboard's density and the engagement patterns of every archetype.
 
-### Campus Reputation
+**CampusRhythm → SHAPES → EventVolume** (across the semester)  
+**CampusRhythm → CREATES → NaturalChurnMoments** (reading break, exam period)  
+**CampusRhythm → CREATES → NaturalEngagementPeaks** (start of semester, cultural events)
 
-Campus Reputation is the social status of a person, organization, or event in the campus social hierarchy. High-reputation organizations can count on higher attendance and more word-of-mouth spread for their events. High-reputation individuals (popular students, well-known athletes, influential student leaders) can drive significant RSVP activity by simply posting or sharing an event. Campus Reputation IS EARNED through consistent high-quality events, large membership, social media presence, and time. Campus Reputation INFLUENCES how quickly an event's RSVP count grows. Campus Reputation IS FRAGILE: one poorly executed event or a negative incident can significantly damage it.
+### FOMO and Victoria-Specific Cultural Context
 
-### Event Quality Signal
+Fear of Missing Out (FOMO) at UVic is somewhat attenuated compared to a large urban campus — Victoria is small, and the social scene is more community-oriented than status-competitive. However, FOMO still operates as a driver, particularly for The Club Crawler who is still discovering the campus ecosystem. The "Expiring Soon" pulse and the #HappeningNow pill activate FOMO in a very literal, time-bound way: something is happening right now and the board is telling you.
 
-Event Quality Signal is the composite impression a viewer forms of an event from the information visible on its poster card. High-quality signals include: a compelling cover image, a clear and interesting title, a recognizable or trusted organizer name, a specific and descriptive location, a reasonable date and time, and visible social proof (RSVP count). Low-quality signals include: no image (plain gradient only), vague title ("Social Event"), generic location ("TBD"), and very few RSVPs. Event Quality Signal DETERMINES whether a viewer clicks to learn more or scrolls past. Event Quality Signal IS PARTIALLY within the organizer's control (through image quality, writing quality, and tag specificity) and partially outside it (through social proof and organizational reputation).
+**FOMO → TRIGGERED_BY → HappeningNowFilter**  
+**FOMO → TRIGGERED_BY → ExpiringEventPulse**  
+**FOMO → TRIGGERED_BY → HighRSVPCount** (social proof of attendance)  
+**FOMO → MOTIVATES → ImpulsiveRSVP**
 
-### Network Density
+### Noticeboard Aesthetics as Social Currency
 
-Network Density describes how many members of a user's social network are also on FlockIn. A user whose entire friend group is on FlockIn will experience the platform very differently — and more valuably — than a user whose social network has no presence there. Network Density IS THE CORE DRIVER of social network adoption patterns (the classic S-curve). Network Density REACHES A TIPPING POINT when a sufficient percentage of a social cluster is on the platform that abstaining from it means missing meaningful social coordination. Network Density IS LOWER initially in cross-community segments (e.g., a student whose social network spans multiple clubs and organizations) and higher within homogeneous communities (e.g., a student whose entire social world is their 80-person Greek chapter, most of whom signed up together).
+The visual distinctiveness of the FlockIn!! corkboard interface creates a form of aesthetic social currency — sharing a FlockIn!! poster card snapshot to Instagram Stories is not just event promotion, it is a small act of identity expression. "I go to cool events. I use a visually interesting app." This aesthetic dimension is unique to FlockIn!! and has no equivalent in generic event platforms.
+
+**NoticeboardAesthetics → DRIVES → ShareBehavior**  
+**ShareBehavior → PRODUCES → ExternalImpressions**  
+**ExternalImpressions → MAY_CAUSE → NewUserAcquisition**  
+**NoticeboardAesthetics → CREATES → PlatformIdentity** (distinguishable from generic apps)
 
 ---
 
-## Key Relationships Summary
+## Full Relationship Summary (Graph Edge List)
 
-For graph construction, the following relationships should be encoded as edges:
+For MiroFish knowledge graph construction, the following relationships should be encoded as typed edges:
 
-- `User → [SELECTS] → Interest` (many-to-many)
-- `User → [RSVPS_TO] → Event` (many-to-many, tracked bidirectionally)
-- `User → [SAVES] → Event` (many-to-many, tracked bidirectionally)
-- `User → [CREATES] → Event` (one-to-many)
-- `User → [JOINS] → Club` (many-to-many, tracked bidirectionally)
-- `User → [SAVES] → Club` (many-to-many)
-- `User → [REPORTS] → Event` (many-to-one flag)
-- `Admin → [APPROVES] → Event` (one-to-many)
-- `Admin → [REJECTS] → Event` (one-to-many)
-- `Event → [HAS_CATEGORY] → Category` (many-to-one)
-- `Event → [HAS_TAG] → Tag` (many-to-many)
-- `Event → [OCCURS_AT] → Location` (many-to-one)
-- `Club → [HAS_TAG] → Tag` (many-to-many)
-- `Club → [HAS_MEMBER] → User` (many-to-many, tracked bidirectionally)
-- `Resource → [HAS_TAG] → Tag` (many-to-many)
-- `Tag → [ASSOCIATED_WITH] → Interest` (implicit, by lowercase string matching)
-- `Interest → [INFLUENCES] → EventRelevanceScore` (scoring mechanism)
-- `FriendGroup → [AMPLIFIES] → Event` (social proof propagation)
-- `StudentOrganization → [CREATES] → Event` (organizational authorship)
-- `GreekChapter → [IS_A] → StudentOrganization`
-- `CulturalAssociation → [IS_A] → StudentOrganization`
-- `RSVPCount → [SIGNALS] → SocialProof` (conversion influence)
-- `SocialProof → [DRIVES] → RSVP_CASCADE` (network effect)
-- `User → [EXPERIENCES] → FOMO` (triggered by high-RSVP events in interest areas)
-- `FOMO → [MOTIVATES] → RSVP` (psychological driver)
-- `Interest → [MATCHED_BY] → EventTag` (recommendation mechanism)
-- `NetworkDensity → [ENABLES] → NetworkEffect` (platform growth mechanism)
+**User–Content Relationships:**
+- `User → [RSVPS_TO] → Event`
+- `User → [SAVES] → Event`
+- `User → [SAVES] → Club`
+- `User → [JOINS] → Club`
+- `User → [SUBSCRIBES_TO] → Club`
+- `User → [CREATES] → Event`
+- `User → [REPORTS] → Event`
+- `User → [SHARES] → Event` (generates snapshot)
+- `User → [EXPORTS_CALENDAR] → Event`
+- `User → [SELECTS] → Interest`
+- `User → [RECEIVES] → PushNotification`
+
+**Platform–Content Relationships:**
+- `Admin → [APPROVES] → Event`
+- `Admin → [REJECTS] → Event`
+- `Admin → [FEATURES] → Event` (gold pushpin designation)
+- `Event → [HAS_CATEGORY] → Category`
+- `Event → [HAS_TAG] → Tag`
+- `Event → [OCCURS_AT] → Location`
+- `Club → [HAS_TAG] → Interest`
+- `Club → [POSTS] → Event` (organizational authorship)
+- `Resource → [HAS_TAG] → Interest`
+
+**Notification Relationships:**
+- `ClubSubscription → [TRIGGERS] → PushNotification` (when club's event approved)
+- `RSVP → [TRIGGERS] → ReminderNotification` (24h and 1h before event)
+- `PushNotification → [DELIVERED_TO] → User`
+- `PushNotification → [MAY_CAUSE] → AppOpen`
+- `PushNotification → [MAY_CAUSE] → RSVP`
+
+**Social Dynamics Relationships:**
+- `HighRSVPCount → [DRIVES] → RSVPCascade`
+- `ShareBehavior → [CREATES] → ExternalImpression`
+- `ExternalImpression → [MAY_CAUSE] → NewUserSignup`
+- `ClubSubscription → [REDUCES] → ChurnRisk`
+- `InterestMatch → [INCREASES] → RetentionProbability`
+- `AdminApprovalLatency → [AFFECTS] → OrganizerRetention`
+- `FeaturedEvent → [AMPLIFIES] → RSVPCount`
+
+**Campus Geography Relationships:**
+- `TheVertigo → [HOSTS] → MusicSocialEvents`
+- `GradHousePub → [HOSTS] → GradStudentEvents`
+- `ECSBuilding → [HOSTS] → TechWorkshopCareerEvents`
+- `VisualArtsBuilding → [HOSTS] → ArtCreativeEvents`
+- `McPhersonLibrary → [HOSTS] → AcademicStudyEvents`
+- `CadboroBay → [HOSTS] → OutdoorPhotographyEvents`
+- `RingRoad → [HOSTS] → FarmersMarketOutdoorEvents`
+
+**Organization–Community Relationships:**
+- `UVSS → [FUNDS] → RegisteredClubs`
+- `UVSS → [OPERATES] → TheVertigo AND GradHousePub`
+- `VictoriaCodingCollective → [ATTRACTS] → TechStudents`
+- `EnvironmentalSociety → [ATTRACTS] → OutdoorWellnessStudents`
+- `EntrepreneurshipHub → [ATTRACTS] → CareerFocusedStudents`
+- `UVSS_ISA → [SERVES] → InternationalStudents`
+- `GSS → [SERVES] → GraduateStudents`

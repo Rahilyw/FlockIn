@@ -1,7 +1,8 @@
 import type { CSSProperties, ReactNode } from "react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { updateUserProfile } from "@/lib/firestore";
+import { updateUserProfile, updateCreatorPhotoOnEvents } from "@/lib/firestore";
+import { uploadProfilePhoto } from "@/lib/storage";
 import { INTERESTS, INTEREST_EMOJI } from "@/lib/interests";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -123,6 +124,29 @@ export default function Profile() {
   const [bio, setBio] = useState(profile?.bio ?? "");
   const [interests, setInterests] = useState<string[]>(profile?.interests ?? []);
   const [saving, setSaving] = useState(false);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const photoInputRef = useRef<HTMLInputElement>(null);
+
+  async function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+    setUploadingPhoto(true);
+    try {
+      const url = await uploadProfilePhoto(user.uid, file);
+      await Promise.all([
+        updateUserProfile(user.uid, { photoURL: url }),
+        updateCreatorPhotoOnEvents(user.uid, url),
+      ]);
+      await refreshProfile();
+      toast({ title: "Profile picture updated!" });
+    } catch {
+      toast({ title: "Failed to upload photo", variant: "destructive" });
+    } finally {
+      setUploadingPhoto(false);
+      // Reset input so same file can be re-selected
+      if (photoInputRef.current) photoInputRef.current.value = "";
+    }
+  }
 
   if (!user || !profile) return null;
 
@@ -169,19 +193,44 @@ export default function Profile() {
         <div className="rounded-3xl p-6 backdrop-blur-sm overflow-hidden" style={CARD}>
           <div className="flex items-center gap-5">
             <div className="relative shrink-0">
-              <Avatar className="h-[88px] w-[88px]">
-                <AvatarImage src={user.photoURL ?? undefined} alt={displayName} />
-                <AvatarFallback
-                  className="text-2xl font-extrabold"
-                  style={{ background: PALETTES.terracotta.selBg, color: PALETTES.terracotta.selFg }}
-                >
-                  {initials}
-                </AvatarFallback>
-              </Avatar>
-              <div
-                className="absolute inset-0 rounded-full pointer-events-none"
-                style={{ boxShadow: `0 0 0 3px ${PALETTES.coral.selBg}, 0 0 0 6px oklch(50% 0.19 18 / 0.14)` }}
+              <input
+                ref={photoInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handlePhotoChange}
               />
+              <button
+                type="button"
+                onClick={() => photoInputRef.current?.click()}
+                disabled={uploadingPhoto}
+                className="group relative block rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+                style={{ ["--tw-ring-color" as string]: PALETTES.coral.selBg }}
+                aria-label="Change profile picture"
+              >
+                <Avatar className="h-[88px] w-[88px]">
+                  <AvatarImage src={profile?.photoURL ?? user.photoURL ?? undefined} alt={displayName} />
+                  <AvatarFallback
+                    className="text-2xl font-extrabold"
+                    style={{ background: PALETTES.terracotta.selBg, color: PALETTES.terracotta.selFg }}
+                  >
+                    {initials}
+                  </AvatarFallback>
+                </Avatar>
+                {/* Ring */}
+                <div
+                  className="absolute inset-0 rounded-full pointer-events-none"
+                  style={{ boxShadow: `0 0 0 3px ${PALETTES.coral.selBg}, 0 0 0 6px oklch(50% 0.19 18 / 0.14)` }}
+                />
+                {/* Camera overlay */}
+                <div className="absolute inset-0 rounded-full flex items-center justify-center bg-black/0 group-hover:bg-black/40 transition-colors duration-150">
+                  {uploadingPhoto ? (
+                    <span className="material-symbols-outlined text-white text-[22px] opacity-0 group-hover:opacity-100 animate-spin transition-opacity">refresh</span>
+                  ) : (
+                    <span className="material-symbols-outlined text-white text-[22px] opacity-0 group-hover:opacity-100 transition-opacity">photo_camera</span>
+                  )}
+                </div>
+              </button>
             </div>
 
             <div className="min-w-0 flex-1">

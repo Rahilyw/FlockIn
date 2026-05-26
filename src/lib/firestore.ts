@@ -75,6 +75,15 @@ export async function updateUserProfile(
   });
 }
 
+/** Syncs a new profile photo URL across all events the user has created. */
+export async function updateCreatorPhotoOnEvents(userId: string, photoURL: string): Promise<void> {
+  const snap = await getDocs(query(eventsCol(), where("creatorId", "==", userId)));
+  if (snap.empty) return;
+  const batch = writeBatch(db());
+  snap.docs.forEach((d) => batch.update(d.ref, { creatorPhoto: photoURL }));
+  await batch.commit();
+}
+
 export async function completeOnboarding(
   uid: string,
   displayName: string,

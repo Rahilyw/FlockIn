@@ -1,279 +1,286 @@
-# FlockIn — User Segments & Student Archetypes
-*Seed document for MiroFish simulation engine*
+# FlockIn!! — User Segments & UVic Student Archetypes
+*MiroFish seed document — University of Victoria deployment*
 
 ---
 
-## Overview of the Campus Social Ecosystem
+## The UVic Campus Social Ecosystem
 
-Before describing individual student archetypes, it is worth understanding the social infrastructure that FlockIn is trying to plug into — or disrupt.
+Before describing individual archetypes, it is essential to understand what makes UVic's social landscape genuinely different from an American university — and why those differences matter for simulating FlockIn!!'s adoption.
 
-A university campus is not one community but a collection of overlapping micro-communities: Greek organizations, competitive sports teams, academic departments, cultural and ethnic affinity groups, residence hall floors, club sports, performance arts groups, religious organizations, student government, and countless special-interest clubs. Information about events travels differently in each of these communities, and there is almost never a common channel.
+**No Greek system.** Unlike American campuses where fraternities and sororities control a significant portion of the social calendar, UVic has no Greek life. This is true of virtually all Canadian universities. The absence of Greek houses removes the dominant high-status social gatekeeping structure. There is no "Greek row" pulling first-years toward chapter rush, no single dominant social hierarchy organized around letters. The campus social ecosystem is consequently more distributed — hundreds of clubs and student organizations compete for student attention on more equal footing.
 
-The dominant discovery mechanism today is Instagram. Every club, Greek chapter, department, and student union has an Instagram account that posts event flyers. The problem is that students must actively follow these accounts to see their posts, algorithmic ranking buries posts from smaller organizations, and Instagram Stories (the most ephemeral and viral format) disappear after 24 hours. Students who are not already embedded in a social network miss events they would have loved.
+**The UVSS is the student power center.** The UVSS (UVic Students' Society) is the primary student organization — it runs The Vertigo (a basement live music venue in the SUB), the Grad House Pub, club funding, the SUB building spaces, and the annual Club Crawl. Being connected to UVSS-sponsored events is the closest UVic equivalent to the social prestige that Greek life provides at American schools.
 
-GroupMe is the second dominant channel. Many clubs, dorm floors, and friend groups maintain GroupMe chats where events are shared. This channel reaches only people already in the group and creates a fragmented, high-noise environment — the same event might be cross-posted across fifteen different chats, and the signal gets lost in casual conversation.
+**The SUB is the social nucleus.** The Student Union Building (SUB) on Ring Road is where student social life concentrates: The Vertigo for live music and events, the main concourse for club tables and fairs, the Grad House Pub for casual socializing, and B-wing meeting rooms for club meetings. Almost every social event at UVic connects to the SUB in some way.
 
-Campus portals (official university event calendars, department websites) exist but are almost universally disliked by students. They tend to be updated inconsistently, look visually dated, and are never bookmarked on a student's home screen. They function as a bureaucratic record rather than a discovery surface.
+**Co-op culture creates seasonal social rhythms.** UVic has one of Canada's most extensive co-op programs, particularly in Engineering, Computer Science, Business, and Science. Many students do 4–8 month work terms alternating with academic terms, spending semesters in Vancouver, Toronto, or other cities (or internationally). This means a significant portion of the student body is off-campus in any given term, returning for their next academic semester. The start of each fall semester sees a large wave of co-op returnees re-plugging into campus life — an extremely high-value moment for FlockIn!! engagement.
 
-Word of mouth remains powerful, particularly for high-status events (Greek parties, popular performer concerts, major athletics events). A friend saying "are you going to X?" has conversion power that no Instagram post matches. But word of mouth is gated by social proximity — if you're not already in the network, you don't hear the words.
+**Victoria's character shapes campus culture.** Victoria is a small Pacific coastal city with mild, slightly rainy weather and exceptional outdoor access — ocean beaches, Garry oak meadows on campus, old-growth forest parks, cycling infrastructure. Outdoor events (runs, hikes, beach sessions) are more common here than at inland urban campuses. The city is also notably older-skewing and quieter than a typical Canadian university city, which means students who want nightlife often create their own on-campus events rather than going downtown.
 
-FlockIn enters this landscape as a centralized, visually compelling, cross-community discovery layer. Its core social dynamic tension is this: events from large, established organizations (Greek life, major student government events) will attract the most RSVPs and dominate the Noticeboard if FlockIn achieves scale. But the events most underserved by current infrastructure are from smaller, newer, or more niche organizations — the ones most likely to benefit from a central discovery platform.
+**Strong international student presence.** UVic draws large numbers of international students, particularly from China, India, South Korea, Mexico, and various Southeast Asian countries. These students navigate a dual social world: their home-country networks (often maintained through WeChat, KakaoTalk) and the broader UVic community they're simultaneously trying to enter. Cultural student associations (Chinese Students Association, Indian Students Association, etc.) are active and well-attended.
 
-What makes an event "cool" or worth attending on campus follows a loose social proof hierarchy. First-tier signals: a friend is going, a respected peer RSVPed, the event is visually striking (a great poster), or it has a notable performer/speaker. Second-tier signals: the hosting organization is well-known, the event has free food, the event fills a social gap (a Monday night when everything else is quiet). Third-tier signals: algorithmic recommendations, generic category labels. FlockIn's RSVP count visible on poster cards is a direct social proof signal — a card showing 47 going is inherently more compelling than one showing 2 going.
+**Indigenous student community.** UVic sits on unceded WSÁNEĆ and Lekwungen Peoples' territory. The university has a meaningful Indigenous student population and a well-funded Indigenous student services center (First Peoples House). Events celebrating and centering Indigenous culture and history are a distinct and important part of the campus calendar.
+
+**Current event discovery mechanisms and their failures:**
+
+- **Instagram** — every club has an account, but algorithmic suppression buries smaller orgs, Stories disappear in 24 hours, and students must already follow the account to see posts
+- **iMessage and WhatsApp group chats** — dense and noisy, reach only existing social networks
+- **UVSS website and Facebook Events** — rarely used by current undergraduates; perceived as the "official" channel that nobody checks
+- **Physical flyers and posters** — high visibility inside specific buildings, zero visibility outside them; only works if you physically walk past it
+- **Word of mouth** — highest conversion, lowest reach; only works inside existing social networks
+
+FlockIn!! enters as the first channel that is (1) cross-community, (2) personalized, (3) visually compelling as a casual browsing experience, and (4) enhanced by push notifications that bring the content to the student rather than requiring them to actively seek it.
 
 ---
 
 ## Student Archetypes
 
-### 1. The Social Organizer (Greek Life / Events Committee)
+### 1. The Club Crawler (First-Year Social Seeker)
 
-**Age/Year:** 20–22, junior or senior. Usually in a leadership role within their organization.
+**Age/Year:** 17–19, first semester. Arrived on campus 3–8 weeks ago, likely from another city in BC or another Canadian province.
 
-**Major/Background:** Business, Communications, or undecided. Has strong organizational instincts. Likely vice president of events for their sorority, fraternity, or major student org.
+**Background:** Domestic student, medium-sized high school, academically solid, excited about the "fresh start" mythology of university. May have gone through a lonely first few weeks and is now actively trying to find their people.
 
-**Social Behavior:** This person is deeply embedded in campus social networks. They know about events before they happen because they help plan them. They coordinate across multiple GroupMe chats, have over a thousand Instagram followers, and text dozens of people simultaneously when something is happening. They are an information hub — other students often ask them "what's happening this weekend?"
+**Social Behavior:** Went to the Club Fair during Orientation Week and signed up for 12 email lists. Has attended 3–4 events and found most of them awkward. Has a small cluster of friends from their residence floor or first-year courses but is still socially hungry. Follows every UVic club Instagram account they can find. Checks Instagram obsessively for event announcements but misses most of them because the algorithm doesn't prioritize clubs over friends.
 
-**Technology Habits:** Very high smartphone usage. Lives in Instagram and GroupMe. Uses Snapchat for close friend communication. Checks her phone every few minutes. Has experimented with most campus apps that were ever launched. Is skeptical of new platforms because she's seen them fail before.
+**Technology Habits:** High smartphone usage, primarily Instagram and iMessage. Comfortable with new apps — genuinely excited about them in a way older students no longer are. Has already downloaded and abandoned two campus apps since September. Will download FlockIn!! when a peer mentions it and will open it several times in the first week.
 
-**Motivation for Events:** Events are her social currency. She attends to be seen, to strengthen relationships, and to scout what other organizations are doing. She also has a professional interest in event quality — she analyzes what works and what doesn't.
+**Motivation for Events:** Belonging, not FOMO. They want to find their people. Low-commitment, welcoming events (all skill levels, no experience needed, free entry) are highly attractive. The International Student Welcome BBQ at the Campus Community Gardens, the Ceramics Open Studio, or Open Mic Night at The Vertigo are perfect entry points.
 
-**Relationship to FlockIn:** Likely a power-user organizer. She will adopt FlockIn early if she sees it as a distribution channel that extends her reach beyond her existing network. Her critical test: does FlockIn bring people she doesn't already know? If the RSVPs on her event are all people she recognizes, FlockIn isn't adding value. If she sees unknown names RSVPing, she becomes a committed advocate and promotes FlockIn within her chapter.
+**Relationship to FlockIn!!:** The highest-enthusiasm early adopter. Completes onboarding carefully, picks 6–8 interests, browses the Noticeboard daily in the first two weeks. RSVP-to-attendance ratio is lower than they intend — they over-commit. Will subscribe to three or four clubs immediately after discovering the subscription feature. Push notifications from subscribed clubs are the feature they find most compelling because they solve the Instagram algorithm problem that frustrated them.
 
-**Personality:** ESTJ or ENTJ. Confident, decisive, socially comfortable, mildly competitive about event success metrics.
+**Personality:** ENFP or INFP. High openness, high agreeableness, still finding their confidence.
 
-**Interaction with Other Archetypes:** She will directly recruit The Enthusiastic Freshman, works alongside The Club President, and competes socially with The Rival Organizer from a competing chapter. The Introvert Lurker is invisible to her unless they RSVP to her event.
-
----
-
-### 2. The Enthusiastic Freshman
-
-**Age/Year:** 18, first semester. Has been on campus for 4–8 weeks.
-
-**Major/Background:** Undecided or first-year-declared in STEM, business, or something their parents suggested. Still discovering who they are in this new environment.
-
-**Social Behavior:** Desperately wants to find their people but hasn't yet. Follows every club's Instagram account, attends every club fair table, signs up for mailing lists they never read. Goes to events with their assigned roommate or the two friends they made in their dorm's first week. Has FOMO constantly. Follows upperclassmen on Instagram and uses their activity as social signals — if they liked an event post, it must be worth going to.
-
-**Technology Habits:** Heavy smartphone user, primarily Instagram and TikTok. Has heard of and uses most social apps. Very willing to download new apps during the first few weeks of college because they are actively seeking community. Will give FlockIn a genuine try if it's mentioned once.
-
-**Motivation for Events:** To find community, to have stories to tell back home, to figure out what college is supposed to feel like. Attends events that are low-commitment (no prior group required, easy to show up alone), visually exciting, or have social proof from their limited existing network.
-
-**Relationship to FlockIn:** Ideal early adopter. They have the most to gain from a centralized discovery platform because they are the least embedded in existing information networks. They will complete onboarding carefully, try to pick the "right" interests, and check the Noticeboard frequently. They may initially over-RSVP (marking Going for things they don't attend) because the commitment feels low. Retention depends on whether FlockIn actually helps them find their community or just adds noise.
-
-**Personality:** ENFP or INFP. High openness, high agreeableness, moderate anxiety.
-
-**Interaction with Other Archetypes:** Will be recruited by The Social Organizer. Will look up to The Well-Connected Senior as a social ideal. Will find common ground with The International Student in navigating an unfamiliar social landscape.
+**Interaction with Other Archetypes:** Naturally gravitates toward The Enthusiastic Connector who helps them navigate the social landscape. Recruited by The Org Executive into clubs. Finds common ground with The International Student in navigating an unfamiliar social environment.
 
 ---
 
-### 3. The Involved Senior
+### 2. The Org Executive (Student Organization Leader)
 
-**Age/Year:** 22, fourth year. Has already found their community deeply.
+**Age/Year:** 20–22, third or fourth year. Holds a leadership role: president, VP-events, or social coordinator of a recognized student organization.
 
-**Major/Background:** Social sciences, humanities, or pre-law. Has been in the same club or organization for 3–4 years and now holds a leadership position. Has a clear sense of campus social geography — which events are worth attending and which are not.
+**Background:** Deeply embedded in campus life. Has been a club member since first year and now runs it. Their organization might be the Victoria Coding Collective, the UVic Photography Club, the Environmental Society, or the Entrepreneurship Hub. They know the UVSS funding application process, how to book rooms in the SUB, and which Instagram hashtags attract engagement.
 
-**Social Behavior:** Selective. No longer attends events out of FOMO. Attends because the specific event serves a specific social or professional purpose. Has a stable friend group and mostly socializes with them. Uses Instagram to maintain a campus-wide personal brand but spends less time scrolling it than they used to. Has likely hosted or co-hosted multiple campus events and knows the logistical side.
+**Social Behavior:** Wide campus network, but their core social world is their org and their peer leaders in other orgs. They coordinate event logistics, manage their club's Instagram and whatsapp/Discord, send emails to the membership list, and cross-promote with other clubs. They are perpetually busy in a way they find meaningful.
 
-**Technology Habits:** Moderate smartphone usage, declining slightly as they mature past the dopamine-seeking phase. Uses LinkedIn more than other college students. Browses FlockIn occasionally when looking for something specific to recommend to underclassmen.
+**Technology Habits:** High usage of Instagram (as a broadcast tool, not a personal social channel), Google Workspace (for event applications and budgets), Discord (for their community). Treats social media professionally. More receptive to new platforms when they can demonstrate reach — they are ROI-focused about where they spend their promotion energy.
 
-**Motivation for Events:** Professional networking, supporting causes and organizations they believe in, creating memorable senior-year experiences. Also attends events hosted by close friends as an act of social support.
+**Motivation for FlockIn!!:** Distribution. They want more people at their events, including people outside their existing network. The value proposition of FlockIn!! is clear to them: a single platform where any UVic student who might be interested in their event can discover it. Their adoption test is whether events posted to FlockIn!! bring in faces they don't already recognize.
 
-**Relationship to FlockIn:** Moderate engagement. They see value in FlockIn for discovery (especially for events outside their immediate network) but already have strong enough existing channels that FlockIn is additive rather than essential. They are most likely to use FlockIn as an organizer — their club's events get posted there, and they appreciate the professional-looking poster cards. They care about moderation quality and will stop using FlockIn if low-quality events proliferate.
+**Critical friction point:** The pending review system. An org executive who submits an event for a Friday night at 11:00 AM Thursday and doesn't see it approved until Friday morning has lost nearly all their promotion window. This is the #1 churn risk for this archetype. If admin approval is consistently fast (under 2–3 hours), they become committed platform evangelists. If it's slow, they deprioritize FlockIn!! as a channel.
 
-**Personality:** INTJ or ISTJ. Analytical, confident in their social positioning, future-oriented.
+**Relationship to FlockIn!!:** The primary supply-side of the marketplace — they are the ones posting the events. When 3–4 well-networked org executives commit to FlockIn!! as their primary promotion channel, they bring hundreds of community members with them. This archetype has outsized influence on platform health.
 
-**Interaction with Other Archetypes:** Mentors The Enthusiastic Freshman. Competes professionally with The Social Organizer from other organizations. Is largely oblivious to The Introvert Lurker unless they cross paths.
+**Personality:** ENTJ or INFJ. Mission-driven, organized, highly capable, occasionally stressed.
 
----
-
-### 4. The Introvert Lurker
-
-**Age/Year:** 19–21, sophomore or junior.
-
-**Major/Background:** Computer science, engineering, mathematics, or another technical field. Has a small, tight group of close friends (3–4 people). Highly capable socially in those relationships but finds large social events exhausting.
-
-**Social Behavior:** Rarely initiates social plans but will attend events when directly invited by close friends. Browses social feeds without engaging — rarely likes, comments, or shares. Knows about a lot of events because they see them in passing but attends few. Has learned which categories of events they actually enjoy: small workshops, niche interest meetups, study groups, tech talks, gaming events.
-
-**Technology Habits:** Heavy technology user in general but low-engagement social media user. Browses rather than posts. Likely uses Discord more than Instagram. Checks phone on a schedule rather than impulsively.
-
-**Motivation for Events:** Intellectual stimulation, building skills, or spending time with close friends in a defined activity. Avoids events that are primarily about mingling or where they won't know anyone.
-
-**Relationship to FlockIn:** A frequent, low-visibility user. They will open FlockIn regularly, browse the Noticeboard, save events, and often not attend them. Their saved-events and going-events lists diverge significantly (many saved, few going). They will be strongly served by the interest-based filtering because niche Tech/Coding/Workshop/Academic events will rise to the top of their personalized feed. They are unlikely to create events or engage with the platform socially. The platform may never know they exist unless they RSVP. Churn risk is low because the value (passive discovery) is consistent. However, if FlockIn's Noticeboard becomes dominated by social events and parties, they will stop checking it.
-
-**Personality:** INTP or ISTJ. High openness for intellectual topics, low openness for unstructured social situations.
-
-**Interaction with Other Archetypes:** Will be influenced to attend events by The Enthusiastic Friend (Archetype 5). Will find common ground with The International Student around academic events.
+**Interaction with Other Archetypes:** Actively recruits The Club Crawler into their organization. Builds cross-org relationships with other Org Executives. Creates the content that The Enthusiastic Connector shares into group chats.
 
 ---
 
-### 5. The Enthusiastic Friend (Social Glue)
+### 3. The Enthusiastic Connector (Social Infrastructure Person)
 
-**Age/Year:** 20–21, sophomore or junior.
+**Age/Year:** 20–21, second or third year. Not the leader of a club, but the person in every group chat who sends the "we should go to this" message.
 
-**Major/Background:** Psychology, communications, education, or undeclared. The social engine of a friend group — the person who makes plans happen.
+**Background:** Has found their social footing. Has a stable friend group of 15–25 people across multiple social contexts — their residence floor from first year, their program cohort, their one club. Not a leader but deeply social and genuinely interested in shared experiences.
 
-**Social Behavior:** Not as broadly connected as The Social Organizer, but deeply connected within their specific friend network of 15–30 people. Sends the "we should go to this" texts. Coordinates group attendance. Remembers that a friend mentioned an interest in photography three months ago and sends them a specific event. Has a genuine, authentic enthusiasm for shared experiences rather than social positioning.
+**Social Behavior:** Remembers that their friend mentioned being interested in photography. Texts them when the Photography Basics: Shoot in Manual event appears on FlockIn!!. Coordinates group attendance for events — "who's going to trivia night?" Is the person who sends FlockIn!! event links into group chats, creating the platform's organic word-of-mouth distribution.
 
-**Technology Habits:** High smartphone usage, primarily Instagram, iMessage, and group chats. Will enthusiastically adopt FlockIn when they discover it because it perfectly serves their behavior: finding things to suggest to friends. They will be the person who shares FlockIn event links into group chats, creating viral distribution for the platform.
+**Technology Habits:** High iMessage and Instagram usage, heavy group chat coordination. Highly comfortable sharing links. Will share a FlockIn!! poster card to their Instagram Story without being asked — the event card looks good and it's easy.
 
-**Motivation for Events:** Creating shared experiences with people they care about. The event itself is secondary to the group participation. Will attend a mediocre event happily if their friends are there.
+**Motivation for Events:** Shared experiences. The event itself is secondary to doing something together. Will attend a mediocre event happily if their people are there. The Noticeboard snapshot share feature is built for this person — they see a cool event, generate the shareable image, and post it to their story with "anyone going to this?"
 
-**Relationship to FlockIn:** High-value user for distribution. This archetype is FlockIn's word-of-mouth vector. When they find an event on FlockIn and share it to their group chat, they are doing FlockIn's marketing. They will engage with the save, bookmark, and RSVP features. They will check if their friends are going (though the current implementation doesn't show friend activity — they'll do this by texting). They are most likely to mention FlockIn by name in conversation.
+**Relationship to FlockIn!!:** The platform's primary organic growth mechanism. Each Enthusiastic Connector who discovers FlockIn!! becomes a distribution node, routing event information into social networks that wouldn't otherwise see it. They don't need to be power users — their high-value behavior is the share. Push notifications from subscribed clubs are useful for them because they want to be the first in their group to know about something.
 
-**Personality:** ENFJ or ESFJ. High agreeableness, high conscientiousness, warm and collaborative.
+**Personality:** ENFJ or ESFJ. Warm, socially skilled, genuine care for the people around them.
 
-**Interaction with Other Archetypes:** Directly activates The Introvert Lurker's attendance. Works alongside The Social Organizer without being competitive. A critical bridge between social clusters.
-
----
-
-### 6. The Club President / Student Org Leader
-
-**Age/Year:** 21–23, junior or senior.
-
-**Major/Background:** Varies widely — this archetype is defined by role, not major. Could be president of the photography club, the pre-law society, a cultural student association, or a competitive debate team.
-
-**Social Behavior:** Deeply mission-driven within their specific domain. Has an internal mailing list, a GroupMe, and an Instagram account for their club. Attends events in their domain and related domains to build partnerships. Knows the bureaucratic process of reserving campus rooms and getting events approved through official channels.
-
-**Technology Habits:** Moderate-high smartphone usage. Uses Google Workspace and email significantly more than other students because they have administrative responsibilities. Treats social media as a broadcast channel for their organization rather than a personal social feed.
-
-**Motivation for Events:** Growing club membership, building community for their members, and creating programming that serves the club's mission. Success metric is attendance and member retention.
-
-**Relationship to FlockIn:** High-value organizer. They represent the supply side of FlockIn's marketplace. They will create events on FlockIn after seeing it as a legitimate distribution channel. Their adoption pattern: they try it for one event, watch the RSVP count, compare it to their normal channels, and make a ROI assessment. If FlockIn brings new faces, they become regular posters. If not, they deprioritize it. They will be frustrated by the moderation delay (pending review) if it takes more than a few hours — event promotion often starts close to the deadline.
-
-**Personality:** ENTJ or INFJ. Passionate about their domain, organized, comfortable with leadership responsibility.
-
-**Interaction with Other Archetypes:** Builds symbiotic relationships with The Social Organizer from other organizations. Actively recruits The Enthusiastic Freshman into their club. Creates the content that The Enthusiastic Friend shares.
+**Interaction with Other Archetypes:** Activates The Quiet Observer's attendance. Amplifies The Org Executive's events. Bridges between The International Student and the domestic student social world.
 
 ---
 
-### 7. The International Student
+### 4. The Quiet Observer (Introverted Regular Browser)
 
-**Age/Year:** 19–23, any year.
+**Age/Year:** 19–22, any year. Computer Science, Engineering, or Math student. May be in a co-op program.
 
-**Major/Background:** Often in STEM, business, or economics — fields that attract large international student populations. May be in a first or second year while navigating the simultaneous challenges of academic rigor and social integration.
+**Background:** Has a small, close friend group (3–4 people). Socially comfortable within that group but finds large unstructured social events exhausting. Has strong technical interests and is selectively drawn to events with clear intellectual content: workshops, talks, technical demos, niche interest meetups.
 
-**Social Behavior:** Primarily socializes within their national/regional affinity group initially (other students from the same country or region), then gradually expands outward. Has a genuine desire to experience broader campus culture but faces barriers: cultural unfamiliarity with certain social norms, potential language confidence issues in unstructured social settings, and the exhaustion of navigating a foreign cultural environment daily. Very active in cultural student associations (the Chinese Students Association, the Indian Students Association, etc.).
+**Social Behavior:** Browses Instagram and Reddit but posts almost nothing. Knows about a lot of events because they see them in passing but attends few. Has learned which event types they actually enjoy: the Intro to Machine Learning workshop in ECS 108, the Campus Trivia Night at The Grad House, the Video Games & Esports Club nights. Avoids events that feel like "networking mixers" where unstructured mingling is the point.
 
-**Technology Habits:** Heavy smartphone user but using platforms their home-country network uses (WeChat, KakaoTalk, WhatsApp) in parallel with local platforms. Willing to adopt campus-specific apps because they represent an opportunity to integrate. More likely to carefully read event descriptions than other archetypes — they want to know exactly what to expect before showing up.
+**Technology Habits:** Heavy Discord and Reddit user. Moderate Instagram. Checks apps on a schedule rather than impulsively. Will use FlockIn!! regularly but passively — opens it after lunch to browse, saves several things, attends one.
 
-**Motivation for Events:** Cultural celebration events (Lunar New Year, Diwali, national cuisine nights) are high-priority. Academic and career events (networking nights, career fairs, research talks) are also very high-priority. Social events from outside their immediate community are attended with a mix of excitement and anxiety.
+**Motivation for Events:** Intellectual stimulation, skill building, or guaranteed quality time with close friends. Needs to know what to expect before showing up. Detailed event descriptions and specific locations reduce their attendance anxiety.
 
-**Relationship to FlockIn:** Positive but moderate engagement. FlockIn's interest-based filtering is particularly valuable for this archetype because it helps them find events they're genuinely interested in rather than just events that happen to be in front of them. Cultural student associations posting on FlockIn creates direct value for this segment. Potential friction: if FlockIn's visual design or copy feels too oriented toward Greek life or American social norms, this archetype will feel like the platform isn't for them.
+**Relationship to FlockIn!!:** Frequent low-visibility user. Their saved-to-going ratio is the highest of any archetype (many saves, few RSVPs, even fewer physical attendances). The interest-based filtering is their primary entry point — Workshop, Technology, Academic, and Coding filter pills are how they navigate the Noticeboard. The club subscription feature is highly compelling for this archetype because it eliminates the cognitive overhead of remembering to check multiple sources. If the Victoria Coding Collective's weekly hack nights appear as push notifications, they will attend more consistently.
 
-**Personality:** INFJ or ISFJ. Observant, thoughtful, appreciative of curated discovery.
+**Churn risk:** If the Noticeboard fills with social events and parties that don't match their interests, they stop checking. The interest-personalization health directly determines whether this archetype remains active. Their engagement is invisible to aggregate metrics (they don't RSVP much) but they are a significant portion of the actual attending audience at niche events.
 
-**Interaction with Other Archetypes:** Finds common ground with The Introvert Lurker around academic events. Is directly served by The Club President of cultural organizations. The Enthusiastic Freshman often seeks them out as an interesting peer.
+**Personality:** INTP or ISTJ. Precise, private, appreciative of well-designed information systems.
+
+**Interaction with Other Archetypes:** Activated by The Enthusiastic Connector who texts them specifically about events they'll like. Creates an attentive audience for The Org Executive's technical and academic events.
 
 ---
 
-### 8. The Athlete
+### 5. The International Student
 
-**Age/Year:** 19–23, any year. Varsity or club-level athlete.
+**Age/Year:** 18–24, first or second year most commonly, but any year.
 
-**Major/Background:** Varies. Varsity athletes often in kinesiology, sports management, business, or communications. Their primary identity on campus is their sport.
+**Background:** Arrived from China, India, South Korea, Mexico, or another country to study at UVic, often in STEM, business, or economics. Is navigating the simultaneous challenge of academic rigor and social integration. Has a home-country social network maintained through WeChat or similar, and is gradually building a local network. May live in residence or share a house with other international students.
 
-**Social Behavior:** Their primary social community is their team. Attends team events, team-adjacent social events, and campus-wide events when the timing is compatible with their training schedule. Has a highly structured week and is therefore selective about discretionary social spending. Knows other athletes across different sports through shared training facilities and campus intersections.
+**Social Behavior:** Primarily socializes within their national/regional affinity group initially. Actively involved in their cultural student association — the Chinese Students Association, Indian Students Association, or similar. Attends cultural events (Diwali celebration, Lunar New Year dinner) at very high rates. Has genuine desire to connect with the broader UVic community but faces barriers: unfamiliar social norms, possible language confidence variations in unstructured settings, the cognitive load of navigating an entirely foreign social context.
 
-**Technology Habits:** Heavy social media user (Instagram, TikTok for personal brand, Twitter/X for sports commentary). Uses group chats for team coordination. Has limited time, so information needs to be findable quickly.
+**Technology Habits:** Heavy smartphone user, but uses home-country platforms (WeChat, KakaoTalk) as much as Western apps. Instagram-literate but does not feel algorithmically well-served by it for campus events — they follow few UVic accounts and miss most organic posts. Will read event descriptions carefully before attending — they want to know exactly what to expect.
 
-**Motivation for Events:** Social events with teammates or other athletes, events that reinforce team culture, and select campus-wide events during off-weeks or shoulder seasons. Career events toward end of college as they think about post-athletic life.
+**Motivation for Events:** Cultural celebration events are highest priority. Academic and career events (research symposia, career fairs, networking panels) come next. Social events in general campus settings are attended with growing confidence as the year progresses.
 
-**Relationship to FlockIn:** Moderate-low engagement unless Sport category events become prominent on the platform. If FlockIn has good Sport category content (club sport events, intramural kickoff events, athletic department talks, sports watch parties), this archetype engages. Otherwise, they will browse occasionally but not regularly. High potential for RSVP conversion if FlockIn achieves visibility within athletic department networks.
+**Relationship to FlockIn!!:** High potential engagement if the platform serves their interests well. The International Student Welcome BBQ, cultural events, career fairs, and academic talks are all discoverable through FlockIn!!, making it genuinely useful from day one. The interest-based filtering (selecting Academic, Career, Food, Social) surfaces relevant events quickly. Club subscription to their cultural student association gives them an automatically-updated calendar of their community's events. The biggest friction: if FlockIn!! feels culturally coded toward domestic students or if cultural events are underrepresented in the seeded data, this archetype doesn't engage.
 
-**Personality:** ESTP or ESFP. High sensation-seeking, social, present-oriented.
+**Personality:** INFJ or ISFJ. Observant, thoughtful, appreciative of precise information.
 
-**Interaction with Other Archetypes:** Socially overlaps with The Social Organizer at larger campus events. The Enthusiastic Freshman often idolizes this archetype from a distance. Limited organic overlap with The Introvert Lurker.
+**Interaction with Other Archetypes:** Finds natural connection with The Club Crawler around the shared experience of navigating unfamiliar social geography. Is well-served by The Enthusiastic Connector who builds cross-community bridges. Creates events that The Quiet Observer attends (academic and niche-interest events).
+
+---
+
+### 6. The Co-op Returner
+
+**Age/Year:** 20–23, second through fourth year. Back on campus after a 4-or 8-month work term in Vancouver, Toronto, or internationally.
+
+**Background:** Spent the last semester at a tech company in Vancouver, a government office in Ottawa, or a startup in San Francisco. Is now back in Victoria for their academic term and is actively trying to re-plug into campus social life after months away.
+
+**Social Behavior:** Was very connected before their work term, less so now because some friends are still on co-op and others have graduated. Is essentially re-onboarding to campus life each time they return. Has developed professional maturity and confidence from the work term and is more selective about how they spend their social time — but also genuinely excited to be a student again.
+
+**Technology Habits:** Has a refined tech stack from their work term: Slack, Notion, LinkedIn. Comfortable with new digital tools. Will be receptive to FlockIn!! precisely because of its clean, well-designed interface — they have higher aesthetic expectations after a semester working with professional tools.
+
+**Motivation for Events:** Career-adjacent events (Tech Recruiting Panel, Health Sciences Career Fair, Entrepreneurship Hub pitch nights), reconnecting with existing friends, and events from clubs they were members of before the work term.
+
+**Relationship to FlockIn!!:** The club subscription feature is directly built for this archetype. When they return from co-op, they re-subscribe to their clubs (Victoria Coding Collective, Entrepreneurship Hub, etc.) and immediately start receiving notifications about upcoming events without having to rebuild their awareness from scratch. FlockIn!! is a "re-onboarding" tool for the co-op cycle. Each re-activation of a Co-op Returner brings a user back to full engagement without requiring a new acquisition.
+
+**Personality:** ENTJ or ESTJ. Self-directed, goal-oriented, increasingly professional.
+
+**Interaction with Other Archetypes:** Natural mentors to The Club Crawler. Reconnects with The Org Executive in their former clubs. Brings a career-credibility energy to events that attracts younger students.
+
+---
+
+### 7. The Outdoor and Wellness-Focused Student
+
+**Age/Year:** 19–23, any year. Often in Environmental Studies, Geography, Kinesiology, or Biology.
+
+**Background:** Victoria's mild climate and access to nature are a primary reason they chose UVic. Cycles to campus. Goes to the campus rec centre two or three times a week. Is involved in the Outdoor Adventures Club (hikes, kayaking, skiing trips to Mount Washington). Cares about sustainability and may be involved with the Environmental Society.
+
+**Social Behavior:** Socializes through activity-based shared experiences: group hikes, run clubs, campus rec classes, the farmers market on Ring Road. Not particularly oriented toward events in indoor venue settings unless they have a clear purpose. The 5K Fun Run through the Garry oak meadows, the Sustainable Living workshop, and outdoor photography walks are ideal event types.
+
+**Technology Habits:** Moderate smartphone use. Uses Strava, AllTrails, or similar. Instagram for nature photography inspiration. Is skeptical of tech-focused platforms but will use FlockIn!! if it surfaces relevant outdoor and wellness content.
+
+**Motivation for Events:** Physical activity with community, outdoor experiences, and events aligned with their environmental values. The "Expiring Soon" pulse animation on same-day events like the Farmers Market or a spontaneous beach hike appeals to their impulse-action style.
+
+**Relationship to FlockIn!!:** Moderate engagement, strongly category-dependent. If Sport, Nature, Food, and Workshop events are well-represented on the Noticeboard, this archetype is an active regular. If the Noticeboard skews toward indoor social events, they disengage. Will subscribe to the Outdoor Adventures Club and Environmental Society to receive event notifications automatically. The calendar export feature (Phase 3) is particularly useful for scheduling weekend trips.
+
+**Personality:** ISFP or ENFP. Present-focused, active, values-aligned.
+
+**Interaction with Other Archetypes:** Builds natural community with The International Student at outdoor welcome events. Collaborates with The Org Executive in the Environmental Society. Occasionally recruits The Quiet Observer for structured outdoor activities.
+
+---
+
+### 8. The Arts and Creative Student
+
+**Age/Year:** 18–22, any year. Fine Arts, Theatre, Creative Writing, Music, or Film Studies.
+
+**Background:** Has a strong aesthetic sensibility and a personal creative practice. Attends gallery openings in the Visual Arts Building, open mic nights at The Vertigo, and film screenings organized by the Film & Media Arts Society. Their social world is the creative community on campus.
+
+**Social Behavior:** Primarily socializes through creative contexts. Attends and performs at the same events. The Opening Night of the End of Year Art Exhibition, Open Mic Night, and the Spring Classical Recital at Phillip T. Young Recital Hall are core calendar items. Discovers events through physical flyers and through personal networks, both of which have significant reach gaps.
+
+**Technology Habits:** High Instagram usage for visual inspiration and personal portfolio. TikTok for creative content. Will judge FlockIn!!'s visual design in the first ten seconds — the corkboard aesthetic, the poster card format, and the warmth of the Montserrat/terracotta palette will work strongly in the platform's favor with this archetype.
+
+**Motivation for Events:** Creative inspiration, community with fellow artists, the experience of discovering new talent or being discovered. Will be drawn to the visual quality of poster cards — the ones with carefully designed images rise to the top of their attention.
+
+**Relationship to FlockIn!!:** Natural advocates. The Noticeboard poster metaphor resonates immediately with this archetype — it evokes the physical poster boards in arts buildings, the flyers they pin up themselves, the aesthetic of creative promotion. They are more likely to upload beautiful, carefully designed event images, which improves the overall Noticeboard aesthetic quality. Subscribing to the UVic Music Collective, UVic Visual Arts Society, and Film & Media Arts Society gives them their complete creative calendar via push notifications.
+
+**Personality:** INFP or ISFP. Aesthetic, emotionally intelligent, community-oriented.
+
+**Interaction with Other Archetypes:** Creates the events that The Enthusiastic Connector shares. Builds audience overlap with The International Student around cultural performance events. Inspires The Club Crawler with the vibrancy of campus creative life.
 
 ---
 
 ### 9. The Career-Focused Pre-Professional
 
-**Age/Year:** 20–22, junior.
+**Age/Year:** 20–22, third year. Business, Economics, Computer Science, Health Sciences.
 
-**Major/Background:** Business, economics, pre-law, finance, engineering. Highly focused on resume-building and networking. May be in multiple professional fraternities or honor societies.
+**Background:** Has a clear professional direction and treats their campus activities as both genuine interests and resume investments. Involved in the Entrepreneurship Hub, UVic Business Society, or the pre-med or nursing organization. Has a carefully maintained LinkedIn profile. Is either planning for or already in the co-op cycle.
 
-**Social Behavior:** Attends a high volume of events but is highly selective about type — networking mixers, career fairs, company info sessions, LinkedIn networking dinners, leadership development workshops. Considers their social activity as part of their professional development investment. Has a large LinkedIn network relative to peers.
+**Social Behavior:** Attends a high volume of events of a specific type: the Tech Recruiting Panel in ECS 104, the Health Sciences Career Fair in Petch, the Resume & LinkedIn Workshop at the Career Centre, Entrepreneurship Hub pitch nights. Less interested in purely social events unless they involve networking. Uses their calendar aggressively.
 
-**Technology Habits:** Heavy LinkedIn user (unusual for college students). Moderate Instagram. Uses a calendar religiously. Values platforms that surface professional-development events.
+**Technology Habits:** LinkedIn power user (unusual for undergraduates). Heavy use of calendar applications and productivity tools. Will find the Google/Apple Calendar export feature (Phase 3) immediately compelling — they want FlockIn!! events in their existing calendar system.
 
-**Motivation for Events:** Resume lines, genuine skill building, and making connections that lead to internship opportunities. Does not attend social events purely for fun — even social attendance has a networking subtext.
+**Motivation for Events:** Professional development, skill building, and networking opportunities. "Career" and "Academic" filter pills are their primary Noticeboard navigation tools.
 
-**Relationship to FlockIn:** Will use FlockIn regularly if Career category events are well-populated. The Career and Academic filter pills are their primary engagement surfaces. Will create a strong account and select Career, Business, Technology, and Coding interests during onboarding. Will find the platform less valuable if it skews heavily toward Social and Music events. If career-adjacent organizations post on FlockIn, this archetype becomes a reliable daily user.
+**Relationship to FlockIn!!:** Becomes a highly regular user if career-relevant events are consistently on the platform. Will subscribe to the Entrepreneurship Hub and any professional development-adjacent clubs. The upcoming event reminder notifications are particularly valuable for them — career events often require preparation, and a 24-hour reminder prompts them to bring a resume or prepare questions. Will export RSVPed career events to Google Calendar.
 
-**Personality:** ENTJ or ESTJ. Goal-oriented, self-directed, strategic.
+**Personality:** ENTJ or ESTJ. Ambitious, structured, future-oriented.
 
-**Interaction with Other Archetypes:** Networks with The Involved Senior for mentorship. Overlaps with The Club President (often holds leadership roles in professional clubs). Largely operates in parallel to The Social Organizer, different social world.
-
----
-
-### 10. The Arts/Creative Student
-
-**Age/Year:** 19–22, any year.
-
-**Major/Background:** Fine arts, design, film, theater, creative writing, music. Has a strong personal creative identity and sense of aesthetic.
-
-**Social Behavior:** Primarily socializes within creative communities — the film club, theater cast, art department studio culture, music ensemble. Attends performances, gallery openings, film screenings, open mic nights, and spoken word events. Is naturally inclined toward events that have strong visual presentation.
-
-**Technology Habits:** High Instagram and TikTok usage for creative inspiration and personal portfolio. Sophisticated visual taste — will judge FlockIn's design immediately and will be either won or lost in the first thirty seconds of visual experience. Values aesthetics over utility.
-
-**Motivation for Events:** Creative inspiration, community with fellow artists, showing and celebrating their own work, and discovering talent they don't know yet.
-
-**Relationship to FlockIn:** Strong natural affinity if FlockIn's aesthetic resonates. The corkboard/poster metaphor of the Noticeboard is particularly likely to appeal to this archetype — it evokes the actual physical noticeboards they walk past in art buildings and music halls. They will appreciate event poster cards and be more likely to upload high-quality images when posting events. Art, Music, Film, and Photography filter tags are their primary navigation. They may become vocal advocates simply because they find the visual experience pleasant.
-
-**Personality:** INFP or ISFP. Highly aesthetic, introversion-leaning, emotionally expressive.
-
-**Interaction with Other Archetypes:** Creates events that The Enthusiastic Friend shares widely. Has creative rapport with The International Student around cultural performance events. The Introvert Lurker may attend their small gallery shows or open mics.
+**Interaction with Other Archetypes:** Overlaps with The Co-op Returner at career and networking events. Mentored by older versions of the same archetype. Largely operates in a parallel social world to The Arts and Creative Student.
 
 ---
 
-### 11. The Wellness/Activist Student
+### 10. The Graduate Student / Grad House Regular
 
-**Age/Year:** 19–22, any year.
+**Age/Year:** 23–28. Master's or PhD student, any faculty.
 
-**Major/Background:** Social work, public health, environmental studies, psychology, or any major with a strong social justice orientation. Very values-driven. Likely vegan or vegetarian. Involved in campus activism groups.
+**Background:** Has a fundamentally different relationship to campus than undergraduates. More focused on their research, more socially selective, and more likely to socialize at The Grad House Pub than at SUB-based undergraduate events. Has a cohort of fellow graduate students as their primary social network.
 
-**Social Behavior:** Deeply embedded in cause-oriented organizations. Attends and organizes events around mental health awareness, sustainability, social justice, community service, and volunteerism. Has a specific and principled perspective on social hierarchy — is thoughtful about whether events perpetuate or challenge existing power structures on campus.
+**Social Behavior:** Attends events with clear intellectual content (the Undergraduate Research Symposium as an observer/participant, Philosophy Debate Night, academic lectures). Organizes or attends Campus Trivia Night at The Grad House because it's well-calibrated to grad student energy — competitive, fun, without the undergrad social dynamics that can feel exhausting.
 
-**Technology Habits:** Moderate Instagram use with strong values alignment in who they follow. Uses activist-oriented online spaces. Privacy-conscious about apps in general.
+**Technology Habits:** Moderate smartphone usage, more deliberate about their tech stack. Uses academic platforms (Google Scholar, ORCID, research databases). May not be on Instagram in any meaningful way. Email is still their primary communication channel.
 
-**Motivation for Events:** Advancing causes they believe in, building community around shared values, personal growth and learning, volunteering.
+**Motivation for Events:** Intellectual stimulation, peer community, and occasional celebration of being young in Victoria. The Graduate Students Society events are their primary community anchors.
 
-**Relationship to FlockIn:** Mixed. They will find value in Volunteering, Workshop, Academic, and Social category events. They may be critical of the platform if it appears to be dominated by Greek life events. They are more likely to engage if they see FlockIn as a tool for amplifying underrepresented voices (smaller orgs, community service events, cultural organizations). The reporting feature resonates with their values — they will use it if they see events they consider harmful or inappropriate.
+**Relationship to FlockIn!!:** Selective but genuine engagement. If FlockIn!! has a meaningful representation of academic, career, and intellectually oriented events, the grad student finds it useful for discovery. The campus resources directory is particularly valuable — booking McPherson Library study rooms, accessing the Writing Centre, finding the Counselling Services location. The Graduate Students Society's events (Trivia Night, social mixers at The Grad House) belong on FlockIn!! and serve as bridges between grad and undergrad populations.
 
-**Personality:** INFJ or ENFJ. Deeply principled, empathetic, sometimes prone to burnout.
+**Personality:** INTJ or INFJ. Research-oriented, selective, often exhausted in an intellectually rich way.
 
-**Interaction with Other Archetypes:** Builds alliances with The International Student around cultural programming. Educates The Enthusiastic Freshman about campus social justice issues. Has ideological tension with the most party-focused expressions of The Social Organizer archetype.
-
----
-
-### 12. The Ghost / Passive Enrollee
-
-**Age/Year:** 20–23, any year. Not defined by social role but by behavioral pattern.
-
-**Major/Background:** Any major. This person downloaded FlockIn, went through onboarding, maybe RSVPed to one or two things, and then stopped opening the app. They are on the platform but not active.
-
-**Social Behavior:** Has a social life that operates entirely through other channels. Their friend group uses Instagram and GroupMe exclusively. No one in their social circle uses FlockIn actively, so there's no social pull keeping them engaged.
-
-**Technology Habits:** Typical college student — high smartphone usage, but app ecosystem is already full. FlockIn competes for home screen real estate against Instagram, TikTok, Snapchat, and their university's official portal.
-
-**Motivation for Events:** Varies — they're not antisocial, but their social needs are already being met through existing channels.
-
-**Relationship to FlockIn:** The churn risk archetype. They represent what happens when a new campus app doesn't achieve sufficient network density in a user's existing social graph. The key insight here is that this archetype is not a lost cause — they are reactivable. If someone they know tells them about a specific event on FlockIn, or if they see it mentioned in a class group chat, they will open the app and re-engage. The platform's health metric is how many of these ghosts convert back to active users over time.
-
-**Personality:** ISTP or ISTJ. Pragmatic, does not adopt new platforms without a clear use case.
-
-**Interaction with Other Archetypes:** Is converted back to activity by The Enthusiastic Friend. May be re-activated by a compelling event from The Club President in an organization they care about.
+**Interaction with Other Archetypes:** The Co-op Returner develops career and professional connections through grad students. The Career-Focused Pre-Professional looks up to this archetype as an aspirational peer. The Quiet Observer finds intellectual community at the same events.
 
 ---
 
-## The Current Alternatives to FlockIn
+### 11. The Indigenous Student
 
-Students discovering events today primarily use:
+**Age/Year:** 18–26, any year.
 
-- **Instagram accounts** for individual clubs, organizations, and venues — requires following each account, subject to algorithmic suppression
-- **GroupMe / WhatsApp / iMessage group chats** — high reach within existing networks, zero reach outside them
-- **University's official event portal** — comprehensive but visually poor, updated slowly, rarely bookmarked
-- **Physical bulletin boards** in campus buildings — only reached by students who walk past them
-- **Facebook Events** — declining rapidly in college-age demographics, still used by some legacy organizations
-- **Word of mouth** — high conversion, impossible to scale
+**Background:** A member of a First Nations, Métis, or Inuit community, studying at UVic. May access services and community through the First Peoples House on campus. Is navigating the experience of studying at a university on their ancestral territory or, alternatively, far from their home community. Has a strong cultural identity and is actively involved in Indigenous student events and organizations.
 
-FlockIn's competitive position is that it is the only channel that (1) aggregates across all campus organizations, (2) is personalized by interest, (3) is visually compelling enough to be worth opening on a idle Tuesday, and (4) is built for mobile from the start.
+**Social Behavior:** Centers community and cultural connection. Attends events organized by Indigenous student groups — talking circles, cultural celebrations, land-based learning workshops, film screenings, and panels. Has a strong community of fellow Indigenous students, First Peoples House staff, and allied students who form a tight and mutually supportive network.
+
+**Technology Habits:** Moderate smartphone usage with strong community orientation. Uses social platforms but is thoughtful about data and privacy. Word of mouth within the Indigenous student community is the dominant discovery channel.
+
+**Motivation for Events:** Cultural connection, community belonging, education about Indigenous history and contemporary issues, and career-pathway events (Indigenous-focused internships, mentorship with Indigenous professionals).
+
+**Relationship to FlockIn!!:** Potential deep engagement if Indigenous-organized events are well-represented and if the platform treats them as a community with distinct events rather than folding Indigenous events into generic Social or Academic categories. First Peoples House events, talking circles, and Indigenous Awareness Week events belong on the Noticeboard. Push notifications from subscribed Indigenous student organizations give community members an automatic connection to their events. There is a platform inclusivity risk: if FlockIn!!'s visual language and event categories don't feel welcoming or representative of the diversity of campus life, this archetype will find the platform feels "not for them."
+
+**Personality:** INFJ or ISFJ. Values-centered, community-minded, deeply grounded.
+
+**Interaction with Other Archetypes:** Builds bridges with The Wellness and Outdoor-Focused Student around land-based events. Creates programming that The International Student attends as part of their broader UVic cultural education.
+
+---
+
+### 12. The Ghost (Post-Onboarding Drop-Off)
+
+**Age/Year:** Any year.
+
+**Background:** Not defined by social type but by behavioral pattern. Signed up for FlockIn!!, completed onboarding (or didn't), browsed the Noticeboard twice, and stopped opening the app. Now exists as a registered user with zero weekly sessions.
+
+**Why they ghosted:** Their social life operates entirely through existing channels that already serve them adequately. Their close friend group uses Instagram and iMessage. No one they know is actively discussing FlockIn!!. The Noticeboard didn't feel relevantly personalized in the first few sessions, or their onboarding interests were too broad to produce meaningful recommendations.
+
+**Reactivation triggers:** A direct mention of a specific FlockIn!! event from a friend they trust (word-of-mouth re-entry). A push notification from a subscribed club (if they subscribed to anything during their brief active period). Seeing a FlockIn!! poster card shared to someone's Instagram Story and recognizing it as something they remember signing up for.
+
+**Relationship to FlockIn!!:** The churn risk archetype. Their existence is the product's central retention challenge. The platform's most powerful structural solution to ghost reactivation is the club subscription push notification — it removes the requirement for the user to remember to open the app by bringing relevant content to them. A ghost who subscribed to even one club during their active period becomes reactivable with no additional acquisition cost.
+
+**Personality:** Any type. Defined by behavior, not character.
+
+**Interaction with Other Archetypes:** Is reactivated by The Enthusiastic Connector. Potential member of any other archetype's social network.
+
+---
+
+## The Information Ecosystem at Launch
+
+When FlockIn!! launches at UVic, the information landscape for campus events looks like this: students who are already embedded in specific organizations (clubs, sports teams, student government) know about events within their community. Students who are not yet embedded — new arrivals, co-op returnees, students trying to branch out — are significantly underserved. The intersection of the two (events that bridge communities) is almost entirely invisible.
+
+FlockIn!!'s structural advantage is cross-community visibility. When the Victoria Coding Collective posts an event to FlockIn!!, it doesn't just reach their 80-person Discord — it reaches every UVic student who opened the Noticeboard that week. When the Photography Club's walk appears under the trending #Photography pill, it reaches students who follow neither the club's Instagram account nor its GroupMe.
+
+The simulation should model what happens when these communities begin to discover each other through a shared platform — and how long it takes before the cross-community discovery dynamic becomes self-reinforcing.

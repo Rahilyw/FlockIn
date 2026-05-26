@@ -17,7 +17,7 @@ import {
   signOut,
 } from "firebase/auth";
 import { getFirebaseAuth, getGoogleProvider } from "@/firebase/app";
-import { createUserProfile, getUserProfile } from "@/lib/firestore";
+import { createUserProfile, getUserProfile, updateUserProfile } from "@/lib/firestore";
 import type { UserProfile } from "@/types/firebaseTypes";
 
 type AuthContextValue = {
@@ -62,6 +62,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               nextUser.displayName,
               nextUser.photoURL,
             ).then(() => fetchProfile(nextUser.uid));
+          } else if (nextUser.photoURL && nextUser.photoURL !== p.photoURL) {
+            // Sync updated Google profile picture to Firestore
+            void updateUserProfile(nextUser.uid, { photoURL: nextUser.photoURL })
+              .then(() => fetchProfile(nextUser.uid));
           }
           setLoading(false);
         });
@@ -88,6 +92,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         credential.user.displayName,
         credential.user.photoURL,
       );
+    } else if (credential.user.photoURL) {
+      // Always sync the latest Google profile picture on sign-in —
+      // onAuthStateChanged uses a cached user so it may not reflect recent changes.
+      await updateUserProfile(credential.user.uid, { photoURL: credential.user.photoURL });
     }
   }, []);
 

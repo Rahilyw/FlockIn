@@ -14,6 +14,7 @@ FlockIn!! is that place. It is a living, digital version of the corkboard in the
 
 The emotional hook is the Noticeboard: when a student opens FlockIn!! for the first time, their reaction should be *"Whoa, this is actually cool"* — not because of the feature set, but because it looks alive. That wow-factor is not a nice-to-have. It is the product.
 
+It's a web-app made for students by students! 
 ---
 
 ## Platform and Access
@@ -21,6 +22,8 @@ The emotional hook is the Noticeboard: when a student opens FlockIn!! for the fi
 FlockIn!! is a progressive web application (PWA) accessible from any modern mobile or desktop browser at uvic.flockin.ca (or the equivalent deployment URL). No app download is required — a student can save it to their home screen from Safari or Chrome and it behaves like a native app, including receiving push notifications (Phase 3).
 
 A React Native mobile app for iOS and Android is planned for Phase 3, but the web app is the primary surface for the UVic deployment. The experience is mobile-first: the interface is designed around thumb-reachability, bright outdoor lighting conditions, and the brief windows of attention students have between classes.
+
+But the desktop experience is not an afterthought. The Noticeboard's masonry layout and hover interactions are optimized for desktop browsing, and the full feature set is available on both platforms. The desktop version is ideal for in-depth exploration of events, clubs, and resources, while the mobile version excels at quick discovery and on-the-go engagement.
 
 The backend runs entirely on Firebase (Firestore for the database, Firebase Storage for event images, Firebase Authentication for sign-in, Firebase Cloud Functions for server-side logic). No custom backend server exists — all data logic flows through Firebase services.
 
