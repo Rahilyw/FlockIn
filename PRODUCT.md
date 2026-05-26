@@ -574,7 +574,6 @@ src/
 14. ✅ `#Today` and `#Happening Now` auto-appear when relevant
 15. ✅ Rate limit blocks more than 3 event posts per user per day
 16. ✅ Report button exists on every event; sets `reported: true` in Firestore
-17. ✅ Mobile bottom tab bar works; noticeboard is single-column on mobile
 
 ---
 

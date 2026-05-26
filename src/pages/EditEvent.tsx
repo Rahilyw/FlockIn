@@ -32,7 +32,7 @@ import {
   EVENT_CATEGORIES,
   type CreateEventFormValues,
 } from "@/lib/eventSchemas";
-import { uploadEventImage } from "@/lib/storage";
+import { uploadEventImage, deleteEventImage } from "@/lib/storage";
 import { toast } from "@/components/ui/sonner";
 
 // ── Category metadata ─────────────────────────────────────────────────────────
@@ -317,6 +317,7 @@ export default function EditEvent() {
     if (imageFile) {
       setIsUploading(true);
       try {
+        if (event.imagePath) await deleteEventImage(event.imagePath);
         imagePath = await uploadEventImage(user.uid, imageFile);
       } catch {
         toast.error("Image upload failed. Please try again.");
@@ -326,6 +327,7 @@ export default function EditEvent() {
       setIsUploading(false);
     } else if (!previewSrc) {
       // User cleared the image
+      if (event.imagePath) await deleteEventImage(event.imagePath);
       imagePath = null;
     }
 
@@ -340,8 +342,9 @@ export default function EditEvent() {
         creatorName: values.creatorName,
         imagePath,
         tags: values.tags,
+        status: "pending",
       });
-      toast.success("Event updated!");
+      toast.success("Event updated and sent for review.");
       navigate(`/events/${id}`);
     } catch {
       toast.error("Failed to update event. Please try again.");

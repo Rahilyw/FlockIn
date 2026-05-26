@@ -85,7 +85,7 @@ function matchesFilter(event: Event, filter: FilterMode): boolean {
   }
 
   const selectedTag = filter.slice("tag:".length);
-  return event.tags.includes(selectedTag);
+  return event.tags.some((tag) => tag.toLowerCase() === selectedTag.toLowerCase());
 }
 
 const ATTACHMENTS: Array<{
@@ -170,6 +170,7 @@ const Noticeboard = ({ filters = new Set() }: NoticeboardProps) => {
     const wasSaved = savedEvents.includes(event.id);
     try {
       await toggleEvent(event.id);
+      await queryClient.invalidateQueries({ queryKey: ["tags"] });
       toast.success(wasSaved ? "Removed from saved events." : "Saved to My Space.");
     } catch {
       toast.error("Couldn't update your saved events. Try again.");
@@ -196,6 +197,7 @@ const Noticeboard = ({ filters = new Set() }: NoticeboardProps) => {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: queryKeys.events.all }),
         queryClient.invalidateQueries({ queryKey: queryKeys.events.detail(event.id) }),
+        queryClient.invalidateQueries({ queryKey: ["tags"] }),
       ]);
       toast.success(wasAttending ? "Removed from your attending list." : "Added to your attending events.");
     } catch {
@@ -298,6 +300,7 @@ const Noticeboard = ({ filters = new Set() }: NoticeboardProps) => {
         onClose={() => setSelectedEvent(null)}
         onToggleSave={() => handleToggleSave(selectedEvent)}
         onToggleAttendance={() => handleToggleAttendance(selectedEvent)}
+        onReport={() => handleReport(selectedEvent)}
       />
     )}
     </>

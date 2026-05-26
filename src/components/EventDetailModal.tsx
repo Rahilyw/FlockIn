@@ -71,6 +71,7 @@ interface EventDetailModalProps {
   onClose: () => void;
   onToggleSave: () => void;
   onToggleAttendance: () => void;
+  onReport: () => void;
 }
 
 export function EventDetailModal({
@@ -82,6 +83,7 @@ export function EventDetailModal({
   onClose,
   onToggleSave,
   onToggleAttendance,
+  onReport,
 }: EventDetailModalProps) {
   const overlayRef = useRef<HTMLDivElement>(null);
 
@@ -386,6 +388,23 @@ export function EventDetailModal({
                 }}
               >
                 <span className="material-symbols-outlined" style={{ fontSize: 20 }}>ios_share</span>
+              </button>
+
+              <button
+                onClick={onReport}
+                aria-label="Report event"
+                title="Report event"
+                style={{
+                  width: 46, height: 46, borderRadius: 999, flexShrink: 0,
+                  background: "rgba(255,255,255,.7)",
+                  border: "1.5px solid rgba(170,140,120,.4)",
+                  display: "inline-flex", alignItems: "center", justifyContent: "center",
+                  cursor: "pointer",
+                  color: "#9b3d2c",
+                  transition: "all .15s",
+                }}
+              >
+                <span className="material-symbols-outlined" style={{ fontSize: 20 }}>flag</span>
               </button>
             </div>
 

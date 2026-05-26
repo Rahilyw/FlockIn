@@ -179,7 +179,7 @@ const PosterCard = ({
 
           {/* Hover glass overlay */}
           <div
-            className="absolute inset-0 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity duration-300 flex flex-col p-6 text-white justify-end"
+            className="absolute inset-0 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity duration-300 flex flex-col p-3 sm:p-5 text-white justify-end"
             style={{
               background: 'linear-gradient(180deg, rgba(20,15,12,0.0) 0%, rgba(20,15,12,0.55) 35%, rgba(20,15,12,0.94) 75%)',
               backdropFilter: 'blur(2px)',
@@ -189,15 +189,15 @@ const PosterCard = ({
 
             {/* ··· report menu — top-right */}
             {onReport && (
-              <div className="absolute top-4 right-4" onClick={(e) => e.stopPropagation()}>
+              <div className="absolute top-2 right-2 sm:top-3 sm:right-3" onClick={(e) => e.stopPropagation()}>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <button
                       type="button"
-                      className="w-8 h-8 rounded-full bg-black/30 hover:bg-black/50 flex items-center justify-center text-white/80 hover:text-white transition-colors"
+                      className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-black/30 hover:bg-black/50 flex items-center justify-center text-white/80 hover:text-white transition-colors"
                       aria-label="More options"
                     >
-                      <span className="material-symbols-outlined text-[18px]">more_horiz</span>
+                      <span className="material-symbols-outlined text-[14px] sm:text-[18px]">more_horiz</span>
                     </button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="min-w-[140px]">
@@ -213,10 +213,10 @@ const PosterCard = ({
               </div>
             )}
 
-            <h3 className="font-bold text-xl mb-2 leading-tight">{title}</h3>
-            <div className="flex items-center gap-2 mb-1">
-              <span className="material-symbols-outlined text-[18px]" style={{ color: '#FFCB77' }}>calendar_today</span>
-              <span className="text-xs font-semibold tracking-wide text-white/90">
+            <h3 className="font-bold text-[11px] sm:text-sm mb-1 leading-tight line-clamp-2">{title}</h3>
+            <div className="flex items-center gap-1 sm:gap-2 mb-0.5">
+              <span className="material-symbols-outlined text-[12px] sm:text-[15px] shrink-0" style={{ color: '#FFCB77' }}>calendar_today</span>
+              <span className="text-[9px] sm:text-[11px] font-semibold tracking-wide text-white/90 truncate">
                 {(() => {
                   const startT = formatTime(date);
                   const endT = formatTime(endTime);
@@ -226,15 +226,14 @@ const PosterCard = ({
                 })()}
               </span>
             </div>
-            <div className="flex items-center gap-2 mb-4">
-              <span className="material-symbols-outlined text-[18px]" style={{ color: '#24E5D2' }}>location_on</span>
-              <span className="text-xs font-semibold tracking-wide text-white/90">{location}</span>
+            <div className="flex items-center gap-1 sm:gap-2 mb-2 sm:mb-3">
+              <span className="material-symbols-outlined text-[12px] sm:text-[15px] shrink-0" style={{ color: '#24E5D2' }}>location_on</span>
+              <span className="text-[9px] sm:text-[11px] font-semibold tracking-wide text-white/90 truncate">{location}</span>
             </div>
-            <p className="text-sm mb-5 line-clamp-3 font-medium" style={{ color: 'rgba(255,255,255,0.96)' }}>{description}</p>
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between gap-1">
               <button
                 type="button"
-                className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors disabled:cursor-wait disabled:opacity-70 ${
+                className={`w-7 h-7 sm:w-9 sm:h-9 rounded-full flex items-center justify-center transition-colors disabled:cursor-wait disabled:opacity-70 shrink-0 ${
                   isSaved ? "bg-red-400/80 text-white hover:bg-red-400" : "bg-white/20 hover:bg-red-400/40"
                 }`}
                 aria-label={isSaved ? `Remove ${title} from saved events` : `Save ${title}`}
@@ -246,7 +245,7 @@ const PosterCard = ({
                 }}
               >
                 <span
-                  className="material-symbols-outlined text-[20px]"
+                  className="material-symbols-outlined text-[14px] sm:text-[18px]"
                   style={{ fontVariationSettings: isSaved ? "'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 24" : undefined }}
                 >
                   favorite
@@ -254,7 +253,7 @@ const PosterCard = ({
               </button>
               <button
                 type="button"
-                className="px-5 py-2 rounded-full font-bold text-sm hover:scale-105 transition-transform disabled:cursor-wait disabled:opacity-75"
+                className="px-2 py-1 sm:px-4 sm:py-1.5 rounded-full font-bold text-[9px] sm:text-xs hover:scale-105 transition-transform disabled:cursor-wait disabled:opacity-75 truncate"
                 style={isAttending
                   ? { background: 'rgba(255,255,255,0.20)', color: '#fff', boxShadow: '0 0 0 1px rgba(255,255,255,0.3)' }
                   : { background: '#24E5D2', color: '#07453E' }
@@ -266,7 +265,7 @@ const PosterCard = ({
                   onToggleAttendance();
                 }}
               >
-                {isAttendancePending ? "Saving…" : isAttending ? "✓ Going" : "I'm going!"}
+                {isAttendancePending ? "…" : isAttending ? "✓ Going" : "I'm going!"}
               </button>
             </div>
           </div>

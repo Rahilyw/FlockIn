@@ -1,5 +1,14 @@
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
 import { getFirebaseStorage } from "@/lib/firebase";
+
+export async function deleteEventImage(imageUrl: string): Promise<void> {
+  const storage = getFirebaseStorage();
+  // Firebase download URLs encode the storage path after /o/
+  const encodedPath = new URL(imageUrl).pathname.split("/o/")[1];
+  if (!encodedPath) return;
+  const storageRef = ref(storage, decodeURIComponent(encodedPath));
+  await deleteObject(storageRef);
+}
 
 export async function uploadEventImage(userId: string, file: File): Promise<string> {
   const storage = getFirebaseStorage();

@@ -185,6 +185,7 @@ export default function EventDetail() {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: queryKeys.events.all }),
         queryClient.invalidateQueries({ queryKey: queryKeys.events.detail(id!) }),
+        queryClient.invalidateQueries({ queryKey: ["tags"] }),
       ]);
       toast.success(isAttending ? "You've left this event." : "You're going! 🎉");
     } catch {

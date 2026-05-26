@@ -189,9 +189,29 @@ export async function getPendingEvents(): Promise<Event[]> {
     .filter((e) => e.status === "pending");
 }
 
+export async function getReportedEvents(): Promise<Event[]> {
+  const snap = await getDocs(
+    query(eventsCol(), where("reported", "==", true), limit(100)),
+  );
+  const events = snap.docs.map((d) => d.data() as Event);
+  events.sort((a, b) => (b.updatedAt?.toMillis?.() ?? 0) - (a.updatedAt?.toMillis?.() ?? 0));
+  return events;
+}
+
+export async function getRecentlyReviewedEvents(): Promise<Event[]> {
+  const snap = await getDocs(
+    query(eventsCol(), orderBy("updatedAt", "desc"), limit(60)),
+  );
+  return snap.docs
+    .map((d) => d.data() as Event)
+    .filter((e) => e.status === "approved" || e.status === "rejected")
+    .slice(0, 30);
+}
+
 export async function approveEvent(id: string): Promise<void> {
   await updateDoc(doc(eventsCol(), id), {
     status: "approved",
+    reported: false,
     updatedAt: serverTimestamp(),
   });
 }
@@ -199,6 +219,14 @@ export async function approveEvent(id: string): Promise<void> {
 export async function rejectEvent(id: string): Promise<void> {
   await updateDoc(doc(eventsCol(), id), {
     status: "rejected",
+    reported: false,
+    updatedAt: serverTimestamp(),
+  });
+}
+
+export async function clearEventReport(id: string): Promise<void> {
+  await updateDoc(doc(eventsCol(), id), {
+    reported: false,
     updatedAt: serverTimestamp(),
   });
 }
@@ -459,31 +487,65 @@ export async function reportEvent(eventId: string): Promise<void> {
 export interface TagDoc {
   name: string;
   count: number;
-  lastUsed: Timestamp;
+  eventCount: number;
+  engagementScore: number;
+  lastUsed?: Timestamp;
 }
 
-/**
- * Returns the top N tags ordered by usage count descending.
- */
+function isEventActive(event: Event): boolean {
+  const endTime = event.endTime as { toDate?: () => Date } | string | null | undefined;
+  if (!endTime || typeof endTime === "string" || typeof endTime.toDate !== "function") return true;
+  return endTime.toDate() >= new Date();
+}
+
+function cleanTagName(tag: string): string {
+  return tag.trim().replace(/^#+/, "");
+}
+
+function newerTimestamp(a?: Timestamp, b?: Timestamp): Timestamp | undefined {
+  if (!a) return b;
+  if (!b) return a;
+  return a.toMillis() >= b.toMillis() ? a : b;
+}
+
+/** Returns top tags from active approved events, ranked by engagement. */
 export async function getTopTags(limitCount = 8): Promise<TagDoc[]> {
   const snap = await getDocs(
-    query(tagsCol(), orderBy("count", "desc"), limit(limitCount)),
+    query(eventsCol(), where("status", "==", "approved"), limit(200)),
   );
-  return snap.docs.map((d) => d.data() as TagDoc);
-}
 
-/**
- * Increments the usage count for each tag (upserts the tag doc).
- * Safe to call with an empty array — resolves immediately.
- */
-export async function incrementTagCounts(tags: string[]): Promise<void> {
-  if (tags.length === 0) return;
-  const batch = writeBatch(db());
-  for (const tag of tags) {
-    const docId = tag.toLowerCase().replace(/[^a-z0-9-]/g, "-");
-    const ref = doc(tagsCol(), docId);
-    batch.set(ref, { name: tag, count: increment(1), lastUsed: serverTimestamp() }, { merge: true });
-  }
-  await batch.commit();
+  const tagMap = new Map<string, TagDoc>();
+  snap.docs
+    .map((d) => d.data() as Event)
+    .filter(isEventActive)
+    .forEach((event) => {
+      const uniqueTags = new Set((event.tags ?? []).map(cleanTagName).filter(Boolean));
+      uniqueTags.forEach((tag) => {
+        const key = tag.toLowerCase();
+        const current = tagMap.get(key) ?? {
+          name: key,
+          count: 0,
+          eventCount: 0,
+          engagementScore: 0,
+          lastUsed: undefined,
+        };
+        const engagement = (event.savedCount ?? 0) + (event.rsvpCount ?? 0);
+        tagMap.set(key, {
+          ...current,
+          count: current.count + 1,
+          eventCount: current.eventCount + 1,
+          engagementScore: current.engagementScore + engagement,
+          lastUsed: newerTimestamp(current.lastUsed, event.updatedAt ?? event.createdAt),
+        });
+      });
+    });
+
+  return [...tagMap.values()]
+    .sort((a, b) =>
+      b.engagementScore - a.engagementScore ||
+      b.eventCount - a.eventCount ||
+      a.name.localeCompare(b.name),
+    )
+    .slice(0, limitCount);
 }
 
