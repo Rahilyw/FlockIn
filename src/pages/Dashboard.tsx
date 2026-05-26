@@ -4,6 +4,7 @@ import type { CSSProperties } from "react";
 import Header from "@/components/Header";
 import { EmptyState } from "@/components/EmptyState";
 import { EventCard } from "@/components/EventCard";
+import ForYouStrip from "@/components/ForYouStrip";
 import { useAuth } from "@/contexts/AuthContext";
 import { useEventsByIds } from "@/hooks/useEventsByIds";
 import { useBookmarks } from "@/hooks/useBookmarks";
@@ -129,9 +130,10 @@ function SkeletonRows({ count = 3 }: { count?: number }) {
 // ── Tab pill button ───────────────────────────────────────────────────────────
 
 const TABS = [
-  { id: "my-events",  icon: "edit_calendar", label: "My Events" },
-  { id: "saved",      icon: "favorite",      label: "Saved"     },
-  { id: "going",      icon: "celebration",   label: "Going"     },
+  { id: "my-events",  icon: "edit_calendar", label: "My Events"      },
+  { id: "saved",      icon: "favorite",      label: "Saved"          },
+  { id: "going",      icon: "celebration",   label: "Going"          },
+  { id: "for-you",    icon: "auto_awesome",  label: "Picked For You" },
 ] as const;
 
 type TabId = typeof TABS[number]["id"];
@@ -152,10 +154,23 @@ export default function Dashboard() {
   const { data: savedEventsList = [], isLoading: loadingSaved      } = useEventsByIds(savedEvents);
   const { data: goingEventsList = [], isLoading: loadingGoing      } = useEventsByIds(profile?.joinedEvents ?? []);
 
+  // Filter out events that have expired (endTime in the past) from Saved/Going.
+  // Rejected/deleted events are cleaned up server-side on action; expiry has no
+  // Cloud Function, so we hide them client-side instead.
+  const now = new Date();
+  const isNotExpired = (e: Event) => {
+    const et = e.endTime as { toDate?: () => Date } | string | null | undefined;
+    if (!et || typeof et === "string" || typeof (et as { toDate?: () => Date }).toDate !== "function") return true;
+    return (et as { toDate: () => Date }).toDate() >= now;
+  };
+  const activeSaved = savedEventsList.filter(isNotExpired);
+  const activeGoing = goingEventsList.filter(isNotExpired);
+
   const counts: Record<TabId, number> = {
     "my-events": myEvents.length,
-    "saved":     savedEvents.length,
-    "going":     (profile?.joinedEvents ?? []).length,
+    "saved":     activeSaved.length,
+    "going":     activeGoing.length,
+    "for-you":   0,
   };
 
   return (
@@ -260,11 +275,11 @@ export default function Dashboard() {
           <div className="animate-content-fade">
             {loadingSaved ? (
               <SkeletonGrid count={4} />
-            ) : savedEventsList.length === 0 ? (
+            ) : activeSaved.length === 0 ? (
               <EmptyState variant="saved" onCta={() => navigate("/")} />
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-                {savedEventsList.map((event, i) => (
+                {activeSaved.map((event, i) => (
                   <EventCard
                     key={event.id}
                     event={event}
@@ -275,6 +290,7 @@ export default function Dashboard() {
                 ))}
               </div>
             )}
+
           </div>
         )}
 
@@ -283,11 +299,11 @@ export default function Dashboard() {
           <div className="animate-content-fade">
             {loadingGoing ? (
               <SkeletonGrid count={4} />
-            ) : goingEventsList.length === 0 ? (
+            ) : activeGoing.length === 0 ? (
               <EmptyState variant="going" onCta={() => navigate("/")} />
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-                {goingEventsList.map((event, i) => (
+                {activeGoing.map((event, i) => (
                   <EventCard
                     key={event.id}
                     event={event}
@@ -298,6 +314,13 @@ export default function Dashboard() {
                 ))}
               </div>
             )}
+          </div>
+        )}
+
+        {/* ── Tab: Picked For You ── */}
+        {activeTab === "for-you" && (
+          <div className="animate-content-fade">
+            <ForYouStrip />
           </div>
         )}
 

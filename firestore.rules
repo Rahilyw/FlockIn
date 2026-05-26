@@ -1,0 +1,168 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Global Helper Functions ──────────────────────────────────────────────
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return request.auth != null && (
+        request.auth.uid == "Ivy0is33P6QjbyZNYqYxYiy6BLC2" ||
+        (exists(/databases/$(database)/documents/config/admin) &&
+         request.auth.uid == get(/databases/$(database)/documents/config/admin).data.uid)
+      );
+    }
+
+    // ── Collection Rules ──────────────────────────────────────────────────────
+
+    match /users/{userId} {
+      allow read: if isSignedIn();
+      allow create, update: if isSignedIn() && isOwner(userId);
+      allow delete: if false;
+    }
+
+    match /events/{eventId} {
+      allow read: if isSignedIn() || resource.data.status == "approved";
+      
+      allow create: if isSignedIn() &&
+                    request.resource.data.creatorId == request.auth.uid &&
+                    request.resource.data.status == "pending" &&
+                    request.resource.data.reported == false &&
+                    request.resource.data.rsvpCount == 0 &&
+                    request.resource.data.rsvpBy.size() == 0 &&
+                    request.resource.data.savedCount == 0 &&
+                    request.resource.data.savedBy.size() == 0;
+
+      allow delete: if isSignedIn() && (isAdmin() || isOwner(resource.data.creatorId));
+
+      allow update: if isSignedIn() && (
+        isAdmin() ||
+        // Owner edit: status must reset/remain pending, creatorId/createdAt/engagement cannot change
+        (isOwner(resource.data.creatorId) &&
+         request.resource.data.creatorId == resource.data.creatorId &&
+         request.resource.data.status == "pending" &&
+         request.resource.data.rsvpBy == resource.data.rsvpBy &&
+         request.resource.data.rsvpCount == resource.data.rsvpCount &&
+         request.resource.data.savedBy == resource.data.savedBy &&
+         request.resource.data.savedCount == resource.data.savedCount &&
+         request.resource.data.reported == resource.data.reported &&
+         request.resource.data.createdAt == resource.data.createdAt) ||
+        // Non-owner updates (RSVPs, Saves, Reports) on approved events only
+        (resource.data.status == "approved" &&
+         // Event details must remain unchanged
+         request.resource.data.id == resource.data.id &&
+         request.resource.data.creatorId == resource.data.creatorId &&
+         request.resource.data.creatorName == resource.data.creatorName &&
+         request.resource.data.creatorPhoto == resource.data.creatorPhoto &&
+         request.resource.data.title == resource.data.title &&
+         request.resource.data.description == resource.data.description &&
+         request.resource.data.date == resource.data.date &&
+         request.resource.data.endTime == resource.data.endTime &&
+         request.resource.data.location == resource.data.location &&
+         request.resource.data.category == resource.data.category &&
+         request.resource.data.imagePath == resource.data.imagePath &&
+         request.resource.data.posterUrl == resource.data.posterUrl &&
+         request.resource.data.tags == resource.data.tags &&
+         request.resource.data.status == resource.data.status &&
+         request.resource.data.createdAt == resource.data.createdAt &&
+         validateRsvps() &&
+         validateSaves() &&
+         validateReport())
+      );
+
+      // Validate that only the current user can add/remove themselves from rsvpBy, and rsvpCount updates by exactly 1
+      function validateRsvps() {
+        let oldRsvps = resource.data.rsvpBy;
+        let newRsvps = request.resource.data.rsvpBy;
+        let oldCount = resource.data.rsvpCount;
+        let newCount = request.resource.data.rsvpCount;
+        let userId = request.auth.uid;
+
+        return (
+          // RSVP added
+          (newRsvps.size() == oldRsvps.size() + 1 && newRsvps.hasAll(oldRsvps) && newRsvps.hasAny([userId]) && newCount == oldCount + 1) ||
+          // RSVP removed
+          (newRsvps.size() == oldRsvps.size() - 1 && oldRsvps.hasAll(newRsvps) && !newRsvps.hasAny([userId]) && oldRsvps.hasAny([userId]) && newCount == oldCount - 1) ||
+          // RSVP unchanged
+          (newRsvps == oldRsvps && newCount == oldCount)
+        );
+      }
+
+      // Validate that only the current user can add/remove themselves from savedBy, and savedCount updates by exactly 1
+      function validateSaves() {
+        let oldSaves = resource.data.savedBy;
+        let newSaves = request.resource.data.savedBy;
+        let oldCount = resource.data.savedCount;
+        let newCount = request.resource.data.savedCount;
+        let userId = request.auth.uid;
+
+        return (
+          // Save added
+          (newSaves.size() == oldSaves.size() + 1 && newSaves.hasAll(oldSaves) && newSaves.hasAny([userId]) && newCount == oldCount + 1) ||
+          // Save removed
+          (newSaves.size() == oldSaves.size() - 1 && oldSaves.hasAll(newSaves) && !newSaves.hasAny([userId]) && oldSaves.hasAny([userId]) && newCount == oldCount - 1) ||
+          // Save unchanged
+          (newSaves == oldSaves && newCount == oldCount)
+        );
+      }
+
+      // Validate that reported can only be changed from false to true
+      function validateReport() {
+        return (
+          (resource.data.reported == false && request.resource.data.reported == true) ||
+          (resource.data.reported == request.resource.data.reported)
+        );
+      }
+    }
+
+    match /clubs/{clubId} {
+      allow read: if true;
+      allow create, delete: if isSignedIn() && isAdmin();
+      allow update: if isSignedIn() && (
+        isAdmin() ||
+        // Standard user joining/leaving the club: details cannot change, only memberIds/memberCount can
+        (request.resource.data.name == resource.data.name &&
+         request.resource.data.description == resource.data.description &&
+         request.resource.data.category == resource.data.category &&
+         request.resource.data.contactEmail == resource.data.contactEmail &&
+         request.resource.data.logoUrl == resource.data.logoUrl &&
+         request.resource.data.tags == resource.data.tags &&
+         validateClubMembers())
+      );
+
+      function validateClubMembers() {
+        let oldMembers = resource.data.memberIds;
+        let newMembers = request.resource.data.memberIds;
+        let oldCount = resource.data.memberCount;
+        let newCount = request.resource.data.memberCount;
+        let userId = request.auth.uid;
+
+        return (
+          // Member joined
+          (newMembers.size() == oldMembers.size() + 1 && newMembers.hasAll(oldMembers) && newMembers.hasAny([userId]) && newCount == oldCount + 1) ||
+          // Member left
+          (newMembers.size() == oldMembers.size() - 1 && oldMembers.hasAll(newMembers) && !newMembers.hasAny([userId]) && oldMembers.hasAny([userId]) && newCount == oldCount - 1) ||
+          // Members unchanged
+          (newMembers == oldMembers && newCount == oldCount)
+        );
+      }
+    }
+
+    match /resources/{resourceId} {
+      allow read: if true;
+      allow write: if isSignedIn() && isAdmin();
+    }
+
+    match /tags/{tagId} {
+      allow read: if true;
+      allow write: if isSignedIn() && isAdmin();
+    }
+  }
+}

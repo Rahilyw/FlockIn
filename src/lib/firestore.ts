@@ -217,10 +217,33 @@ export async function approveEvent(id: string): Promise<void> {
 }
 
 export async function rejectEvent(id: string): Promise<void> {
-  await updateDoc(doc(eventsCol(), id), {
-    status: "rejected",
-    reported: false,
-    updatedAt: serverTimestamp(),
+  const eventRef = doc(eventsCol(), id);
+  await runTransaction(db(), async (tx) => {
+    const eventSnap = await tx.get(eventRef);
+    if (!eventSnap.exists()) return;
+    const event = eventSnap.data() as Event;
+
+    tx.update(eventRef, {
+      status: "rejected",
+      reported: false,
+      updatedAt: serverTimestamp(),
+    });
+
+    // Remove from all attendees' joinedEvents
+    for (const uid of event.rsvpBy ?? []) {
+      tx.update(doc(usersCol(), uid), {
+        joinedEvents: arrayRemove(id),
+        updatedAt: serverTimestamp(),
+      });
+    }
+
+    // Remove from all savers' savedEvents
+    for (const uid of event.savedBy ?? []) {
+      tx.update(doc(usersCol(), uid), {
+        savedEvents: arrayRemove(id),
+        updatedAt: serverTimestamp(),
+      });
+    }
   });
 }
 
@@ -319,11 +342,18 @@ export async function deleteEvent(eventId: string, userId: string): Promise<void
     const event = eventSnap.data() as Event;
     if (event.creatorId !== userId) throw new Error("Only the creator can delete this event.");
 
-    // Remove event from all RSVP users' joinedEvents
-    for (const rsvpUserId of event.rsvpBy) {
-      const userRef = doc(usersCol(), rsvpUserId);
-      tx.update(userRef, {
+    // Remove event from all attendees' joinedEvents
+    for (const uid of event.rsvpBy ?? []) {
+      tx.update(doc(usersCol(), uid), {
         joinedEvents: arrayRemove(eventId),
+        updatedAt: serverTimestamp(),
+      });
+    }
+
+    // Remove event from all savers' savedEvents
+    for (const uid of event.savedBy ?? []) {
+      tx.update(doc(usersCol(), uid), {
+        savedEvents: arrayRemove(eventId),
         updatedAt: serverTimestamp(),
       });
     }

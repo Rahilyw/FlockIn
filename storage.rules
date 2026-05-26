@@ -1,0 +1,39 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // ── Global Helper Functions ──────────────────────────────────────────────
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return request.auth != null && (
+        request.auth.uid == "Ivy0is33P6QjbyZNYqYxYiy6BLC2"
+      );
+    }
+
+    // ── Folder Rules ─────────────────────────────────────────────────────────
+
+    // Event posters
+    match /events/{userId}/{fileName} {
+      allow read: if true;
+      allow write: if isSignedIn() && (isOwner(userId) || isAdmin())
+                    && request.resource.size < 5 * 1024 * 1024
+                    && request.resource.contentType.matches('image/.*');
+    }
+
+    // Profile photos
+    match /profiles/{userId}/{fileName} {
+      allow read: if true;
+      allow write: if isSignedIn() && (isOwner(userId) || isAdmin())
+                    && request.resource.size < 5 * 1024 * 1024
+                    && request.resource.contentType.matches('image/.*');
+    }
+  }
+}

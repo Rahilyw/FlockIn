@@ -1,7 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
+import type { UseQueryOptions } from "@tanstack/react-query";
 import { getEvents } from "@/lib/firestore";
 import { queryKeys } from "./queryKeys";
-import type { EventCategory } from "@/types/firebaseTypes";
+import type { Event, EventCategory } from "@/types/firebaseTypes";
 
 interface UseEventsOptions {
   category?: EventCategory;
@@ -10,7 +11,9 @@ interface UseEventsOptions {
   activeOnly?: boolean;
 }
 
-export function useEvents(options: UseEventsOptions = {}) {
+type QueryOverrides = Omit<UseQueryOptions<Event[]>, "queryKey" | "queryFn">;
+
+export function useEvents(options: UseEventsOptions = {}, overrides?: QueryOverrides) {
   return useQuery({
     queryKey: queryKeys.events.list(
       options.category,
@@ -25,5 +28,6 @@ export function useEvents(options: UseEventsOptions = {}) {
       activeOnly: options.activeOnly,
     }),
     staleTime: 1000 * 60 * 5, // 5 min
+    ...overrides,
   });
 }

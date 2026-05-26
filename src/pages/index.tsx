@@ -3,7 +3,6 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Plus, Search } from "lucide-react";
 import Header from "@/components/Header";
 import Noticeboard, { type FilterMode } from "@/components/Noticeboard";
-import ForYouStrip from "@/components/ForYouStrip";
 import { useTopTags } from "@/hooks/useTopTags";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { EVENT_CATEGORIES } from "@/lib/eventSchemas";
@@ -401,8 +400,6 @@ const Index = () => {
               </Popover>
           </div>{/* inner flex row */}
           </div>{/* scroll wrapper */}
-
-          <ForYouStrip />
 
           <Noticeboard filters={activeFilters} />
         </main>
