@@ -296,6 +296,8 @@ const Noticeboard = ({ filters = new Set() }: NoticeboardProps) => {
                   onToggleSave={() => handleToggleSave(event)}
                   onToggleAttendance={() => handleToggleAttendance(event)}
                   onReport={() => handleReport(event)}
+                  rsvpCount={event.rsvpCount}
+                  attendingUserAvatar={isAttending ? (profile?.photoURL ?? null) : null}
                   {...attachment}
                 />
               </PosterErrorBoundary>

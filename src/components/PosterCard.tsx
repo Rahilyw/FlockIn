@@ -15,6 +15,9 @@ function hashId(id: string): number {
   return Math.abs(h);
 }
 
+// Soft palette for placeholder avatar circles in the social-proof deck
+const AVATAR_COLORS = ["#f97316", "#a855f7", "#3b82f6", "#10b981", "#ec4899", "#f59e0b"];
+
 const GRADIENT_PALETTE = [
   "linear-gradient(160deg, #f97316 0%, #a855f7 50%, #3b82f6 100%)",
   "linear-gradient(160deg, #134e4a 0%, #0ea5e9 60%, #67e8f9 100%)",
@@ -51,6 +54,8 @@ interface PosterCardProps {
   onToggleSave: () => void;
   onToggleAttendance: () => void;
   onReport?: () => void;
+  rsvpCount?: number;
+  attendingUserAvatar?: string | null;
 }
 
 function formatDate(ts: Timestamp | string | null | undefined): string {
@@ -100,10 +105,26 @@ const PosterCard = ({
   onToggleSave,
   onToggleAttendance,
   onReport,
+  rsvpCount = 0,
+  attendingUserAvatar = null,
 }: PosterCardProps) => {
   const fallbackGradient = GRADIENT_PALETTE[hashId(eventId) % GRADIENT_PALETTE.length];
   const showImage = imagePath && !isPdfUrl(imagePath);
   const showPdf = imagePath && isPdfUrl(imagePath);
+
+  // True when the event's date matches today — drives the "Today" pulse badge
+  const isExpiringSoon = (() => {
+    if (!date || typeof date === "string") return false;
+    const ts = date as { toDate?: () => Date };
+    if (typeof ts.toDate !== "function") return false;
+    const d = ts.toDate();
+    const now = new Date();
+    return (
+      d.getFullYear() === now.getFullYear() &&
+      d.getMonth() === now.getMonth() &&
+      d.getDate() === now.getDate()
+    );
+  })();
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
     if (event.key === "Enter" || event.key === " ") {
@@ -177,6 +198,17 @@ const PosterCard = ({
             </div>
           )}
 
+          {/* Today badge — always visible, floats above the hover overlay */}
+          {isExpiringSoon && (
+            <div
+              className="absolute top-2 left-2 sm:top-3 sm:left-3 z-30 flex items-center gap-1 px-1.5 py-0.5 rounded-full pointer-events-none"
+              style={{ background: "rgba(251,191,36,0.92)", backdropFilter: "blur(4px)" }}
+            >
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-800 animate-pulse shrink-0" />
+              <span className="text-[8px] sm:text-[9px] font-bold uppercase tracking-wider text-amber-900">Today</span>
+            </div>
+          )}
+
           {/* Hover glass overlay */}
           <div
             className="absolute inset-0 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity duration-300 flex flex-col p-3 sm:p-5 text-white justify-end"
@@ -226,10 +258,52 @@ const PosterCard = ({
                 })()}
               </span>
             </div>
-            <div className="flex items-center gap-1 sm:gap-2 mb-2 sm:mb-3">
+            <div className="flex items-center gap-1 sm:gap-2 mb-2 sm:mb-2">
               <span className="material-symbols-outlined text-[12px] sm:text-[15px] shrink-0" style={{ color: '#24E5D2' }}>location_on</span>
               <span className="text-[9px] sm:text-[11px] font-semibold tracking-wide text-white/90 truncate">{location}</span>
             </div>
+
+            {/* Social proof — avatar deck + going count */}
+            {rsvpCount > 0 && (
+              <div className="flex items-center gap-1.5 mb-2 sm:mb-3">
+                <div className="flex items-center">
+                  {attendingUserAvatar && (
+                    <img
+                      src={attendingUserAvatar}
+                      alt="You"
+                      className="w-[18px] h-[18px] sm:w-5 sm:h-5 rounded-full object-cover ring-[1.5px] ring-black/25 shrink-0"
+                    />
+                  )}
+                  {Array.from({
+                    length: Math.min(
+                      rsvpCount - (attendingUserAvatar ? 1 : 0),
+                      attendingUserAvatar ? 2 : 3,
+                    ),
+                  }).map((_, i) => (
+                    <div
+                      key={i}
+                      className="w-[18px] h-[18px] sm:w-5 sm:h-5 rounded-full ring-[1.5px] ring-black/25 shrink-0"
+                      style={{
+                        background: AVATAR_COLORS[(i + (attendingUserAvatar ? 1 : 0)) % AVATAR_COLORS.length],
+                        marginLeft: attendingUserAvatar || i > 0 ? "-5px" : 0,
+                      }}
+                    />
+                  ))}
+                  {rsvpCount > (attendingUserAvatar ? 3 : 3) && (
+                    <div
+                      className="w-[18px] h-[18px] sm:w-5 sm:h-5 rounded-full ring-[1.5px] ring-black/25 shrink-0 flex items-center justify-center text-[7px] sm:text-[8px] font-bold text-white"
+                      style={{ background: "rgba(255,255,255,0.22)", marginLeft: "-5px" }}
+                    >
+                      +{rsvpCount - (attendingUserAvatar ? 2 : 3)}
+                    </div>
+                  )}
+                </div>
+                <span className="text-[9px] sm:text-[10px] font-semibold text-white/75 leading-none">
+                  {rsvpCount === 1 ? "1 going" : `${rsvpCount} going`}
+                </span>
+              </div>
+            )}
+
             <div className="flex items-center justify-between gap-1">
               <button
                 type="button"
