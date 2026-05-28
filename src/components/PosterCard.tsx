@@ -148,11 +148,10 @@ const PosterCard = ({
         <div className="pushpin" style={{ backgroundColor: pushpinColor }} />
       ) : (
         <div
-          className="washi-tape absolute z-20 h-7 shadow-sm border border-white/20"
+          className={`washi-tape absolute z-20 h-4 md:h-7 w-12 md:w-[76px] -top-2 md:-top-[13px] shadow-sm border border-white/20 ${
+            washiSide === "left" ? "left-2 md:left-[14px]" : "right-2 md:right-[14px]"
+          }`}
           style={{
-            width: "76px",
-            top: "-13px",
-            [washiSide]: "14px",
             background: washiColor,
             transform: `rotate(${washiRotation}deg)`,
           }}
