@@ -343,6 +343,7 @@ export default function EditEvent() {
         imagePath,
         tags: values.tags,
         status: "pending",
+        rejectionReason: null,
       });
       toast.success("Event updated and sent for review.");
       navigate(`/events/${id}`);

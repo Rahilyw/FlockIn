@@ -87,19 +87,23 @@ function MyEventRow({ event }: { event: Event }) {
           <span className="material-symbols-outlined text-[13px]">group</span>
           {event.rsvpCount}
         </div>
+        {event.status === "rejected" && event.rejectionReason && (
+          <p className="mt-1.5 text-[11px] font-semibold text-destructive leading-snug flex items-start gap-1">
+            <span className="material-symbols-outlined text-[13px] mt-0.5 shrink-0">info</span>
+            <span>Reason: {event.rejectionReason}</span>
+          </p>
+        )}
       </div>
 
       {/* Status + edit */}
       <div className="shrink-0 flex flex-col items-end gap-2">
         <StatusBadge status={event.status} />
-        {event.status !== "rejected" && (
-          <button
-            className="text-[11px] font-semibold text-primary/70 hover:text-primary transition-colors"
-            onClick={(e) => { e.stopPropagation(); navigate(`/events/${event.id}/edit`); }}
-          >
-            Edit →
-          </button>
-        )}
+        <button
+          className="text-[11px] font-semibold text-primary/70 hover:text-primary transition-colors"
+          onClick={(e) => { e.stopPropagation(); navigate(`/events/${event.id}/edit`); }}
+        >
+          Edit →
+        </button>
       </div>
     </div>
   );

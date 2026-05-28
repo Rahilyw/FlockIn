@@ -218,7 +218,7 @@ export async function approveEvent(id: string): Promise<void> {
   });
 }
 
-export async function rejectEvent(id: string): Promise<void> {
+export async function rejectEvent(id: string, reason?: string): Promise<void> {
   const eventRef = doc(eventsCol(), id);
   await runTransaction(db(), async (tx) => {
     const eventSnap = await tx.get(eventRef);
@@ -227,6 +227,7 @@ export async function rejectEvent(id: string): Promise<void> {
 
     tx.update(eventRef, {
       status: "rejected",
+      rejectionReason: reason || null,
       reported: false,
       updatedAt: serverTimestamp(),
     });
@@ -267,7 +268,7 @@ export async function joinEvent(eventId: string, userId: string): Promise<void> 
   await runTransaction(db(), async (tx) => {
     const eventSnap = await tx.get(eventRef);
     if (!eventSnap.exists()) throw new Error("Event not found.");
-    if ((eventSnap.data() as Event).rsvpBy.includes(userId)) return;
+    if (((eventSnap.data() as Event).rsvpBy ?? []).includes(userId)) return;
 
     tx.update(eventRef, {
       rsvpBy: arrayUnion(userId),
@@ -292,7 +293,7 @@ export async function leaveEvent(eventId: string, userId: string): Promise<void>
   await runTransaction(db(), async (tx) => {
     const eventSnap = await tx.get(eventRef);
     if (!eventSnap.exists()) throw new Error("Event not found.");
-    if (!(eventSnap.data() as Event).rsvpBy.includes(userId)) return;
+    if (!((eventSnap.data() as Event).rsvpBy ?? []).includes(userId)) return;
 
     tx.update(eventRef, {
       rsvpBy: arrayRemove(userId),

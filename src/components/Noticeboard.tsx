@@ -95,12 +95,45 @@ const ATTACHMENTS: Array<{
   washiSide?: "left" | "right";
   washiRotation?: number;
 }> = [
+  // ── Pushpins ─────────────────────────────────────────────────────────────
   { attachmentType: "pushpin", pushpinColor: "#FF5252" },
-  { attachmentType: "washi", washiColor: "rgba(178,235,242,0.70)", washiSide: "right", washiRotation: -12 },
   { attachmentType: "pushpin", pushpinColor: "#F06292" },
-  { attachmentType: "washi", washiColor: "rgba(220,231,117,0.70)", washiSide: "left", washiRotation: 12 },
   { attachmentType: "pushpin", pushpinColor: "#FFB300" },
-  { attachmentType: "washi", washiColor: "rgba(200,180,255,0.70)", washiSide: "right", washiRotation: -8 },
+  { attachmentType: "pushpin", pushpinColor: "#4FC3F7" },
+  // ── Solid washi ──────────────────────────────────────────────────────────
+  { attachmentType: "washi", washiColor: "rgba(178,235,242,0.80)", washiSide: "right", washiRotation: -12 },
+  { attachmentType: "washi", washiColor: "rgba(220,231,117,0.80)", washiSide: "left",  washiRotation:  13 },
+  { attachmentType: "washi", washiColor: "rgba(200,180,255,0.80)", washiSide: "right", washiRotation:  -8 },
+  { attachmentType: "washi", washiColor: "rgba(255,183,158,0.80)", washiSide: "left",  washiRotation:  10 },
+  { attachmentType: "washi", washiColor: "rgba(167,213,169,0.80)", washiSide: "right", washiRotation: -11 },
+  { attachmentType: "washi", washiColor: "rgba(147,197,253,0.80)", washiSide: "left",  washiRotation:   9 },
+  // ── Diagonal-stripe washi ────────────────────────────────────────────────
+  {
+    attachmentType: "washi",
+    washiColor: "repeating-linear-gradient(45deg,rgba(178,235,242,0.85) 0px,rgba(178,235,242,0.85) 5px,rgba(255,255,255,0.55) 5px,rgba(255,255,255,0.55) 10px)",
+    washiSide: "right", washiRotation: -10,
+  },
+  {
+    attachmentType: "washi",
+    washiColor: "repeating-linear-gradient(45deg,rgba(255,183,158,0.85) 0px,rgba(255,183,158,0.85) 5px,rgba(255,255,255,0.55) 5px,rgba(255,255,255,0.55) 10px)",
+    washiSide: "left",  washiRotation:   8,
+  },
+  {
+    attachmentType: "washi",
+    washiColor: "repeating-linear-gradient(45deg,rgba(220,231,117,0.85) 0px,rgba(220,231,117,0.85) 5px,rgba(255,255,255,0.55) 5px,rgba(255,255,255,0.55) 10px)",
+    washiSide: "right", washiRotation: -13,
+  },
+  // ── Horizontal-stripe washi ──────────────────────────────────────────────
+  {
+    attachmentType: "washi",
+    washiColor: "repeating-linear-gradient(0deg,rgba(200,180,255,0.85) 0px,rgba(200,180,255,0.85) 4px,rgba(255,255,255,0.50) 4px,rgba(255,255,255,0.50) 8px)",
+    washiSide: "left",  washiRotation:  11,
+  },
+  {
+    attachmentType: "washi",
+    washiColor: "repeating-linear-gradient(0deg,rgba(167,213,169,0.85) 0px,rgba(167,213,169,0.85) 4px,rgba(255,255,255,0.50) 4px,rgba(255,255,255,0.50) 8px)",
+    washiSide: "right", washiRotation:  -7,
+  },
 ];
 
 
@@ -172,7 +205,8 @@ const Noticeboard = ({ filters = new Set() }: NoticeboardProps) => {
       await toggleEvent(event.id);
       await queryClient.invalidateQueries({ queryKey: ["tags"] });
       toast.success(wasSaved ? "Removed from saved events." : "Saved to My Space.");
-    } catch {
+    } catch (err) {
+      console.error("[FlockIn] toggleSave failed:", err);
       toast.error("Couldn't update your saved events. Try again.");
     } finally {
       setSavingEventId(null);
@@ -200,7 +234,8 @@ const Noticeboard = ({ filters = new Set() }: NoticeboardProps) => {
         queryClient.invalidateQueries({ queryKey: ["tags"] }),
       ]);
       toast.success(wasAttending ? "Removed from your attending list." : "Added to your attending events.");
-    } catch {
+    } catch (err) {
+      console.error("[FlockIn] toggleAttendance failed:", err);
       toast.error("Couldn't update your attendance. Try again.");
     } finally {
       setAttendingEventId(null);

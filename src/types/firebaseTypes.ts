@@ -48,6 +48,7 @@ export interface Event {
   /** @deprecated Legacy field — old events written before schema migration. Use imagePath. */
   posterUrl?: string | null;
   status: "pending" | "approved" | "rejected";
+  rejectionReason?: string | null;
   reported: boolean;
   savedBy: string[];
   savedCount: number;

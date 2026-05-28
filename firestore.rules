@@ -54,24 +54,11 @@ service cloud.firestore {
          request.resource.data.savedCount == resource.data.savedCount &&
          request.resource.data.reported == resource.data.reported &&
          request.resource.data.createdAt == resource.data.createdAt) ||
-        // Non-owner updates (RSVPs, Saves, Reports) on approved events only
+        // Non-owner updates (RSVPs, Saves, Reports) on approved events only: details cannot change
         (resource.data.status == "approved" &&
-         // Event details must remain unchanged
-         request.resource.data.id == resource.data.id &&
-         request.resource.data.creatorId == resource.data.creatorId &&
-         request.resource.data.creatorName == resource.data.creatorName &&
-         request.resource.data.creatorPhoto == resource.data.creatorPhoto &&
-         request.resource.data.title == resource.data.title &&
-         request.resource.data.description == resource.data.description &&
-         request.resource.data.date == resource.data.date &&
-         request.resource.data.endTime == resource.data.endTime &&
-         request.resource.data.location == resource.data.location &&
-         request.resource.data.category == resource.data.category &&
-         request.resource.data.imagePath == resource.data.imagePath &&
-         request.resource.data.posterUrl == resource.data.posterUrl &&
-         request.resource.data.tags == resource.data.tags &&
-         request.resource.data.status == resource.data.status &&
-         request.resource.data.createdAt == resource.data.createdAt &&
+         request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+           'rsvpBy', 'rsvpCount', 'savedBy', 'savedCount', 'reported', 'updatedAt'
+         ]) &&
          validateRsvps() &&
          validateSaves() &&
          validateReport())
@@ -79,10 +66,10 @@ service cloud.firestore {
 
       // Validate that only the current user can add/remove themselves from rsvpBy, and rsvpCount updates by exactly 1
       function validateRsvps() {
-        let oldRsvps = resource.data.get("rsvpBy", []);
-        let newRsvps = request.resource.data.get("rsvpBy", []);
-        let oldCount = resource.data.get("rsvpCount", 0);
-        let newCount = request.resource.data.get("rsvpCount", 0);
+        let oldRsvps = resource.data.rsvpBy;
+        let newRsvps = request.resource.data.rsvpBy;
+        let oldCount = resource.data.rsvpCount;
+        let newCount = request.resource.data.rsvpCount;
         let userId = request.auth.uid;
 
         return (
@@ -97,10 +84,10 @@ service cloud.firestore {
 
       // Validate that only the current user can add/remove themselves from savedBy, and savedCount updates by exactly 1
       function validateSaves() {
-        let oldSaves = resource.data.get("savedBy", []);
-        let newSaves = request.resource.data.get("savedBy", []);
-        let oldCount = resource.data.get("savedCount", 0);
-        let newCount = request.resource.data.get("savedCount", 0);
+        let oldSaves = resource.data.savedBy;
+        let newSaves = request.resource.data.savedBy;
+        let oldCount = resource.data.savedCount;
+        let newCount = request.resource.data.savedCount;
         let userId = request.auth.uid;
 
         return (
@@ -127,13 +114,10 @@ service cloud.firestore {
       allow create, delete: if isSignedIn() && isAdmin();
       allow update: if isSignedIn() && (
         isAdmin() ||
-        // Standard user joining/leaving the club: details cannot change, only memberIds/memberCount can
-        (request.resource.data.name == resource.data.name &&
-         request.resource.data.description == resource.data.description &&
-         request.resource.data.category == resource.data.category &&
-         request.resource.data.contactEmail == resource.data.contactEmail &&
-         request.resource.data.logoUrl == resource.data.logoUrl &&
-         request.resource.data.tags == resource.data.tags &&
+        // Standard user joining/leaving the club: details cannot change, only memberIds/memberCount/updatedAt can
+        (request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+           'memberIds', 'memberCount', 'updatedAt'
+         ]) &&
          validateClubMembers())
       );
 

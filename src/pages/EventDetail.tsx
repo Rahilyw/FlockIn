@@ -304,19 +304,32 @@ export default function EventDetail() {
 
             {/* Organizer status badge (only shown to the creator) */}
             {isOrganizer && event.status !== "approved" && (
-              <div
-                className="mt-3 flex items-center gap-2 px-4 py-2.5 rounded-2xl text-sm font-semibold"
-                style={event.status === "pending"
-                  ? { background: "oklch(95% 0.07 75)", color: "oklch(30% 0.13 75)", border: "1px solid oklch(74% 0.14 75 / 0.5)" }
-                  : { background: "oklch(94% 0.05 20)", color: "oklch(32% 0.13 20)", border: "1px solid oklch(66% 0.16 20 / 0.5)" }
-                }
-              >
-                <span className="material-symbols-outlined text-[18px]">
-                  {event.status === "pending" ? "schedule" : "cancel"}
-                </span>
-                {event.status === "pending"
-                  ? "Pending review — visible to you only"
-                  : "This event wasn't approved"}
+              <div className="space-y-2 mt-3">
+                <div
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-2xl text-sm font-semibold"
+                  style={event.status === "pending"
+                    ? { background: "oklch(95% 0.07 75)", color: "oklch(30% 0.13 75)", border: "1px solid oklch(74% 0.14 75 / 0.5)" }
+                    : { background: "oklch(94% 0.05 20)", color: "oklch(32% 0.13 20)", border: "1px solid oklch(66% 0.16 20 / 0.5)" }
+                  }
+                >
+                  <span className="material-symbols-outlined text-[18px]">
+                    {event.status === "pending" ? "schedule" : "cancel"}
+                  </span>
+                  <span>
+                    {event.status === "pending"
+                      ? "Pending review — visible to you only"
+                      : "This event wasn't approved"}
+                  </span>
+                </div>
+                {event.status === "rejected" && event.rejectionReason && (
+                  <div className="px-4 py-3 rounded-2xl text-xs font-semibold bg-destructive/5 text-destructive border border-destructive/20 flex gap-2 items-start leading-relaxed">
+                    <span className="material-symbols-outlined text-[16px] shrink-0 mt-0.5">info</span>
+                    <div>
+                      <p className="font-bold text-destructive">Rejection feedback:</p>
+                      <p className="mt-0.5 text-muted-foreground font-normal">{event.rejectionReason}</p>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>
