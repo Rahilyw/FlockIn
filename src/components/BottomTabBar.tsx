@@ -2,8 +2,52 @@ import { useNavigate, useLocation } from "react-router-dom";
 
 const HIDDEN_ON = ["/login", "/signup", "/admin", "/onboarding"];
 
-const LEFT_TABS  = [{ id: "noticeboard", label: "Noticeboard", icon: "dynamic_feed", route: "/",          tabState: null }] as const;
-const RIGHT_TABS = [{ id: "myspace",     label: "My Space",    icon: "person",       route: "/dashboard", tabState: null }] as const;
+interface TabConfig {
+  id: string;
+  label: string;
+  icon: string;
+  route: string;
+  activeBg: string;
+  activeFg: string;
+}
+
+const LEFT_TABS: TabConfig[] = [
+  {
+    id: "noticeboard",
+    label: "Discover",
+    icon: "dynamic_feed",
+    route: "/",
+    activeBg: "#FFE0D5",
+    activeFg: "#C95D36",
+  },
+  {
+    id: "clubs",
+    label: "Clubs",
+    icon: "group",
+    route: "/clubs",
+    activeBg: "#C6F8F1",
+    activeFg: "#1F8A6E",
+  },
+];
+
+const RIGHT_TABS: TabConfig[] = [
+  {
+    id: "resources",
+    label: "Resources",
+    icon: "layers",
+    route: "/resources",
+    activeBg: "#E2E4FB",
+    activeFg: "#626CDA",
+  },
+  {
+    id: "myspace",
+    label: "My Space",
+    icon: "person",
+    route: "/dashboard",
+    activeBg: "#FFD8DA",
+    activeFg: "#D8188A",
+  },
+];
 
 const PEACOCK_GRADIENT =
   "linear-gradient(145deg, #0F3D5C 0%, #2A6FC8 28%, #1F8A6E 54%, #24E5D2 78%, #0ea5e9 100%)";
@@ -11,18 +55,18 @@ const PEACOCK_GRADIENT =
 const RAINBOW_RING =
   "conic-gradient(from 0deg, #ff0080, #ff6b00, #ffd700, #00e676, #00b4d8, #7c4dff, #ff0080)";
 
-const ACTIVE_BG  = "#C7F5EF";
-const ACTIVE_FG  = "#1F8A6E";
-const INACTIVE   = "#a8a29e";
+const INACTIVE = "#a8a29e";
 
 const BottomTabBar = () => {
-  const navigate  = useNavigate();
+  const navigate = useNavigate();
   const { pathname } = useLocation();
 
   if (HIDDEN_ON.some((p) => pathname === p || pathname.startsWith(p + "/"))) return null;
 
   const isActive = (id: string) => {
     if (id === "noticeboard") return pathname === "/";
+    if (id === "clubs")       return pathname.startsWith("/clubs");
+    if (id === "resources")   return pathname.startsWith("/resources");
     if (id === "myspace")     return pathname.startsWith("/dashboard") || pathname.startsWith("/profile");
     return false;
   };
@@ -41,7 +85,7 @@ const BottomTabBar = () => {
       {/* Tab row */}
       <div className="flex items-end h-full px-1 pb-3">
 
-        {/* Left tab */}
+        {/* Left tabs */}
         {LEFT_TABS.map((tab) => {
           const active = isActive(tab.id);
           return (
@@ -53,13 +97,13 @@ const BottomTabBar = () => {
             >
               <div
                 className="flex items-center justify-center rounded-full transition-all duration-200"
-                style={{ width: 52, height: 30, background: active ? ACTIVE_BG : "transparent" }}
+                style={{ width: 52, height: 30, background: active ? tab.activeBg : "transparent" }}
               >
                 <span
                   className="material-symbols-outlined"
                   style={{
                     fontSize: 20,
-                    color: active ? ACTIVE_FG : INACTIVE,
+                    color: active ? tab.activeFg : INACTIVE,
                     fontVariationSettings: active ? "'FILL' 1, 'wght' 500" : "'FILL' 0, 'wght' 400",
                     transition: "color 0.2s",
                   }}
@@ -67,7 +111,7 @@ const BottomTabBar = () => {
                   {tab.icon}
                 </span>
               </div>
-              <span className="text-[9.5px] font-bold leading-none" style={{ color: active ? ACTIVE_FG : INACTIVE }}>
+              <span className="text-[9.5px] font-bold leading-none" style={{ color: active ? tab.activeFg : INACTIVE }}>
                 {tab.label}
               </span>
             </button>
@@ -77,7 +121,7 @@ const BottomTabBar = () => {
         {/* FAB spacer */}
         <div style={{ width: 72, flexShrink: 0 }} />
 
-        {/* Right tab */}
+        {/* Right tabs */}
         {RIGHT_TABS.map((tab) => {
           const active = isActive(tab.id);
           return (
@@ -89,13 +133,13 @@ const BottomTabBar = () => {
             >
               <div
                 className="flex items-center justify-center rounded-full transition-all duration-200"
-                style={{ width: 52, height: 30, background: active ? ACTIVE_BG : "transparent" }}
+                style={{ width: 52, height: 30, background: active ? tab.activeBg : "transparent" }}
               >
                 <span
                   className="material-symbols-outlined"
                   style={{
                     fontSize: 20,
-                    color: active ? ACTIVE_FG : INACTIVE,
+                    color: active ? tab.activeFg : INACTIVE,
                     fontVariationSettings: active ? "'FILL' 1, 'wght' 500" : "'FILL' 0, 'wght' 400",
                     transition: "color 0.2s",
                   }}
@@ -103,7 +147,7 @@ const BottomTabBar = () => {
                   {tab.icon}
                 </span>
               </div>
-              <span className="text-[9.5px] font-bold leading-none" style={{ color: active ? ACTIVE_FG : INACTIVE }}>
+              <span className="text-[9.5px] font-bold leading-none" style={{ color: active ? tab.activeFg : INACTIVE }}>
                 {tab.label}
               </span>
             </button>

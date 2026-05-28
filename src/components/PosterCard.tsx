@@ -245,10 +245,10 @@ const PosterCard = ({
               </div>
             )}
 
-            <h3 className="font-bold text-[11px] sm:text-sm mb-1 leading-tight line-clamp-2">{title}</h3>
+            <h3 className="font-bold text-[11px] sm:text-sm lg:text-base mb-1 leading-tight line-clamp-2">{title}</h3>
             <div className="flex items-center gap-1 sm:gap-2 mb-0.5">
-              <span className="material-symbols-outlined text-[12px] sm:text-[15px] shrink-0" style={{ color: '#FFCB77' }}>calendar_today</span>
-              <span className="text-[9px] sm:text-[11px] font-semibold tracking-wide text-white/90 truncate">
+              <span className="material-symbols-outlined text-[12px] sm:text-[15px] lg:text-[18px] shrink-0" style={{ color: '#FFCB77' }}>calendar_today</span>
+              <span className="text-[9px] sm:text-[11px] lg:text-[13px] font-semibold tracking-wide text-white/90 truncate">
                 {(() => {
                   const startT = formatTime(date);
                   const endT = formatTime(endTime);
@@ -258,9 +258,9 @@ const PosterCard = ({
                 })()}
               </span>
             </div>
-            <div className="flex items-center gap-1 sm:gap-2 mb-2 sm:mb-2">
-              <span className="material-symbols-outlined text-[12px] sm:text-[15px] shrink-0" style={{ color: '#24E5D2' }}>location_on</span>
-              <span className="text-[9px] sm:text-[11px] font-semibold tracking-wide text-white/90 truncate">{location}</span>
+            <div className="flex items-center gap-1 sm:gap-2 mb-2 sm:mb-2 lg:mb-3">
+              <span className="material-symbols-outlined text-[12px] sm:text-[15px] lg:text-[18px] shrink-0" style={{ color: '#24E5D2' }}>location_on</span>
+              <span className="text-[9px] sm:text-[11px] lg:text-[13px] font-semibold tracking-wide text-white/90 truncate">{location}</span>
             </div>
 
             {/* Social proof — avatar deck + going count */}
@@ -271,7 +271,7 @@ const PosterCard = ({
                     <img
                       src={attendingUserAvatar}
                       alt="You"
-                      className="w-[18px] h-[18px] sm:w-5 sm:h-5 rounded-full object-cover ring-[1.5px] ring-black/25 shrink-0"
+                      className="w-[18px] h-[18px] sm:w-5 sm:h-5 lg:w-6 lg:h-6 rounded-full object-cover ring-[1.5px] ring-black/25 shrink-0"
                     />
                   )}
                   {Array.from({
@@ -282,7 +282,7 @@ const PosterCard = ({
                   }).map((_, i) => (
                     <div
                       key={i}
-                      className="w-[18px] h-[18px] sm:w-5 sm:h-5 rounded-full ring-[1.5px] ring-black/25 shrink-0"
+                      className="w-[18px] h-[18px] sm:w-5 sm:h-5 lg:w-6 lg:h-6 rounded-full ring-[1.5px] ring-black/25 shrink-0"
                       style={{
                         background: AVATAR_COLORS[(i + (attendingUserAvatar ? 1 : 0)) % AVATAR_COLORS.length],
                         marginLeft: attendingUserAvatar || i > 0 ? "-5px" : 0,
@@ -291,14 +291,14 @@ const PosterCard = ({
                   ))}
                   {rsvpCount > (attendingUserAvatar ? 3 : 3) && (
                     <div
-                      className="w-[18px] h-[18px] sm:w-5 sm:h-5 rounded-full ring-[1.5px] ring-black/25 shrink-0 flex items-center justify-center text-[7px] sm:text-[8px] font-bold text-white"
+                      className="w-[18px] h-[18px] sm:w-5 sm:h-5 lg:w-6 lg:h-6 rounded-full ring-[1.5px] ring-black/25 shrink-0 flex items-center justify-center text-[7px] sm:text-[8px] lg:text-[9px] font-bold text-white"
                       style={{ background: "rgba(255,255,255,0.22)", marginLeft: "-5px" }}
                     >
                       +{rsvpCount - (attendingUserAvatar ? 2 : 3)}
                     </div>
                   )}
                 </div>
-                <span className="text-[9px] sm:text-[10px] font-semibold text-white/75 leading-none">
+                <span className="text-[9px] sm:text-[10px] lg:text-xs font-semibold text-white/75 leading-none">
                   {rsvpCount === 1 ? "1 going" : `${rsvpCount} going`}
                 </span>
               </div>
@@ -307,7 +307,7 @@ const PosterCard = ({
             <div className="flex items-center justify-between gap-1">
               <button
                 type="button"
-                className={`w-7 h-7 sm:w-9 sm:h-9 rounded-full flex items-center justify-center transition-colors disabled:cursor-wait disabled:opacity-70 shrink-0 ${
+                className={`w-7 h-7 sm:w-9 sm:h-9 lg:w-10 lg:h-10 rounded-full flex items-center justify-center transition-colors disabled:cursor-wait disabled:opacity-70 shrink-0 ${
                   isSaved ? "bg-red-400/80 text-white hover:bg-red-400" : "bg-white/20 hover:bg-red-400/40"
                 }`}
                 aria-label={isSaved ? `Remove ${title} from saved events` : `Save ${title}`}
@@ -319,7 +319,7 @@ const PosterCard = ({
                 }}
               >
                 <span
-                  className="material-symbols-outlined text-[14px] sm:text-[18px]"
+                  className="material-symbols-outlined text-[14px] sm:text-[18px] lg:text-[22px]"
                   style={{ fontVariationSettings: isSaved ? "'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 24" : undefined }}
                 >
                   favorite
@@ -327,7 +327,7 @@ const PosterCard = ({
               </button>
               <button
                 type="button"
-                className="px-2 py-1 sm:px-4 sm:py-1.5 rounded-full font-bold text-[9px] sm:text-xs hover:scale-105 transition-transform disabled:cursor-wait disabled:opacity-75 truncate"
+                className="px-2 py-1 sm:px-4 sm:py-1.5 lg:px-5 lg:py-2 rounded-full font-bold text-[9px] sm:text-xs lg:text-sm hover:scale-105 transition-transform disabled:cursor-wait disabled:opacity-75 truncate"
                 style={isAttending
                   ? { background: 'rgba(255,255,255,0.20)', color: '#fff', boxShadow: '0 0 0 1px rgba(255,255,255,0.3)' }
                   : { background: '#24E5D2', color: '#07453E' }
