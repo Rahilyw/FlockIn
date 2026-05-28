@@ -79,10 +79,10 @@ service cloud.firestore {
 
       // Validate that only the current user can add/remove themselves from rsvpBy, and rsvpCount updates by exactly 1
       function validateRsvps() {
-        let oldRsvps = resource.data.rsvpBy;
-        let newRsvps = request.resource.data.rsvpBy;
-        let oldCount = resource.data.rsvpCount;
-        let newCount = request.resource.data.rsvpCount;
+        let oldRsvps = resource.data.get("rsvpBy", []);
+        let newRsvps = request.resource.data.get("rsvpBy", []);
+        let oldCount = resource.data.get("rsvpCount", 0);
+        let newCount = request.resource.data.get("rsvpCount", 0);
         let userId = request.auth.uid;
 
         return (
@@ -97,10 +97,10 @@ service cloud.firestore {
 
       // Validate that only the current user can add/remove themselves from savedBy, and savedCount updates by exactly 1
       function validateSaves() {
-        let oldSaves = resource.data.savedBy;
-        let newSaves = request.resource.data.savedBy;
-        let oldCount = resource.data.savedCount;
-        let newCount = request.resource.data.savedCount;
+        let oldSaves = resource.data.get("savedBy", []);
+        let newSaves = request.resource.data.get("savedBy", []);
+        let oldCount = resource.data.get("savedCount", 0);
+        let newCount = request.resource.data.get("savedCount", 0);
         let userId = request.auth.uid;
 
         return (

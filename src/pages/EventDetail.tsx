@@ -162,6 +162,7 @@ export default function EventDetail() {
   const { savedEvents, toggleEvent } = useBookmarks();
   const { user, profile, refreshProfile } = useAuth();
   const [joining, setJoining] = useState(false);
+  const [bookmarking, setBookmarking] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const { mutateAsync: deleteEventMutation, isPending: isDeleting } = useDeleteEvent({
     eventId: id!,
@@ -192,6 +193,19 @@ export default function EventDetail() {
       toast.error("Couldn't update your RSVP. Try again.");
     } finally {
       setJoining(false);
+    }
+  };
+
+  const handleBookmark = async () => {
+    if (!user) { navigate("/login"); return; }
+    setBookmarking(true);
+    try {
+      await toggleEvent(id!);
+      toast.success(isBookmarked ? "Removed from saved events." : "Saved to My Space.");
+    } catch {
+      toast.error("Couldn't update your saved events. Try again.");
+    } finally {
+      setBookmarking(false);
     }
   };
 
@@ -381,8 +395,9 @@ export default function EventDetail() {
                 isBookmarked={isBookmarked}
                 isOrganizer={isOrganizer}
                 joining={joining}
+                bookmarking={bookmarking}
                 onJoin={handleJoinLeave}
-                onBookmark={() => toggleEvent(event.id)}
+                onBookmark={handleBookmark}
                 onEdit={() => navigate(`/events/${id}/edit`)}
                 onDelete={() => setShowDeleteDialog(true)}
               />
@@ -400,8 +415,9 @@ export default function EventDetail() {
             isBookmarked={isBookmarked}
             isOrganizer={isOrganizer}
             joining={joining}
+            bookmarking={bookmarking}
             onJoin={handleJoinLeave}
-            onBookmark={() => toggleEvent(event.id)}
+            onBookmark={handleBookmark}
             onEdit={() => navigate(`/events/${id}/edit`)}
             onDelete={() => setShowDeleteDialog(true)}
           />
@@ -422,13 +438,14 @@ export default function EventDetail() {
 // ── Action buttons (shared between mobile sticky bar + desktop inline) ────────
 
 function ActionButtons({
-  isAttending, isBookmarked, isOrganizer, joining,
+  isAttending, isBookmarked, isOrganizer, joining, bookmarking,
   onJoin, onBookmark, onEdit, onDelete,
 }: {
   isAttending: boolean;
   isBookmarked: boolean;
   isOrganizer: boolean;
   joining: boolean;
+  bookmarking: boolean;
   onJoin: () => void;
   onBookmark: () => void;
   onEdit: () => void;
@@ -457,7 +474,8 @@ function ActionButtons({
       {/* Bookmark */}
       <button
         onClick={onBookmark}
-        className="w-11 h-11 rounded-2xl flex items-center justify-center transition-all hover:scale-105 active:scale-95"
+        disabled={bookmarking}
+        className="w-11 h-11 rounded-2xl flex items-center justify-center transition-all hover:scale-105 active:scale-95 disabled:opacity-60 disabled:cursor-wait"
         style={isBookmarked
           ? { background: "oklch(82% 0.14 18 / 0.25)", border: "1.5px solid oklch(63% 0.17 18 / 0.5)" }
           : { background: "rgba(255,255,255,0.6)", border: "1.5px solid oklch(85% 0.04 30 / 0.6)" }

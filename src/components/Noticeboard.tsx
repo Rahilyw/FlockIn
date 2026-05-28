@@ -235,12 +235,27 @@ const Noticeboard = ({ filters = new Set() }: NoticeboardProps) => {
           </div>
         )}
 
-        {events?.map((event, i) => {
-          const attachment = ATTACHMENTS[i % ATTACHMENTS.length];
+        {(() => {
+          const filterActive = filters.size > 0;
+          const baseEvents = events ?? [];
+
+          // When a filter is active, float matching events to the top so users
+          // don't have to scroll past dimmed cards to find relevant ones.
+          const sortedEvents = filterActive
+            ? [
+                ...baseEvents.filter((e) => [...filters].every((f) => matchesFilter(e, f as FilterMode))),
+                ...baseEvents.filter((e) => ![...filters].every((f) => matchesFilter(e, f as FilterMode))),
+              ]
+            : baseEvents;
+
+          return sortedEvents.map((event, i) => {
+          // Use a stable hash of the event ID so attachment/marginTop don't
+          // change when events are reordered by the filter.
+          const h = hashId(event.id);
+          const attachment = ATTACHMENTS[h % ATTACHMENTS.length];
           const action = ACTION_BY_CATEGORY[event.category] ?? ACTION_BY_CATEGORY.Other;
           const isSaved = savedEvents.includes(event.id);
           const isAttending = profile?.joinedEvents?.includes(event.id) ?? false;
-          const filterActive = filters.size > 0;
           const matches = filterActive
             ? [...filters].every((f) => matchesFilter(event, f as FilterMode))
             : true;
@@ -270,7 +285,7 @@ const Noticeboard = ({ filters = new Set() }: NoticeboardProps) => {
                   description={event.description}
                   imagePath={event.imagePath ?? event.posterUrl ?? null}
                   rotation={seededRotation(event.id)}
-                  marginTop={MARGIN_TOPS[i % MARGIN_TOPS.length]}
+                  marginTop={MARGIN_TOPS[h % MARGIN_TOPS.length]}
                   actionLabel={action.label}
                   actionClassName={action.className}
                   onOpen={() => setSelectedEvent(event)}
@@ -286,7 +301,8 @@ const Noticeboard = ({ filters = new Set() }: NoticeboardProps) => {
               </PosterErrorBoundary>
             </div>
           );
-        })}
+        });
+        })()}
       </div>
     </div>
 

@@ -54,6 +54,8 @@ export async function createUserProfile(
     interests: [],
     joinedEvents: [],
     joinedClubs: [],
+    savedEvents: [],
+    savedClubs: [],
     onboardingComplete: false,
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
