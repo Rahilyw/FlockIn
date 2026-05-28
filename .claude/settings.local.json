@@ -36,7 +36,12 @@
       "Bash(grep -E \"\\\\.tsx$\")",
       "Bash(grep -E \"\\\\.\\(ts|tsx\\)$\")",
       "Bash(grep -i \"\\\\.ts$\")",
-      "Bash(xargs grep -l \"completeOnboarding\\\\|interests\")"
+      "Bash(xargs grep -l \"completeOnboarding\\\\|interests\")",
+      "Bash(firebase --version)",
+      "Bash(firebase projects:list)",
+      "Bash(npm install *)",
+      "Bash(firebase deploy *)",
+      "Bash(gcloud projects *)"
     ]
   }
 }

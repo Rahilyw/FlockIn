@@ -538,44 +538,79 @@ function newerTimestamp(a?: Timestamp, b?: Timestamp): Timestamp | undefined {
   return a.toMillis() >= b.toMillis() ? a : b;
 }
 
-/** Returns top tags from active approved events, ranked by engagement. */
+/**
+ * Returns top tags ranked by engagement.
+ *
+ * Primary path: reads from the `tags` collection maintained by Cloud Functions
+ * (cheap single-collection query). Falls back to computing dynamically from
+ * the events collection while the tags collection is still being populated
+ * (e.g., on first deploy before any events have been approved post-launch).
+ */
 export async function getTopTags(limitCount = 8): Promise<TagDoc[]> {
   const snap = await getDocs(
-    query(eventsCol(), where("status", "==", "approved"), limit(200)),
+    query(tagsCol(), orderBy("engagementScore", "desc"), limit(limitCount * 2)),
   );
 
-  const tagMap = new Map<string, TagDoc>();
-  snap.docs
-    .map((d) => d.data() as Event)
-    .filter(isEventActive)
-    .forEach((event) => {
-      const uniqueTags = new Set((event.tags ?? []).map(cleanTagName).filter(Boolean));
-      uniqueTags.forEach((tag) => {
-        const key = tag.toLowerCase();
-        const current = tagMap.get(key) ?? {
-          name: key,
-          count: 0,
-          eventCount: 0,
-          engagementScore: 0,
-          lastUsed: undefined,
-        };
-        const engagement = (event.savedCount ?? 0) + (event.rsvpCount ?? 0);
-        tagMap.set(key, {
-          ...current,
-          count: current.count + 1,
-          eventCount: current.eventCount + 1,
-          engagementScore: current.engagementScore + engagement,
-          lastUsed: newerTimestamp(current.lastUsed, event.updatedAt ?? event.createdAt),
+  if (!snap.empty) {
+    return snap.docs
+      .map((d) => {
+        const data = d.data();
+        const count = (data.eventCount ?? data.count ?? 0) as number;
+        return {
+          name: (data.name ?? d.id) as string,
+          count,
+          eventCount: count,
+          engagementScore: (data.engagementScore ?? 0) as number,
+          lastUsed: data.lastUsed as Timestamp | undefined,
+        } as TagDoc;
+      })
+      .filter((t) => t.eventCount > 0)
+      .slice(0, limitCount);
+  }
+
+  // Fallback: compute dynamically from events until Cloud Functions seed the
+  // tags collection. This path is used before any events have been approved
+  // after Cloud Functions are deployed.
+  return getTopTagsDynamic(limitCount);
+}
+
+function getTopTagsDynamic(limitCount: number): Promise<TagDoc[]> {
+  return getDocs(
+    query(eventsCol(), where("status", "==", "approved"), limit(200)),
+  ).then((snap) => {
+    const tagMap = new Map<string, TagDoc>();
+    snap.docs
+      .map((d) => d.data() as Event)
+      .filter(isEventActive)
+      .forEach((event) => {
+        const uniqueTags = new Set((event.tags ?? []).map(cleanTagName).filter(Boolean));
+        uniqueTags.forEach((tag) => {
+          const key = tag.toLowerCase();
+          const current = tagMap.get(key) ?? {
+            name: key,
+            count: 0,
+            eventCount: 0,
+            engagementScore: 0,
+            lastUsed: undefined,
+          };
+          const engagement = (event.savedCount ?? 0) + (event.rsvpCount ?? 0);
+          tagMap.set(key, {
+            ...current,
+            count: current.count + 1,
+            eventCount: current.eventCount + 1,
+            engagementScore: current.engagementScore + engagement,
+            lastUsed: newerTimestamp(current.lastUsed, event.updatedAt ?? event.createdAt),
+          });
         });
       });
-    });
 
-  return [...tagMap.values()]
-    .sort((a, b) =>
-      b.engagementScore - a.engagementScore ||
-      b.eventCount - a.eventCount ||
-      a.name.localeCompare(b.name),
-    )
-    .slice(0, limitCount);
+    return [...tagMap.values()]
+      .sort((a, b) =>
+        b.engagementScore - a.engagementScore ||
+        b.eventCount - a.eventCount ||
+        a.name.localeCompare(b.name),
+      )
+      .slice(0, limitCount);
+  });
 }
 

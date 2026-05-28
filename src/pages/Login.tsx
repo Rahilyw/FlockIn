@@ -6,18 +6,10 @@ import { signInWithEmailAndPassword } from "firebase/auth";
 import { getFirebaseAuth } from "@/firebase/app";
 import { loginSchema, type LoginFormValues } from "@/lib/authSchemas";
 import { mapAuthError } from "@/lib/authErrors";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/sonner";
 import { useAuth } from "@/contexts/AuthContext";
-import { ChevronDown, ChevronUp } from "lucide-react";
 import { AuthBoardLayout } from "@/components/auth/AuthBoardLayout";
 
 const GoogleIcon = () => (
@@ -30,21 +22,22 @@ const GoogleIcon = () => (
 );
 
 const FlockInWordmark = () => (
-  <div
-    className="font-black leading-none"
-    style={{ fontFamily: "Montserrat, sans-serif", fontSize: 34, letterSpacing: "-0.01em" }}
-  >
-    <span style={{ color: "#2A6FC8" }}>F</span>
-    <span style={{ color: "#2A6FC8" }}>l</span>
-    <span style={{ color: "#E89B3C" }}>o</span>
-    <span style={{ color: "#0F3D5C" }}>c</span>
-    <span style={{ color: "#2A6FC8" }}>k</span>
-    <span style={{ color: "#1F8A6E" }}>I</span>
-    <span style={{ color: "#E89B3C" }}>n</span>
-    <span style={{ color: "#C95D36" }}>!</span>
+  <div className="font-black leading-none" style={{ fontFamily: "Montserrat, sans-serif", fontSize: 34, letterSpacing: "-0.01em" }}>
+    <span style={{ color: "#2A6FC8" }}>F</span><span style={{ color: "#2A6FC8" }}>l</span>
+    <span style={{ color: "#E89B3C" }}>o</span><span style={{ color: "#0F3D5C" }}>c</span>
+    <span style={{ color: "#2A6FC8" }}>k</span><span style={{ color: "#1F8A6E" }}>I</span>
+    <span style={{ color: "#E89B3C" }}>n</span><span style={{ color: "#C95D36" }}>!</span>
     <span style={{ color: "#2A6FC8" }}>!</span>
   </div>
 );
+
+const fieldStyle = {
+  height: 42,
+  background: "#fff",
+  borderColor: "#E4E0D9",
+  fontFamily: "Montserrat, sans-serif",
+  fontSize: 13,
+};
 
 const Login = () => {
   const navigate = useNavigate();
@@ -52,26 +45,13 @@ const Login = () => {
   const { user, loading: authLoading, signInWithGoogle } = useAuth();
   const from = (location.state as { from?: Location } | null)?.from?.pathname ?? "/";
   const [googleLoading, setGoogleLoading] = useState(false);
-  const [showEmailForm, setShowEmailForm] = useState(false);
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: { email: "", password: "" },
   });
 
-  if (!authLoading && user) {
-    return <Navigate to={from} replace />;
-  }
-
-  const onSubmit = async (values: LoginFormValues) => {
-    try {
-      await signInWithEmailAndPassword(getFirebaseAuth(), values.email, values.password);
-      toast.success("Signed in successfully.");
-      navigate(from, { replace: true });
-    } catch (error) {
-      toast.error(mapAuthError(error));
-    }
-  };
+  if (!authLoading && user) return <Navigate to={from} replace />;
 
   const handleGoogleSignIn = async () => {
     setGoogleLoading(true);
@@ -86,258 +66,114 @@ const Login = () => {
     }
   };
 
+  const onSubmit = async (values: LoginFormValues) => {
+    try {
+      await signInWithEmailAndPassword(getFirebaseAuth(), values.email, values.password);
+      toast.success("Signed in successfully.");
+      navigate(from, { replace: true });
+    } catch (error) {
+      toast.error(mapAuthError(error));
+    }
+  };
+
   return (
     <AuthBoardLayout>
-      <div
-        className="relative w-full max-w-sm"
-        style={{ transform: "rotate(0.5deg)" }}
-      >
+      <div className="relative w-full max-w-sm" style={{ transform: "rotate(0.5deg)" }}>
         {/* Pushpin */}
-        <div
-          style={{
-            width: 14,
-            height: 14,
-            borderRadius: "50%",
-            background: "radial-gradient(circle at 35% 35%, #ff8a80 0%, transparent 55%), #FF5252",
-            position: "absolute",
-            top: -8,
-            left: "50%",
-            transform: "translateX(-50%)",
-            boxShadow: "0 3px 7px rgba(0,0,0,0.55), inset 0 -1px 2px rgba(0,0,0,0.2)",
-            zIndex: 10,
-          }}
-        />
+        <div style={{
+          width: 14, height: 14, borderRadius: "50%",
+          background: "radial-gradient(circle at 35% 35%, #ff8a80 0%, transparent 55%), #FF5252",
+          position: "absolute", top: -8, left: "50%", transform: "translateX(-50%)",
+          boxShadow: "0 3px 7px rgba(0,0,0,0.55), inset 0 -1px 2px rgba(0,0,0,0.2)", zIndex: 10,
+        }} />
 
         {/* Card */}
-        <div
-          style={{
-            background: "#FFFEF8",
-            borderRadius: 16,
-            boxShadow:
-              "0 20px 60px rgba(0,0,0,0.30), 0 6px 20px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.95)",
-            overflow: "hidden",
-          }}
-        >
+        <div style={{
+          background: "#FFFEF8", borderRadius: 16, overflow: "hidden",
+          boxShadow: "0 20px 60px rgba(0,0,0,0.30), 0 6px 20px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.95)",
+        }}>
           {/* Header */}
           <div className="flex flex-col items-center pt-10 pb-6 px-8">
-            <img
-              src="/flockin-peacock-pixel.jpeg"
-              alt="FlockIn!! logo"
-              style={{ width: 64, height: 64, borderRadius: 12, marginBottom: 10 }}
-            />
+            <img src="/flockin-peacock-pixel.jpeg" alt="FlockIn!! logo"
+              style={{ width: 64, height: 64, borderRadius: 12, marginBottom: 10 }} />
             <FlockInWordmark />
-            <h1
-              className="font-black mt-4 mb-1"
-              style={{
-                fontFamily: "Montserrat, sans-serif",
-                fontSize: 20,
-                color: "#1B1C19",
-                letterSpacing: "-0.01em",
-              }}
-            >
+            <h1 className="font-black mt-4 mb-1"
+              style={{ fontFamily: "Montserrat, sans-serif", fontSize: 20, color: "#1B1C19", letterSpacing: "-0.01em" }}>
               Welcome back!
             </h1>
-            <p
-              style={{
-                fontFamily: "Montserrat, sans-serif",
-                fontSize: 13,
-                color: "#8a7c79",
-                fontWeight: 500,
-                textAlign: "center",
-              }}
-            >
+            <p style={{ fontFamily: "Montserrat, sans-serif", fontSize: 13, color: "#8a7c79", fontWeight: 500, textAlign: "center" }}>
               Sign in to check what's pinned today.
             </p>
           </div>
 
           {/* Body */}
-          <div className="px-8 pb-8 space-y-4">
-            {/* Google button */}
-            <button
-              type="button"
-              onClick={handleGoogleSignIn}
-              disabled={googleLoading}
+          <div className="px-8 pb-8 space-y-3">
+            {/* Google */}
+            <button type="button" onClick={handleGoogleSignIn} disabled={googleLoading}
               className="w-full flex items-center justify-center gap-3 transition-all active:scale-95"
               style={{
-                height: 48,
-                background: "#FFFFFF",
-                border: "1.5px solid #dadce0",
-                borderRadius: 10,
-                fontFamily: "Montserrat, sans-serif",
-                fontWeight: 700,
-                fontSize: 14,
-                color: "#1f1f1f",
-                cursor: googleLoading ? "not-allowed" : "pointer",
-                boxShadow: "0 1px 4px rgba(0,0,0,0.08)",
-              }}
-            >
+                height: 48, background: "#FFFFFF", border: "1.5px solid #dadce0", borderRadius: 10,
+                fontFamily: "Montserrat, sans-serif", fontWeight: 700, fontSize: 14, color: "#1f1f1f",
+                cursor: googleLoading ? "not-allowed" : "pointer", boxShadow: "0 1px 4px rgba(0,0,0,0.08)",
+              }}>
               <GoogleIcon />
               {googleLoading ? "Signing in…" : "Continue with Google"}
             </button>
 
-            <p
-              style={{
-                textAlign: "center",
-                fontFamily: "Montserrat, sans-serif",
-                fontSize: 11.5,
-                color: "#8a7c79",
-                fontWeight: 500,
-              }}
-            >
-              Any email works: students, alumni, or friends.
-            </p>
-
-            {/* Dotted divider */}
-            <div
-              style={{
-                borderTop: "1.5px dashed #E4E0D9",
-                marginTop: 4,
-                marginBottom: 4,
-              }}
-            />
-
-            {/* Developer access toggle */}
-            <div>
-              <button
-                type="button"
-                onClick={() => setShowEmailForm(!showEmailForm)}
-                className="w-full flex items-center justify-center gap-1 py-1 border-0 outline-none appearance-none transition-colors"
-                style={{
-                  fontFamily: "Montserrat, sans-serif",
-                  fontSize: 10,
-                  fontWeight: 600,
-                  color: "#c4bab8",
-                  background: "none",
-                  cursor: "pointer",
-                }}
-              >
-                {showEmailForm ? (
-                  <><ChevronUp className="w-3 h-3" />hide email login</>
-                ) : (
-                  <><ChevronDown className="w-3 h-3" />sign in with email</>
-                )}
-              </button>
-
-              {showEmailForm && (
-                <div className="animate-card-enter space-y-3 pt-3">
-                  <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
-                      <FormField
-                        control={form.control}
-                        name="email"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel
-                              style={{
-                                fontFamily: "Montserrat, sans-serif",
-                                fontSize: 10,
-                                fontWeight: 800,
-                                letterSpacing: "0.12em",
-                                textTransform: "uppercase",
-                                color: "#8a7c79",
-                              }}
-                            >
-                              Email
-                            </FormLabel>
-                            <FormControl>
-                              <Input
-                                type="email"
-                                autoComplete="email"
-                                placeholder="you@example.com"
-                                className="h-10 bg-white text-sm"
-                                style={{ borderColor: "#E4E0D9" }}
-                                {...field}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name="password"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel
-                              style={{
-                                fontFamily: "Montserrat, sans-serif",
-                                fontSize: 10,
-                                fontWeight: 800,
-                                letterSpacing: "0.12em",
-                                textTransform: "uppercase",
-                                color: "#8a7c79",
-                              }}
-                            >
-                              Password
-                            </FormLabel>
-                            <FormControl>
-                              <Input
-                                type="password"
-                                autoComplete="current-password"
-                                className="h-10 bg-white text-sm"
-                                style={{ borderColor: "#E4E0D9" }}
-                                {...field}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <button
-                        type="submit"
-                        disabled={form.formState.isSubmitting}
-                        className="w-full transition-all active:scale-95"
-                        style={{
-                          height: 44,
-                          background: "#C95D36",
-                          color: "#FFF",
-                          border: "none",
-                          borderRadius: 10,
-                          fontFamily: "Montserrat, sans-serif",
-                          fontWeight: 800,
-                          fontSize: 13,
-                          cursor: form.formState.isSubmitting ? "not-allowed" : "pointer",
-                          opacity: form.formState.isSubmitting ? 0.7 : 1,
-                        }}
-                      >
-                        {form.formState.isSubmitting ? "Signing in…" : "Sign in with Email"}
-                      </button>
-                    </form>
-                  </Form>
-                </div>
-              )}
+            {/* Divider */}
+            <div className="flex items-center gap-3 py-1">
+              <div style={{ flex: 1, height: 1, background: "#E4E0D9" }} />
+              <span style={{ fontFamily: "Montserrat, sans-serif", fontSize: 10, fontWeight: 800,
+                color: "#c4bab8", letterSpacing: "0.12em", textTransform: "uppercase" }}>or</span>
+              <div style={{ flex: 1, height: 1, background: "#E4E0D9" }} />
             </div>
+
+            {/* Email form */}
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-2.5">
+                <FormField control={form.control} name="email" render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Input type="email" autoComplete="email" placeholder="Email"
+                        className="text-sm" style={fieldStyle} {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )} />
+                <FormField control={form.control} name="password" render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Input type="password" autoComplete="current-password" placeholder="Password"
+                        className="text-sm" style={fieldStyle} {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )} />
+                <button type="submit" disabled={form.formState.isSubmitting}
+                  className="w-full transition-all active:scale-95"
+                  style={{
+                    height: 44, background: "#C95D36", color: "#FFF", border: "none", borderRadius: 10,
+                    fontFamily: "Montserrat, sans-serif", fontWeight: 800, fontSize: 13,
+                    cursor: form.formState.isSubmitting ? "not-allowed" : "pointer",
+                    opacity: form.formState.isSubmitting ? 0.7 : 1, marginTop: 4,
+                  }}>
+                  {form.formState.isSubmitting ? "Signing in…" : "Sign in with Email"}
+                </button>
+              </form>
+            </Form>
           </div>
 
           {/* Footer */}
-          <div
-            className="flex flex-col items-center gap-2 py-5 px-8"
-            style={{ borderTop: "1px solid #F0EDE8" }}
-          >
-            <p
-              style={{
-                fontFamily: "Montserrat, sans-serif",
-                fontSize: 12,
-                color: "#8a7c79",
-                fontWeight: 500,
-              }}
-            >
+          <div className="flex flex-col items-center gap-2 py-5 px-8"
+            style={{ borderTop: "1px solid #F0EDE8" }}>
+            <p style={{ fontFamily: "Montserrat, sans-serif", fontSize: 12, color: "#8a7c79", fontWeight: 500 }}>
               Don't have a login yet?
             </p>
-            <Link
-              to="/signup"
-              className="transition-colors"
-              style={{
-                padding: "6px 20px",
-                borderRadius: 999,
-                border: "1.5px solid rgba(201,93,54,0.4)",
-                fontFamily: "Montserrat, sans-serif",
-                fontWeight: 700,
-                fontSize: 12.5,
-                color: "#C95D36",
-                textDecoration: "none",
-              }}
-            >
+            <Link to="/signup" className="transition-colors" style={{
+              padding: "6px 20px", borderRadius: 999, border: "1.5px solid rgba(201,93,54,0.4)",
+              fontFamily: "Montserrat, sans-serif", fontWeight: 700, fontSize: 12.5,
+              color: "#C95D36", textDecoration: "none",
+            }}>
               Create Account →
             </Link>
           </div>

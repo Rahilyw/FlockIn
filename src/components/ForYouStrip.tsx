@@ -11,6 +11,7 @@ import { queryKeys } from "@/hooks/queryKeys";
 import type { Event } from "@/types/firebaseTypes";
 import PosterCard from "./PosterCard";
 import { EventDetailModal } from "./EventDetailModal";
+import { EmptyState } from "./EmptyState";
 
 const DISMISSED_KEY = (uid: string) => `fk_foryou_dismissed_${uid}`;
 
@@ -67,7 +68,29 @@ const ForYouStrip = () => {
 
   const visible = recommended.filter((e) => !dismissedIds.has(e.id));
 
-  if (!user || interests.length === 0 || recommended.length === 0) return null;
+  if (!user) return null;
+
+  if (interests.length === 0) {
+    return (
+      <EmptyState
+        variant="for-you"
+        message="Pick your interests and we'll surface events you'll actually want to go to."
+        cta="Set your interests"
+        onCta={() => navigate("/profile")}
+      />
+    );
+  }
+
+  if (recommended.length === 0) {
+    return (
+      <EmptyState
+        variant="for-you"
+        message="No events match your interests right now. The board updates often — check back soon!"
+        cta="Browse the Noticeboard"
+        onCta={() => navigate("/")}
+      />
+    );
+  }
 
   const redirectToLogin = () => navigate("/login", { state: { from: location } });
 

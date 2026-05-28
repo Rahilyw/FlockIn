@@ -1,6 +1,6 @@
 import type { CSSProperties } from "react";
 
-export type EmptyVariant = "saved" | "going" | "my-events" | "clubs" | "no-results";
+export type EmptyVariant = "saved" | "going" | "my-events" | "clubs" | "no-results" | "for-you";
 
 interface Dot {
   w: number; c: string;
@@ -133,6 +133,28 @@ const V: Record<EmptyVariant, VariantCfg> = {
     ctaIcon: "restart_alt",
     defaultMessage: "Nothing matches your search. Try different keywords or clear your filters.",
     defaultCta: "Clear filters",
+  },
+  "for-you": {
+    bg: "radial-gradient(ellipse 80% 70% at 50% 30%, #fef9f0 0%, #f5edff 70%)",
+    dots: [
+      { w: 8,  c: "#626CDA", top: "13%",    left: "8%",   r: 2, rot: 15 },
+      { w: 6,  c: "#FFCB77", top: "11%",    right: "13%"               },
+      { w: 9,  c: "#24E5D2", bottom: "20%", left: "12%",  r: 999        },
+      { w: 7,  c: "#FE6D73", bottom: "22%", right: "9%",  r: 2, rot: 30 },
+      { w: 5,  c: "#E89B3C", top: "40%",    left: "5%",   r: 2, rot: 45 },
+      { w: 8,  c: "#626CDA", top: "48%",    right: "7%",  r: 999        },
+      { w: 6,  c: "#FFCB77", top: "26%",    left: "21%",  r: 2, rot: 20 },
+      { w: 5,  c: "#FE6D73", bottom: "30%", right: "18%", r: 999        },
+    ],
+    left:   { gradient: "linear-gradient(160deg,#FFCB77 0%,#FE6D73 55%,#626CDA 100%)", rotate: "-7deg", mb: 6  },
+    center: { gradient: "linear-gradient(160deg,#626CDA 0%,#24E5D2 55%,#FBFF96 100%)", rotate:  "3deg"         },
+    right:  { gradient: "linear-gradient(160deg,#a78bdb 0%,#FE6D73 55%,#FFCB77 100%)", rotate: "-4deg", mb: 10 },
+    anchorIcon: "auto_awesome", anchorColor: "#626CDA", anchorGlow: "rgba(98,108,218,.50)",
+    ctaBg: "#626CDA", ctaText: "#fff",
+    ctaShadow: "0 4px 18px rgba(98,108,218,.40), inset 0 1px 0 rgba(255,255,255,.25)",
+    ctaIcon: "tune",
+    defaultMessage: "Pick your interests in your profile and we'll surface events you'll actually want to go to.",
+    defaultCta: "Set your interests",
   },
 };
 

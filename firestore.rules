@@ -160,9 +160,11 @@ service cloud.firestore {
       allow write: if isSignedIn() && isAdmin();
     }
 
+    // tags documents are written exclusively by Cloud Functions (admin SDK bypasses
+    // these rules). Clients are read-only — they render the pill bar from here.
     match /tags/{tagId} {
       allow read: if true;
-      allow write: if isSignedIn() && isAdmin();
+      allow write: if false;
     }
   }
 }
