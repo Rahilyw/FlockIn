@@ -10,7 +10,6 @@
 
 ---
 <img width="1885" height="1074" alt="image" src="https://github.com/user-attachments/assets/f28e9ba1-afdc-467d-b2c1-66cb959fbce8" />
----
 
 ## 🎨 Visual Identity & Brand Personality
 
