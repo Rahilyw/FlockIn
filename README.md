@@ -7,6 +7,7 @@
 [![Firebase](https://img.shields.io/badge/Firebase-11.x-FFCA28?style=flat-square&logo=firebase)](https://firebase.google.com/)
 
 **FlockIn!!** is a vibrant campus event discovery platform designed to connect university students with events, clubs, and resources. Inspired by the physical, buzzing corkboard at a student union center, FlockIn!! serves as a tactile digital noticeboard where students can discover what's happening on campus in under 30 seconds.
+
 <img width="1885" height="1074" alt="image" src="https://github.com/user-attachments/assets/f28e9ba1-afdc-467d-b2c1-66cb959fbce8" />
 
 ---
