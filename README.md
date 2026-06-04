@@ -37,10 +37,14 @@ FlockIn!! rejects bland enterprise styling and cold corporate UI in favor of a w
 *   **Admin Review Queue**: All newly created events go into a `pending` state and must be reviewed and approved by the admin before appearing on the public noticeboard.
 *   **Rate Limiting**: Users are restricted to a maximum of 3 event posts per day.
 *   **Flag/Report Flow**: Users can report events, which flags them in Firestore for review.
+*   <img width="1319" height="923" alt="image" src="https://github.com/user-attachments/assets/1ede2c32-ce19-419e-8657-b6dc62a8055c" />
+
 
 ### 4. Personal Dashboard ("My Space")
 *   **My Events**: Track created events and view their status (`Pending Review`, `Approved`, or `Rejected`).
 *   **Saved & Going**: Track saved bookmarks (🔖) and RSVP responses (✅) with count states syncing in real-time.
+*   <img width="1061" height="672" alt="image" src="https://github.com/user-attachments/assets/54fdc595-731d-4fc1-b317-1d7883d98f25" />
+
 
 ### 5. Responsive Bottom Tab Bar
 *   An adaptive UI layout that transitions the left sidebar into a thumb-friendly bottom tab bar on mobile screens (≤768px).
