@@ -9,7 +9,8 @@
 **FlockIn!!** is a vibrant campus event discovery platform designed to connect university students with events, clubs, and resources. Inspired by the physical, buzzing corkboard at a student union center, FlockIn!! serves as a tactile digital noticeboard where students can discover what's happening on campus in under 30 seconds.
 
 ---
-<img width="1885" height="1074" alt="image" src="https://github.com/user-attachments/assets/f28e9ba1-afdc-467d-b2c1-66cb959fbce8" />
+
+<img width="800" alt="FlockIn noticeboard" src="https://github.com/user-attachments/assets/f28e9ba1-afdc-467d-b2c1-66cb959fbce8" />
 
 ## 🎨 Visual Identity & Brand Personality
 
@@ -37,13 +38,14 @@ FlockIn!! rejects bland enterprise styling and cold corporate UI in favor of a w
 *   **Admin Review Queue**: All newly created events go into a `pending` state and must be reviewed and approved by the admin before appearing on the public noticeboard.
 *   **Rate Limiting**: Users are restricted to a maximum of 3 event posts per day.
 *   **Flag/Report Flow**: Users can report events, which flags them in Firestore for review.
-*   <img width="1319" height="923" alt="image" src="https://github.com/user-attachments/assets/1ede2c32-ce19-419e-8657-b6dc62a8055c" />
 
+<img width="700" alt="Admin moderation queue" src="https://github.com/user-attachments/assets/1ede2c32-ce19-419e-8657-b6dc62a8055c" />
 
 ### 4. Personal Dashboard ("My Space")
 *   **My Events**: Track created events and view their status (`Pending Review`, `Approved`, or `Rejected`).
 *   **Saved & Going**: Track saved bookmarks (🔖) and RSVP responses (✅) with count states syncing in real-time.
-*   <img width="1061" height="672" alt="image" src="https://github.com/user-attachments/assets/54fdc595-731d-4fc1-b317-1d7883d98f25" />
+
+<img width="700" alt="Personal dashboard My Space" src="https://github.com/user-attachments/assets/54fdc595-731d-4fc1-b317-1d7883d98f25" />
 
 
 ### 5. Responsive Bottom Tab Bar
